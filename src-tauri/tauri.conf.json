@@ -8,7 +8,10 @@
 	"ctx": {},
 	"tauri": {
 		"embeddedServer": {
-			"active": true
+			"active": false
+		},
+		"allowlist": {
+			"all": true
 		},
 		"bundle": {
 			"active": true,
@@ -37,9 +40,6 @@
 				"useBootstrapper": false
 			},
 			"exceptionDomain": ""
-		},
-		"allowlist": {
-			"all": true
 		},
 		"window": {
 			"title": "gtaggenator",

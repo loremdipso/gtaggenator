@@ -1,10 +1,53 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
+#[derive(Deserialize, Debug)]
+pub struct DoSomethingPayload {
+	state: String,
+	data: u64,
+}
+
+// The commands definitions
+// Deserialized from JS
 #[derive(Deserialize)]
 #[serde(tag = "cmd", rename_all = "camelCase")]
 pub enum Cmd {
-  // your custom commands
-  // multiple arguments are allowed
-  // note that rename_all = "camelCase": you need to use "myCustomCommand" on JS
-  MyCustomCommand { argument: String },
+	DoSomethingSync {
+		argument: String,
+	},
+
+	DoSomethingAsync {
+		count: u64,
+		payload: DoSomethingPayload,
+		callback: String,
+		error: String,
+	},
 }
+
+#[derive(Serialize)]
+pub struct Response<'a> {
+	pub value: u64,
+	pub message: &'a str,
+}
+
+// An error type we define
+// We could also use the `anyhow` lib here
+#[derive(Debug, Clone)]
+pub struct CommandError<'a> {
+	message: &'a str,
+}
+
+impl<'a> CommandError<'a> {
+	pub fn new(message: &'a str) -> Self {
+		Self { message }
+	}
+}
+
+impl<'a> std::fmt::Display for CommandError<'a> {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}", self.message)
+	}
+}
+
+// Tauri uses the `anyhow` lib so custom error types must implement std::error::Error
+// and the function call should call `.into()` on it
+impl<'a> std::error::Error for CommandError<'a> {}
