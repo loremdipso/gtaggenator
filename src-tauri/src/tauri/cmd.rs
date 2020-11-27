@@ -2,14 +2,16 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
 pub struct DoSomethingPayload {
+	command: String,
 	state: String,
 	data: u64,
 }
 
 // The commands definitions
 // Deserialized from JS
+// #[serde(tag = "cmd", rename_all = "camelCase")]
 #[derive(Deserialize)]
-#[serde(tag = "cmd", rename_all = "camelCase")]
+#[serde(tag = "cmd")]
 pub enum Cmd {
 	DoSomethingSync {
 		argument: String,
@@ -18,6 +20,11 @@ pub enum Cmd {
 	DoSomethingAsync {
 		count: u64,
 		payload: DoSomethingPayload,
+		callback: String,
+		error: String,
+	},
+
+	GetTags {
 		callback: String,
 		error: String,
 	},

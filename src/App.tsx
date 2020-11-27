@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import clamp from "lodash-es/clamp";
 import { useSpring, animated } from "react-spring";
 import { useGesture } from "react-with-gesture";
-import { promisified } from "tauri/api/tauri";
 
 import "./App.css";
+import { bridge } from "./Commands";
 
 function App() {
+	const [tags, setTags] = useState([] as String[]);
 	const [clicked, setClick] = useState(false);
 	const [{ xy }, set] = useSpring(() => ({ xy: [0, 0] }));
 	const bind = useGesture(({ down, delta, velocity }) => {
@@ -17,23 +18,15 @@ function App() {
 		});
 	});
 
-	useEffect(() => {
-		(async () => {
-			console.log("A");
-			let thing = await promisified({
-				cmd: "doSomethingAsync",
-				count: 6,
-				payload: {
-					state: "some string data",
-					data: 17,
-				},
-			});
-			console.log("B");
-			console.log(thing);
-		})();
-	});
+	const doit = async () => {
+		let newTags = await bridge.get_tags();
+		setTags(newTags);
+	};
 
-	const _onClick = (_: any) => setClick(!clicked);
+	const _onClick = (_: any) => {
+		setClick(!clicked);
+		doit();
+	};
 
 	return (
 		<div className="App">
@@ -51,6 +44,9 @@ function App() {
 					>
 						<span onClick={_onClick}>
 							{!clicked ? "gtaggenator" : "Sup!"}
+							{tags.map((tag, i) => (
+								<span key={i}>sup{tag}</span>
+							))}
 						</span>
 					</animated.div>
 				</div>

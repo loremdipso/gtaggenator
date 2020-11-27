@@ -1,0 +1,31 @@
+{
+	"extensions": [".txt"],
+
+	"synonyms": {
+		"pre": "prefix",
+		"post": "postfix"
+	},
+
+	"prefixes": [
+		"getmore:"
+	],
+
+	"commands": {
+		"ls": "ls"
+	},
+
+	"tagger": {
+		"test": "echo \"new tag1\nnew tag2\""
+	},
+
+	"openerconfig": {
+		"default": {
+		},
+
+		"video": {
+		},
+
+		"comic": {
+		}
+	}
+}
