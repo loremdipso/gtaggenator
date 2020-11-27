@@ -1,6 +1,8 @@
+use crate::Taggenator;
+
 mod cmd;
 
-pub fn start_tauri() {
+pub fn start_tauri(taggenator: Taggenator) {
 	tauri::AppBuilder::new()
 		.invoke_handler(|_webview, arg| {
 			use cmd::Cmd::*;
