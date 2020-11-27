@@ -10,9 +10,12 @@ set -e
 
 #image_name = "BROKEN.jpg"
 #image_name="TB.jpg"
-cargo build --release
-#time cargo run --release -- --black-lines ./input/$image_name --output ./output/jpg
-#time cargo run --release -q ./input/BROKEN.jpg --output ./output/jpg
+cd ./taggenator
+cargo build --release -q -p taggenator
 
-time cargo run --release -q -- --black-lines ./input/*.jpg --output ./output/jpg
+# thanks! https://github.com/rust-lang/cargo/issues/3591#issuecomment-673356426
+#cargo build --release 2>&1 | rg -i --multiline "(^error.*\n.*)|(aborting)|(warnings)"
+
+cd ../tests
+time cargo run -p taggenator --release -q -- dump_tags
 

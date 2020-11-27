@@ -1,3 +1,7 @@
+// TODO: remove
+#![allow(warnings, unused)]
+use std::env;
+
 pub struct Taggenator {}
 
 impl Taggenator {
@@ -6,7 +10,8 @@ impl Taggenator {
 	}
 
 	pub fn parse_args(self, args: Vec<String>) {
-		dbg!("todo");
+		dbg!(args);
+		dbg!(env::current_dir());
 	}
 
 	/// Attempt to load and parse the config file into our Config struct.
