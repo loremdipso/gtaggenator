@@ -1,5 +1,5 @@
 [package]
-authors = [ "you" ]
+authors = [ "Michael Adams" ]
 build = "src/build.rs"
 default-run = "gtaggenator"
 description = "A Tauri App"
@@ -13,8 +13,14 @@ version = "0.1.0"
 name = "gtaggenator"
 path = "src/main.rs"
 
+[workspace]
+members = [ "taggenator" ]
+
 [dependencies]
 serde_json = "1.0"
+
+  [dependencies.taggenator]
+  path = "taggenator"
 
   [dependencies.serde]
   features = [ "derive" ]

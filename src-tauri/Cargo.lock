@@ -452,6 +452,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
+ "taggenator",
  "tauri",
  "winres",
 ]
@@ -1165,6 +1166,10 @@ dependencies = [
  "rayon",
  "winapi",
 ]
+
+[[package]]
+name = "taggenator"
+version = "0.1.0"
 
 [[package]]
 name = "tar"

@@ -3,9 +3,8 @@
 	all(not(debug_assertions), target_os = "windows"),
 	windows_subsystem = "windows"
 )]
-use crate::cli::Taggenator;
 use std::env;
-mod cli;
+use taggenator::Taggenator;
 mod tauri;
 
 fn main() {
