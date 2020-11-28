@@ -5,7 +5,7 @@ use crate::taggenator::settings::Settings;
 use jwalk;
 use std::fs::File;
 use std::include_str;
-// use std::io::prelude::*;
+use std::io::prelude::*;
 use toml::{de::Error, Value};
 use walkdir;
 

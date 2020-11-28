@@ -17,5 +17,6 @@ cargo build --release -q -p taggenator
 #cargo build --release 2>&1 | rg -i --multiline "(^error.*\n.*)|(aborting)|(warnings)"
 
 cd ../tests
-time cargo run -p taggenator --release -q -- dump_tags
+#time cargo run -p taggenator --release -q -- dump_tags
+time ~/.cargo-target/release/taggenator --release -q -- dump_tags
 
