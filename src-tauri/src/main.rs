@@ -11,8 +11,8 @@ fn main() {
 	let args: Vec<String> = env::args().skip(1).collect();
 	let taggenator = Taggenator::new();
 	if args.len() == 0 {
-		tauri::start_tauri(taggenator)
+		tauri::start_tauri(taggenator);
 	} else {
-		taggenator.parse_args(args)
+		taggenator.parse_args(args);
 	}
 }

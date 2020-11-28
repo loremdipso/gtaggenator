@@ -1,6 +1,8 @@
 // TODO: remove
 #![allow(warnings, unused)]
-use std::env;
+use jwalk;
+use std::error::Error;
+use walkdir;
 
 pub struct Taggenator {}
 
@@ -9,9 +11,34 @@ impl Taggenator {
 		return Taggenator {};
 	}
 
-	pub fn parse_args(self, args: Vec<String>) {
-		dbg!(args);
-		dbg!(env::current_dir());
+	pub fn parse_args(self, args: Vec<String>) -> Result<(), Box<Error>> {
+		// dbg!(args);
+		// dbg!(env::current_dir());
+		self.base();
+		// self.jwalk();
+		Ok(())
+	}
+
+	fn jwalk(self) -> Result<(), Box<Error>> {
+		let mut num_chars = 0;
+		for entry in jwalk::WalkDir::new(".") {
+			if let Some(name) = entry?.file_name().to_str() {
+				num_chars += name.len();
+			}
+		}
+		dbg!(num_chars);
+		Ok(())
+	}
+
+	fn base(self) -> Result<(), Box<Error>> {
+		let mut num_chars = 0;
+		for entry in walkdir::WalkDir::new(".") {
+			if let Some(name) = entry?.file_name().to_str() {
+				num_chars += name.len();
+			}
+		}
+		dbg!(num_chars);
+		Ok(())
 	}
 
 	/// Attempt to load and parse the config file into our Config struct.
