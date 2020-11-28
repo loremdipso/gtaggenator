@@ -1,5 +1,6 @@
 // TODO: remove
 #![allow(warnings, unused)]
+use crate::taggenator::database::testDB;
 use crate::taggenator::errors::BError;
 use crate::taggenator::settings::Settings;
 use jwalk;
@@ -25,6 +26,7 @@ impl Taggenator {
 		// self.settings.save();
 		// self.base();
 		// self.jwalk();
+		testDB();
 		Ok(())
 	}
 
