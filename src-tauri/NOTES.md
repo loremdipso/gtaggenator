@@ -9,5 +9,10 @@
         - [x] Modify
         - [x] Save
     - [ ] Efficient, persistent DB
+        - In-memory?
+        - SQL or KVS?
 2. GUI
     - [x] POC
+    - [ ] Figure out plugin architecture
+        - Load how?
+        - Can they be dynamic?
