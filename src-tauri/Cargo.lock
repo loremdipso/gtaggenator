@@ -1269,6 +1269,7 @@ name = "taggenator"
 version = "0.1.0"
 dependencies = [
  "jwalk",
+ "toml",
  "walkdir",
 ]
 
