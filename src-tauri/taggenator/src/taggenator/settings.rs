@@ -4,6 +4,8 @@
 use crate::taggenator::errors::BError;
 use crate::taggenator::inout::readline;
 use jwalk;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -12,9 +14,18 @@ use std::{error::Error, include_str};
 use toml::Value;
 use walkdir;
 
-static SETTINGS_FILENAME: &str = "taggenator_settings.toml";
+static SETTINGS_FILENAME: &str = "tsettings.yaml";
 
-pub struct Settings {}
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct Settings {
+	pub extensions: Vec<String>,
+	pub synonyms: HashMap<String, String>,
+	pub prefixes: Vec<String>,
+	pub derived: HashMap<String, Vec<String>>,
+	pub commands: HashMap<String, String>,
+	pub tagger: HashMap<String, String>,
+	pub openerconfig: HashMap<String, HashMap<String, String>>,
+}
 
 impl Settings {
 	pub fn new() -> Result<Settings, Box<Error>> {
@@ -34,43 +45,23 @@ impl Settings {
 					.expect("Unable to write file");
 			}
 		}
-		return Ok(Settings {});
+
+		Settings::load(SETTINGS_FILENAME)
 	}
 
 	fn get_default() -> &'static str {
-		include_str!("../data/taggenator_settings.toml")
+		include_str!("../data/tsettings.yaml")
 	}
 
-	/// Attempt to load and parse the config file into our Config struct.
-	/// If a file cannot be found, return a default Config.
-	/// If we find a file but cannot parse it, panic
-	pub fn parse(self, path: String) -> Result<(), BError> {
+	pub fn load(path: &str) -> Result<Settings, BError> {
 		match File::open(&path) {
 			Ok(mut file) => {
-				let mut toml_content = String::new();
-				file.read_to_string(&mut toml_content)
+				let mut content = String::new();
+				file.read_to_string(&mut content)
 					.unwrap_or_else(|err| panic!("Error while reading config: [{}]", err));
 
-				let package_info: Value = toml::from_str(&toml_content)?;
-				// let toml = parser.parse();
-
-				// if toml.is_none() {
-				// 	for err in &parser.errors {
-				// 		let (loline, locol) = parser.to_linecol(err.lo);
-				// 		let (hiline, hicol) = parser.to_linecol(err.hi);
-				// 		println!(
-				// 			"{}:{}:{}-{}:{} error: {}",
-				// 			path, loline, locol, hiline, hicol, err.desc
-				// 		);
-				// 	}
-				// 	panic!("Exiting server");
-				// }
-
-				// let config = Value::Table(toml.unwrap());
-				// match toml::decode(config) {
-				// 	Some(t) => t,
-				// 	None => panic!("Error while deserializing config"),
-				// }
+				let settings = serde_yaml::from_str(&content)?;
+				return Ok(settings);
 			}
 			Err(error) => {
 				return Err(Box::new(error));
@@ -78,7 +69,11 @@ impl Settings {
 				// return Config::new();
 			}
 		};
+	}
 
+	pub fn save(&self) -> Result<(), BError> {
+		let s = serde_yaml::to_string(&self)?;
+		fs::write(SETTINGS_FILENAME, s)?;
 		Ok(())
 	}
 }

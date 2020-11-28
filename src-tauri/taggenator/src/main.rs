@@ -6,6 +6,6 @@ use taggenator::Taggenator;
 
 fn main() -> Result<(), Box<Error>> {
 	let args: Vec<String> = env::args().skip(1).collect();
-	let taggenator = Taggenator::new().unwrap();
+	let mut taggenator = Taggenator::new().unwrap();
 	taggenator.parse_args(args)
 }

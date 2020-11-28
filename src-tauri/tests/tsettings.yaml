@@ -1,0 +1,26 @@
+---
+extensions:
+  - ".txt"
+  - sup
+synonyms:
+  post: postfix
+  pre: prefix
+prefixes:
+  - "getmore:"
+derived:
+  thing:
+    - another thing
+commands:
+  ls: ls
+tagger:
+  test: "echo \"new tag1\nnew tag2\n%s\""
+openerconfig:
+  video:
+    Open: "vlc \"%s\""
+    Update: "vlc \"%s\""
+    Close: killall vlc
+  comic:
+    Open: "mcomix \"%s\""
+    Close: killall mcomix
+  default:
+    Open: "gnome-open \"%s\""

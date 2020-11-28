@@ -19,9 +19,10 @@ impl Taggenator {
 		return Ok(Taggenator { settings: settings });
 	}
 
-	pub fn parse_args(self, args: Vec<String>) -> Result<(), BError> {
+	pub fn parse_args(&mut self, args: Vec<String>) -> Result<(), BError> {
 		// dbg!(args);
 		// dbg!(env::current_dir());
+		// self.settings.save();
 		// self.base();
 		// self.jwalk();
 		Ok(())
