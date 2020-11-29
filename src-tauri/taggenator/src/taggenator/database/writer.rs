@@ -86,14 +86,18 @@ impl Writer {
 	}
 
 	fn write_batch(conn: &mut Connection, batch: &Vec<Query>) -> Result<(), BError> {
-		let tx = conn.transaction()?;
-		for action in batch {
-			match tx.execute(&action.sql, &action.params) {
-				Ok(_) => (),
-				Err(err) => println!("update failed: {}", err),
+		let max_batch_size = 1000; // TODO: what should this number be?
+
+		for chunk in batch.chunks(max_batch_size) {
+			let tx = conn.transaction()?;
+			for action in chunk {
+				match tx.execute(&action.sql, &action.params) {
+					Ok(_) => (),
+					Err(err) => println!("update failed: {}", err),
+				}
 			}
+			tx.commit()?;
 		}
-		tx.commit()?;
 		Ok(())
 	}
 }

@@ -129,6 +129,13 @@ impl Database {
 		Ok(names)
 	}
 
+	pub fn delete_record(&mut self, recordName: &str) -> Result<(), BError> {
+		self.async_write(
+			"DELETE FROM Records WHERE Name=?",
+			vec![recordName.to_string()],
+		)
+	}
+
 	pub fn add_tag(&mut self, recordId: &str, tags: Vec<String>) -> Result<(), BError> {
 		let mut args = vec![recordId.to_string()];
 		args.extend(tags);

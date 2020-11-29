@@ -2,7 +2,9 @@
 #![allow(warnings, unused)]
 use super::database::Database;
 use crate::taggenator::errors::BError;
+use crate::taggenator::errors::MyCustomError;
 use crate::taggenator::settings::Settings;
+use std::collections::HashSet;
 use std::fs::File;
 use std::include_str;
 use std::io::prelude::*;
@@ -27,8 +29,9 @@ impl Taggenator {
 	}
 
 	pub fn parse_args(&mut self, args: Vec<String>) -> Result<(), BError> {
-		let num_added = self.update_files()?;
+		let (num_added, num_deleted) = self.update_files()?;
 		println!("Added {} new files", num_added);
+		println!("Deleted {} files", num_deleted);
 		self.database.flush_writes();
 
 		// self.settings.save();
@@ -40,7 +43,7 @@ impl Taggenator {
 		Ok(())
 	}
 
-	fn update_files(&mut self) -> Result<i32, BError> {
+	fn update_files(&mut self) -> Result<(i32, i32), BError> {
 		let (sender, receiver) = channel();
 
 		// start to run through the fs
@@ -54,20 +57,38 @@ impl Taggenator {
 		// get all current filenames from the DB and then pend work
 		// for later
 		let mut num_added = 0;
+		let mut num_deleted = 0;
 		let files = self.database.get_filenames()?;
+		let mut seen = HashSet::new();
 		loop {
 			let value = receiver.recv()?;
 			match value {
-				None => return Ok(num_added),
+				None => break,
 				Some(entry) => {
 					if let Some(name) = entry?.file_name().to_str() {
 						if !files.contains(name) {
 							num_added += 1;
 							self.database.add_record(name);
 						}
+
+						if seen.contains(name) {
+							return Err(Box::new(MyCustomError::DuplicateFile {
+								name: name.to_string(),
+							}));
+						}
+						seen.insert(name.to_string());
 					}
 				}
 			}
 		}
+
+		for file in files {
+			if !seen.contains(&file) {
+				self.database.delete_record(&file);
+				num_deleted += 1;
+			}
+		}
+
+		return Ok((num_added, num_deleted));
 	}
 }

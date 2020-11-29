@@ -10,6 +10,7 @@ pub type BError = Box<Error>;
 pub enum MyCustomError {
 	SetupError,
 	ParseError,
+	DuplicateFile { name: String },
 }
 
 impl std::error::Error for MyCustomError {}
@@ -19,6 +20,9 @@ impl fmt::Display for MyCustomError {
 		match self {
 			MyCustomError::SetupError => write!(f, "Setup Error"),
 			MyCustomError::ParseError => write!(f, "Parse Error"),
+			MyCustomError::DuplicateFile { name } => {
+				write!(f, "Duplicate file error: {}", name)
+			}
 		}
 	}
 }

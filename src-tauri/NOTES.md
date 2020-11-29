@@ -22,3 +22,5 @@
 
 3. Backburner
     - [ ] Figure out migrations
+    - [ ] How do we ensure we don't leave the DB in a funky state?
+    - [ ] Package thread-safe SQLite with the project instead of using whatever's installed
