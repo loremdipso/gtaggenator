@@ -6,7 +6,6 @@ use crate::taggenator::database::writer::Writer;
 use crate::taggenator::errors::BError;
 use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OpenFlags};
-use std::collections::HashMap;
 use std::path::Path;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::Receiver;
@@ -15,7 +14,6 @@ use std::thread;
 use std::thread::JoinHandle;
 
 static SETTINGS_FILENAME: &str = "tagg.db";
-static END_OF_WRITES: &str = "end";
 
 pub struct Database {
 	conn: Connection,
@@ -25,14 +23,14 @@ pub struct Database {
 
 impl Database {
 	pub fn new() -> Result<Database, BError> {
-		let didExist = Path::new(SETTINGS_FILENAME).exists();
+		let did_exist = Path::new(SETTINGS_FILENAME).exists();
 
-		let mut conn = Connection::open_with_flags(
+		let conn = Connection::open_with_flags(
 			SETTINGS_FILENAME,
 			OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_CREATE,
 		)?;
 
-		if !didExist {
+		if !did_exist {
 			conn.execute_batch(
 				"BEGIN;
 			CREATE TABLE foo(x INTEGER);
@@ -43,11 +41,6 @@ impl Database {
 
 		let (sender, receiver) = channel();
 		let writer = Writer::new(sender.clone(), receiver)?;
-		// sender.send("A".to_string());
-		sender.send(Some(Query {
-			sql: "INSERT INTO foo VALUES (?)".to_string(),
-			params: vec!["woop".to_string()],
-		}));
 
 		return Ok(Database {
 			conn: conn,
@@ -56,7 +49,7 @@ impl Database {
 		});
 	}
 
-	pub fn testRead(&self) -> Result<Vec<i32>, BError> {
+	pub fn test_read(&self) -> Result<Vec<i32>, BError> {
 		let mut stmt = self.conn.prepare("SELECT * FROM foo")?;
 		let rows = stmt.query_map(NO_PARAMS, |row| row.get(0))?;
 
@@ -67,7 +60,7 @@ impl Database {
 		Ok(names)
 	}
 
-	pub fn testWrite(&mut self, count: i32) -> Result<(), BError> {
+	pub fn test_write(&mut self, count: i32) -> Result<(), BError> {
 		// match conn.execute("UPDATE foo SET bar = 'baz' WHERE qux = ?", &[&1i32]) {
 		let tx = self.conn.transaction()?;
 
@@ -80,5 +73,18 @@ impl Database {
 
 		tx.commit()?;
 		Ok(())
+	}
+
+	pub fn async_write_test(&self) -> Result<(), BError> {
+		return Ok(());
+	}
+
+	fn async_write(&self, sql: &str, params: Vec<String>) -> Result<(), BError> {
+		self.sender.send(Some(Query {
+			sql: sql.to_string(),
+			params: params,
+		}))?;
+
+		return Ok(());
 	}
 }

@@ -27,8 +27,8 @@ impl Taggenator {
 	pub fn parse_args(&mut self, args: Vec<String>) -> Result<(), BError> {
 		// self.update_files()?;
 		// self.settings.save();
-		// self.database.testWrite(100000)?;
-		// dbg!(self.database.testRead()?.len());
+		// self.database.test_write(100000)?;
+		// dbg!(self.database.test_read()?.len());
 		Ok(())
 	}
 
