@@ -6,6 +6,8 @@ use crate::taggenator::settings::Settings;
 use std::fs::File;
 use std::include_str;
 use std::io::prelude::*;
+use std::sync::mpsc::channel;
+use std::thread;
 use toml::{de::Error, Value};
 use walkdir;
 
@@ -39,18 +41,33 @@ impl Taggenator {
 	}
 
 	fn update_files(&mut self) -> Result<i32, BError> {
-		let files = self.database.get_filenames()?;
+		let (sender, receiver) = channel();
 
+		// start to run through the fs
+		let worker = thread::spawn(move || loop {
+			for entry in walkdir::WalkDir::new(".") {
+				sender.send(Some(entry));
+			}
+			sender.send(None);
+		});
+
+		// get all current filenames from the DB and then pend work
+		// for later
 		let mut num_added = 0;
-		// for entry in walkdir::WalkDir::new(".") {
-		// 	if let Some(name) = entry?.file_name().to_str() {
-		// 		if !files.contains(name) {
-		// 			num_added += 1;
-		// 			self.database.add_record(name);
-		// 		}
-		// 	}
-		// }
-
-		Ok(num_added)
+		let files = self.database.get_filenames()?;
+		loop {
+			let value = receiver.recv()?;
+			match value {
+				None => return Ok(num_added),
+				Some(entry) => {
+					if let Some(name) = entry?.file_name().to_str() {
+						if !files.contains(name) {
+							num_added += 1;
+							self.database.add_record(name);
+						}
+					}
+				}
+			}
+		}
 	}
 }
