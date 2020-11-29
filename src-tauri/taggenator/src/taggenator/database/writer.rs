@@ -8,6 +8,8 @@ use rusqlite::ToSql;
 use rusqlite::{Connection, OpenFlags};
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
+use std::sync::Arc;
+use std::sync::Mutex;
 use std::thread;
 use std::thread::JoinHandle;
 
@@ -35,6 +37,7 @@ impl Writer {
 	pub fn new(
 		sender: Sender<Option<Query>>,
 		receiver: Receiver<Option<Query>>,
+		todo_sender: Sender<usize>,
 	) -> Result<Writer, BError> {
 		let mut conn = Connection::open_with_flags(
 			SETTINGS_FILENAME,
@@ -59,9 +62,12 @@ impl Writer {
 						}
 					}
 
-					if let Err(e) = Writer::write_batch(&mut conn, batch) {
+					if let Err(e) = Writer::write_batch(&mut conn, &batch) {
 						dbg!(e);
 					}
+
+					// TOOD: this could get out of sync if there's an error
+					todo_sender.send(batch.len());
 
 					if should_return {
 						return;
@@ -79,11 +85,11 @@ impl Writer {
 		})
 	}
 
-	fn write_batch(conn: &mut Connection, batch: Vec<Query>) -> Result<(), BError> {
+	fn write_batch(conn: &mut Connection, batch: &Vec<Query>) -> Result<(), BError> {
 		let tx = conn.transaction()?;
 		for action in batch {
-			match tx.execute(&action.sql, action.params) {
-				Ok(_) => (println!("it worked!")),
+			match tx.execute(&action.sql, &action.params) {
+				Ok(_) => (),
 				Err(err) => println!("update failed: {}", err),
 			}
 		}

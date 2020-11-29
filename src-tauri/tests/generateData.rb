@@ -4,7 +4,9 @@ require 'fileutils'
 def main(args)
 	base = File.join("tmp", "test")
 	num_dirs = 1
-	num_files = 1000000
+	## like 3s
+	#num_files = 1_000_000
+	num_files = 10000
 
 	FileUtils.rm_rf(base)
 	makeIfNotExists(base)

@@ -6,10 +6,13 @@ use crate::taggenator::database::writer::Writer;
 use crate::taggenator::errors::BError;
 use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OpenFlags};
+use std::collections::HashSet;
 use std::path::Path;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
+use std::sync::Arc;
+use std::sync::Mutex;
 use std::thread;
 use std::thread::JoinHandle;
 
@@ -19,10 +22,19 @@ pub struct Database {
 	conn: Connection,
 	sender: Sender<Option<Query>>,
 	writer: Writer,
+
+	// the idea here is we want to wait until the write thread
+	// has finished writing, so let's let us tell it how many things its
+	// written and use that to decrement our todo count
+	todo_receiver: Receiver<usize>,
+	todo_count: i64,
 }
 
 impl Database {
 	pub fn new() -> Result<Database, BError> {
+		// TODO: remove
+		// std::fs::remove_file(SETTINGS_FILENAME);
+
 		let did_exist = Path::new(SETTINGS_FILENAME).exists();
 
 		let conn = Connection::open_with_flags(
@@ -33,19 +45,36 @@ impl Database {
 		if !did_exist {
 			conn.execute_batch(
 				"BEGIN;
-			CREATE TABLE foo(x INTEGER);
-			CREATE TABLE bar(y TEXT);
-			COMMIT;",
+				CREATE TABLE Records (
+					RecordID INTEGER PRIMARY KEY,
+					Name VARCHAR(500),
+					Size INTEGER DEFAULT -1,
+					Length INTEGER DEFAULT -1,
+					TimesOpened INTEGER DEFAULT -1
+				);
+
+				CREATE TABLE Tags (
+					RecordID INTEGER,
+					TagName VARCHAR(255),
+					primary key (RecordID, TagName),
+					FOREIGN KEY(RecordID) REFERENCES Records(RecordID)
+				);
+
+				COMMIT;",
 			)?;
 		}
 
 		let (sender, receiver) = channel();
-		let writer = Writer::new(sender.clone(), receiver)?;
+		let (todo_sender, todo_receiver) = channel();
+
+		let writer = Writer::new(sender.clone(), receiver, todo_sender)?;
 
 		return Ok(Database {
 			conn: conn,
 			sender: sender,
 			writer: writer,
+			todo_receiver: todo_receiver,
+			todo_count: 0,
 		});
 	}
 
@@ -65,7 +94,10 @@ impl Database {
 		let tx = self.conn.transaction()?;
 
 		for i in 1..count {
-			match tx.execute("INSERT INTO foo VALUES (?)", &[&"sup"]) {
+			match tx.execute(
+				"INSERT INTO records (Name) VALUES (?)",
+				&[&format!("file_{}", i)],
+			) {
 				Ok(_) => (),
 				Err(err) => println!("update failed: {}", err),
 			}
@@ -79,12 +111,47 @@ impl Database {
 		return Ok(());
 	}
 
-	fn async_write(&self, sql: &str, params: Vec<String>) -> Result<(), BError> {
+	pub fn add_record(&mut self, filename: &str) -> Result<(), BError> {
+		self.async_write(
+			"INSERT INTO records (Name) VALUES (?)",
+			vec![filename.to_string()],
+		)
+	}
+
+	pub fn get_filenames(&self) -> Result<HashSet<String>, BError> {
+		let mut stmt = self.conn.prepare("SELECT (Name) FROM Records")?;
+		let rows = stmt.query_map(NO_PARAMS, |row| row.get(0))?;
+
+		let mut names = HashSet::new();
+		for name_result in rows {
+			names.insert(name_result?);
+		}
+		Ok(names)
+	}
+
+	pub fn add_tag(&mut self, recordId: &str, tags: Vec<String>) -> Result<(), BError> {
+		let mut args = vec![recordId.to_string()];
+		args.extend(tags);
+		self.async_write("INSERT INTO Tags (RecordID, TagName) VALUES (?1, ?2)", args)
+	}
+
+	fn async_write(&mut self, sql: &str, params: Vec<String>) -> Result<(), BError> {
 		self.sender.send(Some(Query {
 			sql: sql.to_string(),
 			params: params,
 		}))?;
 
+		self.todo_count += 1;
+
 		return Ok(());
+	}
+
+	pub fn flush_writes(&mut self) -> Result<(), BError> {
+		while self.todo_count > 0 {
+			let value = self.todo_receiver.recv()?;
+			self.todo_count -= value as i64;
+			dbg!(value);
+		}
+		Ok(())
 	}
 }

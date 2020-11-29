@@ -25,21 +25,32 @@ impl Taggenator {
 	}
 
 	pub fn parse_args(&mut self, args: Vec<String>) -> Result<(), BError> {
-		// self.update_files()?;
+		let num_added = self.update_files()?;
+		println!("Added {} new files", num_added);
+		self.database.flush_writes();
+
 		// self.settings.save();
 		// self.database.test_write(100000)?;
+		// self.database.test_write(10)?;
 		// dbg!(self.database.test_read()?.len());
+		// self.database.add_tag("1000016", vec!["sup".to_string()]);
+
 		Ok(())
 	}
 
-	fn update_files(&mut self) -> Result<(), BError> {
-		let mut num_chars = 0;
-		for entry in walkdir::WalkDir::new(".") {
-			if let Some(name) = entry?.file_name().to_str() {
-				num_chars += name.len();
-			}
-		}
-		dbg!(num_chars);
-		Ok(())
+	fn update_files(&mut self) -> Result<i32, BError> {
+		let files = self.database.get_filenames()?;
+
+		let mut num_added = 0;
+		// for entry in walkdir::WalkDir::new(".") {
+		// 	if let Some(name) = entry?.file_name().to_str() {
+		// 		if !files.contains(name) {
+		// 			num_added += 1;
+		// 			self.database.add_record(name);
+		// 		}
+		// 	}
+		// }
+
+		Ok(num_added)
 	}
 }
