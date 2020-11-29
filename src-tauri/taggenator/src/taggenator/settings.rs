@@ -3,7 +3,6 @@
 
 use crate::taggenator::errors::BError;
 use crate::taggenator::inout::readline;
-use jwalk;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
@@ -11,8 +10,6 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::{error::Error, include_str};
-use toml::Value;
-use walkdir;
 
 static SETTINGS_FILENAME: &str = "tsettings.yaml";
 
@@ -28,7 +25,7 @@ pub struct Settings {
 }
 
 impl Settings {
-	pub fn new() -> Result<Settings, Box<Error>> {
+	pub fn new() -> Result<Settings, BError> {
 		if !Path::new(SETTINGS_FILENAME).exists() {
 			let ret = readline(
 				format!(

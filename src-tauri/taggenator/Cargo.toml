@@ -3,8 +3,8 @@ authors = ["madams <mtadams42@gmail.com>"]
 edition = "2018"
 name = "taggenator"
 version = "0.1.0"
+
 [dependencies]
-jwalk = "*"
 rusqlite = "*"
 serde_yaml = "*"
 toml = "0.5.7"

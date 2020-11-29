@@ -3,8 +3,8 @@ extensions:
   - ".txt"
   - sup
 synonyms:
-  post: postfix
   pre: prefix
+  post: postfix
 prefixes:
   - "getmore:"
 derived:
