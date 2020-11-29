@@ -1,5 +1,6 @@
 // TODO: remove
 #![allow(dead_code, warnings, unused)]
+
 use std::env;
 use std::error::Error;
 use taggenator::Taggenator;

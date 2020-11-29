@@ -18,5 +18,5 @@ cargo build --release -q -p taggenator
 
 cd ../tests
 #time cargo run -p taggenator --release -q -- dump_tags
-time ~/.cargo-target/release/taggenator --release -q -- dump_tags
+time ~/.cargo-target/release/taggenator dump_tags search sup
 

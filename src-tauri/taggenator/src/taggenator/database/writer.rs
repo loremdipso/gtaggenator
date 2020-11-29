@@ -1,6 +1,3 @@
-// TODO: remove
-#![allow(warnings, unused)]
-
 use crate::taggenator::database::END_OF_WRITES;
 use crate::taggenator::database::SETTINGS_FILENAME;
 use crate::taggenator::errors::BError;

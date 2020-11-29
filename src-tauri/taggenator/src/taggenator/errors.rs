@@ -1,6 +1,3 @@
-// TODO: remove
-#![allow(dead_code, warnings, unused)]
-
 use std::fmt;
 use std::{error::Error, include_str};
 
@@ -10,6 +7,7 @@ pub type BError = Box<Error>;
 pub enum MyCustomError {
 	SetupError,
 	ParseError,
+	InvalidCommand { name: String },
 	DuplicateFile { name: String },
 }
 
@@ -22,6 +20,9 @@ impl fmt::Display for MyCustomError {
 			MyCustomError::ParseError => write!(f, "Parse Error"),
 			MyCustomError::DuplicateFile { name } => {
 				write!(f, "Duplicate file error: {}", name)
+			}
+			MyCustomError::InvalidCommand { name } => {
+				write!(f, "Invalid command error: {}", name)
 			}
 		}
 	}

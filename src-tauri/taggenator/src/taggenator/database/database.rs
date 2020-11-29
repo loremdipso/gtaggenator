@@ -1,9 +1,7 @@
-// TODO: remove
-#![allow(warnings, unused)]
-
 use crate::taggenator::database::writer::Query;
 use crate::taggenator::database::writer::Writer;
 use crate::taggenator::errors::BError;
+use crate::taggenator::models;
 use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OpenFlags};
 use std::collections::HashSet;
@@ -43,25 +41,11 @@ impl Database {
 		)?;
 
 		if !did_exist {
-			conn.execute_batch(
-				"BEGIN;
-				CREATE TABLE Records (
-					RecordID INTEGER PRIMARY KEY,
-					Name VARCHAR(500),
-					Size INTEGER DEFAULT -1,
-					Length INTEGER DEFAULT -1,
-					TimesOpened INTEGER DEFAULT -1
-				);
-
-				CREATE TABLE Tags (
-					RecordID INTEGER,
-					TagName VARCHAR(255),
-					primary key (RecordID, TagName),
-					FOREIGN KEY(RecordID) REFERENCES Records(RecordID)
-				);
-
-				COMMIT;",
-			)?;
+			conn.execute_batch(&format!(
+				"BEGIN; {} {} COMMIT;",
+				models::record::SQL,
+				models::tags::SQL
+			))?;
 		}
 
 		let (sender, receiver) = channel();
@@ -157,7 +141,6 @@ impl Database {
 		while self.todo_count > 0 {
 			let value = self.todo_receiver.recv()?;
 			self.todo_count -= value as i64;
-			dbg!(value);
 		}
 		Ok(())
 	}

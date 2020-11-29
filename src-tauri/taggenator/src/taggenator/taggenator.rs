@@ -1,6 +1,6 @@
-// TODO: remove
-#![allow(warnings, unused)]
+use super::database::searcher::Searcher;
 use super::database::Database;
+use crate::taggenator::commands::RunCommand;
 use crate::taggenator::errors::BError;
 use crate::taggenator::errors::MyCustomError;
 use crate::taggenator::settings::Settings;
@@ -14,8 +14,8 @@ use toml::{de::Error, Value};
 use walkdir;
 
 pub struct Taggenator {
-	settings: Settings,
-	database: Database,
+	pub settings: Settings,
+	pub database: Database,
 }
 
 impl Taggenator {
@@ -28,11 +28,12 @@ impl Taggenator {
 		});
 	}
 
-	pub fn parse_args(&mut self, args: Vec<String>) -> Result<(), BError> {
+	pub fn parse_args(&mut self, mut args: Vec<String>) -> Result<(), BError> {
 		let (num_added, num_deleted) = self.update_files()?;
-		println!("Added {} new files", num_added);
-		println!("Deleted {} files", num_deleted);
-		self.database.flush_writes();
+
+		let command = args[0].clone();
+		args.remove(0);
+		RunCommand(self, command, args)?;
 
 		// self.settings.save();
 		// self.database.test_write(100000)?;
@@ -46,7 +47,7 @@ impl Taggenator {
 	fn update_files(&mut self) -> Result<(i32, i32), BError> {
 		let (sender, receiver) = channel();
 
-		// start to run through the fs
+		// start a thread to run through the fs while the main thread talks to the DB
 		let worker = thread::spawn(move || loop {
 			for entry in walkdir::WalkDir::new(".") {
 				sender.send(Some(entry));
@@ -54,8 +55,7 @@ impl Taggenator {
 			sender.send(None);
 		});
 
-		// get all current filenames from the DB and then pend work
-		// for later
+		// get all current filenames from the DB and then pend work for later
 		let mut num_added = 0;
 		let mut num_deleted = 0;
 		let files = self.database.get_filenames()?;
@@ -88,6 +88,10 @@ impl Taggenator {
 				num_deleted += 1;
 			}
 		}
+
+		println!("Added {} new files", num_added);
+		println!("Deleted {} files", num_deleted);
+		self.database.flush_writes();
 
 		return Ok((num_added, num_deleted));
 	}

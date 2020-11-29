@@ -13,6 +13,7 @@
         - SQL or KVS?
     - [x] Make writes async and batch them together if possible
     - [x] Create schema
+    - [ ] Implement dump_tags
 2. GUI
 
     - [x] POC

@@ -1,6 +1,3 @@
-// TODO: remove
-#![allow(warnings, unused)]
-
 use std::io::{self, Write};
 
 pub fn readline(message: &str) -> Option<String> {

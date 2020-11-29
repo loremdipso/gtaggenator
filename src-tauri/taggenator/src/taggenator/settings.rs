@@ -1,8 +1,5 @@
-// TODO: remove
-#![allow(warnings, unused)]
-
 use crate::taggenator::errors::BError;
-use crate::taggenator::inout::readline;
+use crate::taggenator::utils::input::readline;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
