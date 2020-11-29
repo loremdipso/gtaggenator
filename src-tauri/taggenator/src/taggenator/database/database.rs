@@ -1,16 +1,26 @@
 // TODO: remove
 #![allow(warnings, unused)]
 
+use crate::taggenator::database::writer::Query;
+use crate::taggenator::database::writer::Writer;
 use crate::taggenator::errors::BError;
 use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OpenFlags};
 use std::collections::HashMap;
 use std::path::Path;
+use std::sync::mpsc::channel;
+use std::sync::mpsc::Receiver;
+use std::sync::mpsc::Sender;
+use std::thread;
+use std::thread::JoinHandle;
 
 static SETTINGS_FILENAME: &str = "tagg.db";
+static END_OF_WRITES: &str = "end";
 
 pub struct Database {
 	conn: Connection,
+	sender: Sender<Option<Query>>,
+	writer: Writer,
 }
 
 impl Database {
@@ -31,11 +41,22 @@ impl Database {
 			)?;
 		}
 
-		return Ok(Database { conn: conn });
+		let (sender, receiver) = channel();
+		let writer = Writer::new(sender.clone(), receiver)?;
+		// sender.send("A".to_string());
+		sender.send(Some(Query {
+			sql: "INSERT INTO foo VALUES (?)".to_string(),
+			params: vec!["woop".to_string()],
+		}));
+
+		return Ok(Database {
+			conn: conn,
+			sender: sender,
+			writer: writer,
+		});
 	}
 
 	pub fn testRead(&self) -> Result<Vec<i32>, BError> {
-		// for i in 1..count {
 		let mut stmt = self.conn.prepare("SELECT * FROM foo")?;
 		let rows = stmt.query_map(NO_PARAMS, |row| row.get(0))?;
 
@@ -51,7 +72,7 @@ impl Database {
 		let tx = self.conn.transaction()?;
 
 		for i in 1..count {
-			match tx.execute("INSERT INTO foo VALUES (?)", &[&i]) {
+			match tx.execute("INSERT INTO foo VALUES (?)", &[&"sup"]) {
 				Ok(_) => (),
 				Err(err) => println!("update failed: {}", err),
 			}

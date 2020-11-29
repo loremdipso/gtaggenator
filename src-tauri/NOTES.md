@@ -8,9 +8,10 @@
         - [x] Load
         - [x] Modify
         - [x] Save
-    - [ ] Efficient, persistent DB
+    - [x] Efficient, persistent DB
         - In-memory?
         - SQL or KVS?
+    - [ ] Make writes async and batch them together if possible
 2. GUI
     - [x] POC
     - [ ] Figure out plugin architecture
