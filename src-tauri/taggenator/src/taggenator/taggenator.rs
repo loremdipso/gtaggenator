@@ -61,9 +61,16 @@ impl Taggenator {
 		let (sender, receiver) = channel();
 
 		// start a thread to run through the fs while the main thread talks to the DB
+		let extensions = self.settings.extensions.clone();
 		let worker = thread::spawn(move || loop {
 			for entry in walkdir::WalkDir::new(".") {
-				sender.send(Some(entry));
+				if let Ok(entry) = entry {
+					if !entry.path().is_dir()
+						&& Taggenator::valid_extension(&extensions, entry.path())
+					{
+						sender.send(Some(entry));
+					}
+				}
 			}
 			sender.send(None);
 		});
@@ -81,12 +88,7 @@ impl Taggenator {
 			match value {
 				None => break,
 				Some(entry) => {
-					let entry = entry.unwrap();
 					if let Some(name) = &entry.file_name().to_str() {
-						if entry.path().is_dir() || !self.valid_extension(entry.path()) {
-							continue;
-						}
-
 						let location = entry.path().to_str().unwrap();
 						let mut did_create = false;
 						if !file_map.contains_key(*name) {
@@ -190,9 +192,9 @@ impl Taggenator {
 		return Ok((num_added, num_deleted));
 	}
 
-	fn valid_extension(&self, path: &Path) -> bool {
+	fn valid_extension(extensions: &Vec<String>, path: &Path) -> bool {
 		if let Some(extension) = get_extension_from_filename(&path) {
-			if self.settings.extensions.iter().any(|ext| ext == extension) {
+			if extensions.iter().any(|ext| ext == extension) {
 				return true;
 			}
 		}
