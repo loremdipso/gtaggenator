@@ -14,7 +14,7 @@ use std::sync::Mutex;
 use std::thread;
 use std::thread::JoinHandle;
 
-static SETTINGS_FILENAME: &str = "tagg.db";
+static DATABASE_FILENAME: &str = "tagg.db";
 
 pub struct Database {
 	pub conn: Connection,
@@ -31,12 +31,12 @@ pub struct Database {
 impl Database {
 	pub fn new() -> Result<Database, BError> {
 		// TODO: remove
-		std::fs::remove_file(SETTINGS_FILENAME);
+		// std::fs::remove_file(DATABASE_FILENAME);
 
-		let did_exist = Path::new(SETTINGS_FILENAME).exists();
+		let did_exist = Path::new(DATABASE_FILENAME).exists();
 
 		let conn = Connection::open_with_flags(
-			SETTINGS_FILENAME,
+			DATABASE_FILENAME,
 			OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_CREATE,
 		)?;
 

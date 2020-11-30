@@ -17,7 +17,8 @@ cargo build --release -q -p taggenator
 #cargo build --release 2>&1 | rg -i --multiline "(^error.*\n.*)|(aborting)|(warnings)"
 
 cd ../tests
-time ~/.cargo-target/release/taggenator dump search yu
+#time ~/.cargo-target/release/taggenator dump tags_inclusive yup yupp
+time ~/.cargo-target/release/taggenator dump search_inclusive yu yup
 #time ~/.cargo-target/release/taggenator dump search yup -sort reverse
 #time ~/.cargo-target/release/taggenator dump search yup -sort random
 #time ~/.cargo-target/release/taggenator dump search_inclusive yup sup

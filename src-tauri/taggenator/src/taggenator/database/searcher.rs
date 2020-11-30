@@ -178,29 +178,9 @@ impl Filter {
 
 	pub fn sqlizable(&self) -> bool {
 		return match &self.name[..] {
-			"search" | "search_inclusive" | "search_exclusive" => return true,
+			"search" | "search_inclusive" | "search_exclusive" | "tags" | "tags_exclusive"
+			| "tags_inclusive" => return true,
 			_ => return false,
-		};
-	}
-
-	pub fn execute(&self, records: &mut Vec<Record>) {
-		match &self.name[..] {
-			"random" => {
-				records.shuffle(&mut thread_rng());
-			}
-
-			"reverse" => {
-				records.reverse();
-			}
-
-			"alpha" | "alphabetical" => {
-				records.sort_by(|a, b| a.Name.cmp(&b.Name));
-			}
-
-			_ => {
-				// TODO: figure out error logging
-				println!("Unknown option: {}", self.name);
-			}
 		};
 	}
 
@@ -252,9 +232,73 @@ impl Filter {
 					rv.append("\nor ");
 
 					rv.append(format!(
-	// 					"EXISTS(
-	// 	SELECT 1 FROM TagsFTS where TagsFTS.RecordID = Records.RecordID
-	// and TagsFTS MATCH '{}')",
+						// tags exclusive
+						// "(\"{}\" in (
+						// SELECT Tags.TagName from Tags
+						// WHERE Tags.RecordID = Records.RecordID))",
+
+						// loose search
+						"EXISTS(
+							SELECT Tags.TagName from Tags
+							WHERE Tags.RecordID = Records.RecordID
+							AND Tags.TagName Like '%{}%'
+						)",
+						&arg
+					));
+					rv.append("\n)");
+				}
+				self.args.clear();
+				rv.append(")");
+
+				let rv = format!("{} {}", sql, rv.string().unwrap());
+				return rv;
+			}
+
+			// TODO: deduplicate this horrible logic
+			"tags" | "tags_inclusive" | "tags_exclusive" => {
+				let mut rv = Builder::default();
+				if self.args.len() == 0 {
+					return sql;
+				}
+
+				if is_first {
+					rv.append("where (");
+				} else {
+					rv.append("and (");
+				}
+
+				for (i, arg) in self.args.iter().enumerate() {
+					let mut arg = arg.clone();
+					let mut exclude = false;
+					if arg.starts_with("-") {
+						arg = (&arg[1..]).to_string();
+						exclude = true;
+					}
+
+					if exclude {
+						if i > 0 {
+							rv.append("\nand not ");
+						} else {
+							rv.append("\nnot ");
+						}
+					} else {
+						if i > 0 {
+							match &self.name[..] {
+								"tags_inclusive" => {
+									rv.append("\nor ");
+								}
+								_ => {
+									// default
+									rv.append("\nand ");
+								}
+							}
+						}
+					}
+
+					rv.append(" (");
+
+					rv.append(format!(
+						// tags exclusive
 						"(\"{}\" in (
 						SELECT Tags.TagName from Tags
 						WHERE Tags.RecordID = Records.RecordID))",
@@ -270,6 +314,31 @@ impl Filter {
 			}
 
 			_ => return sql,
+		};
+	}
+
+	// if we can't SQL something we execute it here.
+	// We should have implementations for everything in sqlize,
+	// since the sqlizability depends on both the position of the action
+	// and the action itself
+	pub fn execute(&self, records: &mut Vec<Record>) {
+		match &self.name[..] {
+			"random" => {
+				records.shuffle(&mut thread_rng());
+			}
+
+			"reverse" => {
+				records.reverse();
+			}
+
+			"alpha" | "alphabetical" => {
+				records.sort_by(|a, b| a.Name.cmp(&b.Name));
+			}
+
+			_ => {
+				// TODO: figure out error logging
+				println!("Unknown option: {}", self.name);
+			}
 		};
 	}
 }
