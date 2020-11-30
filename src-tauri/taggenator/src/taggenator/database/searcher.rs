@@ -50,10 +50,10 @@ impl Searcher {
 	}
 
 	pub fn get_tags(&mut self, db: &Database) -> Result<HashSet<String>, BError> {
-		let mut query = "SELECT Tags.TagName FROM Tags".to_string();
-		if self.filters.len() > 0 {
+		// let mut query = "SELECT Tags.TagName FROM Tags".to_string();
+		// if self.filters.len() > 0 {
 			query += &"\nJoin Records ON Records.RecordID = Tags.RecordID";
-		}
+		// }
 
 		let mut stmt = db.conn.prepare(&self.format_query(&query))?;
 		let rows = stmt.query_map(&self.get_query_args(), |row| row.get(0))?;
@@ -74,16 +74,14 @@ impl Searcher {
 	}
 
 	fn format_query(&mut self, query: &str) -> String {
-		let mut rv = Builder::default();
-		rv.append(query);
+		let mut sql = query.to_string();
+		// rv.append(query);
 		for mut filter in &mut self.filters {
-			rv.append("\n");
-			rv.append(filter.to_sql());
+			sql = filter.append_sql(sql);
 		}
 
-		rv.append(";");
-		let rv = rv.string().unwrap();
-		println!("{}", &rv);
+		// let rv = rv.string().unwrap();
+		// println!("{}", &rv);
 		return rv;
 	}
 }
@@ -102,15 +100,27 @@ impl Filter {
 		});
 	}
 
-	fn to_sql(&mut self) -> String {
+	fn append_sql(&mut self, sql: String) -> String {
 		// TODO: figure out escaping
-		let rv = match &self.name[..] {
-			"search" => {
+		return match &self.name[..] {
+			"search" | "search_inclusive" | "search_exclusive" => {
 				let mut rv = Builder::default();
+				if self.args.len() == 0 {
+					return sql;
+				}
+
 				rv.append("and ( ");
 				for (i, arg) in self.args.iter().enumerate() {
 					if i > 0 {
-						rv.append("\nand ");
+						match &self.name[..] {
+							"search_inclusive" => {
+								rv.append("\nor ");
+							}
+							_ => {
+								// default
+								rv.append("\nand ");
+							}
+						}
 					}
 
 					rv.append(" (");
@@ -129,11 +139,14 @@ impl Filter {
 				}
 				self.args.clear();
 				rv.append(")");
-				rv.string().unwrap()
+				return format!("{} {}", sql, rv.string().unwrap());
 			}
 
-			_ => "".to_string(),
+			"reverse" => {
+				return format!("({}) "
+			}
+
+			_ => return sql,
 		};
-		return rv;
 	}
 }

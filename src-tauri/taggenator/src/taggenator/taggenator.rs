@@ -37,6 +37,7 @@ impl Taggenator {
 		// dbg!(self.database.test_read()?.len());
 		// self.database.add_tag("2", vec!["sup".to_string()]);
 		// self.database.add_tag("100", vec!["yup".to_string()]);
+		// self.database.add_tag("100", vec!["group".to_string()]);
 
 		let command = args[0].clone();
 		args.remove(0);
