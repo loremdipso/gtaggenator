@@ -9,9 +9,10 @@ use std::collections::HashSet;
 use std::error::Error;
 use string_builder::Builder;
 
+// TODO: is there some way to clean this up? Diesel, for ex?
 const RECORD_ID_INDEX: usize = 0;
 const RECORD_NAME_INDEX: usize = 1;
-const TAG_INDEX: usize = 7;
+const TAG_INDEX: usize = 8;
 const LOCATION_INDEX: usize = 2;
 
 #[derive(Debug)]
@@ -81,7 +82,11 @@ impl Searcher {
 		// TODO: how can we make this less bad?
 		let mut records: Vec<Record> = vec![];
 		let mut current_record: Option<Record> = None;
-		let mut rows = stmt.query(&self.get_query_args())?;
+
+		// We're handling query args ourselves
+		// let mut rows = stmt.query(&self.get_query_args())?;
+		let mut rows = stmt.query(NO_PARAMS)?;
+
 		loop {
 			let row = rows.next()?;
 			match row {
@@ -120,20 +125,25 @@ impl Searcher {
 			records.push(current_record.take().unwrap());
 		}
 
+		let mut temp_records = Some(records);
 		for filter in &self.filters {
-			filter.execute(&mut records);
+			// the idea here is we wrap/unwrap the records array, filtering/sorting
+			// in-between. We could try and optimize by running multiple filters so we
+			// don't need to build several temporary vectors, but for now we don't.
+			temp_records = filter.execute(temp_records);
 		}
+		let records = temp_records.take().unwrap();
 
 		return Ok(records);
 	}
 
-	fn get_query_args(&self) -> Vec<String> {
-		let mut rv = vec![];
-		for filter in &self.filters {
-			rv.extend(filter.args.clone());
-		}
-		return rv;
-	}
+	// fn get_query_args(&self) -> Vec<String> {
+	// 	let mut rv = vec![];
+	// 	for filter in &self.filters {
+	// 		rv.extend(filter.args.clone());
+	// 	}
+	// 	return rv;
+	// }
 
 	fn format_query(&mut self, query: &str) -> String {
 		let mut sql = query.to_string();
@@ -178,8 +188,8 @@ impl Filter {
 
 	pub fn sqlizable(&self) -> bool {
 		return match &self.name[..] {
-			"search" | "search_inclusive" | "search_exclusive" | "tags" | "tags_exclusive"
-			| "tags_inclusive" => return true,
+			// "search" | "search_inclusive" | "search_exclusive" | "tags" | "tags_exclusive"
+			// | "tags_inclusive" => return true,
 			_ => return false,
 		};
 	}
@@ -321,24 +331,140 @@ impl Filter {
 	// We should have implementations for everything in sqlize,
 	// since the sqlizability depends on both the position of the action
 	// and the action itself
-	pub fn execute(&self, records: &mut Vec<Record>) {
-		match &self.name[..] {
-			"random" => {
-				records.shuffle(&mut thread_rng());
+	pub fn execute(&self, records: Option<Vec<Record>>) -> Option<Vec<Record>> {
+		match records {
+			Some(mut records) => {
+				match &self.name[..] {
+					"random" => {
+						records.shuffle(&mut thread_rng());
+					}
+
+					"reverse" => {
+						records.reverse();
+					}
+
+					"alpha" | "alphabetical" => {
+						records.sort_by(|a, b| a.Name.cmp(&b.Name));
+					}
+
+					"tags" | "tags_exclusive" => {
+						records = records
+							.drain(..)
+							.filter(|record| search_tags_exclusive(&record, &self.args))
+							.collect();
+					}
+
+					"tags_inclusive" => {
+						records = records
+							.drain(..)
+							.filter(|record| search_tags_inclusive(&record, &self.args))
+							.collect();
+					}
+
+					"search" | "search_exclusive" => {
+						records = records
+							.drain(..)
+							.filter(|record| loose_search_exclusive(&record, &self.args))
+							.collect();
+					}
+
+					"search_inclusive" => {
+						records = records
+							.drain(..)
+							.filter(|record| loose_search_inclusive(&record, &self.args))
+							.collect();
+					}
+
+					_ => {
+						// TODO: figure out error logging
+						println!("Unknown option: {}", self.name);
+					}
+				};
+
+				return Some(records);
 			}
 
-			"reverse" => {
-				records.reverse();
-			}
-
-			"alpha" | "alphabetical" => {
-				records.sort_by(|a, b| a.Name.cmp(&b.Name));
-			}
-
-			_ => {
-				// TODO: figure out error logging
-				println!("Unknown option: {}", self.name);
-			}
-		};
+			None => return None,
+		}
 	}
+}
+
+// every search term must match
+fn loose_search_exclusive(record: &Record, search_terms: &Vec<String>) -> bool {
+	for term in search_terms {
+		if record.Location.to_lowercase().contains(term) {
+			continue;
+		}
+
+		if record
+			.Tags
+			.iter()
+			.any(|tag| tag.to_lowercase().contains(term))
+		{
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+// any search term needs to match
+fn loose_search_inclusive(record: &Record, search_terms: &Vec<String>) -> bool {
+	// special case: if there are no args, let's just assume this is true
+	// NOTE: this is different from SQL
+	if search_terms.len() == 0 {
+		return true;
+	}
+
+	for term in search_terms {
+		if record.Location.to_lowercase().contains(term) {
+			return true;
+		}
+
+		for tag in &record.Tags {
+			if tag.to_lowercase().contains(term) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+// every search term must match
+fn search_tags_exclusive(record: &Record, search_terms: &Vec<String>) -> bool {
+	for term in search_terms {
+		if record
+			.Tags
+			.iter()
+			.any(|tag| tag.to_lowercase().contains(term))
+		{
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+// any search term needs to match
+fn search_tags_inclusive(record: &Record, search_terms: &Vec<String>) -> bool {
+	// special case: if there are no args, let's just assume this is true
+	// NOTE: this is different from SQL
+	if search_terms.len() == 0 {
+		return true;
+	}
+
+	for term in search_terms {
+		for tag in &record.Tags {
+			if tag.to_lowercase().contains(term) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }

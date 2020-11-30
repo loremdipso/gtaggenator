@@ -18,7 +18,7 @@ cargo build --release -q -p taggenator
 
 cd ../tests
 #time ~/.cargo-target/release/taggenator dump tags_inclusive yup yupp
-time ~/.cargo-target/release/taggenator dump search_inclusive yu yup
+time ~/.cargo-target/release/taggenator dump tags_inclusive yupp yup
 #time ~/.cargo-target/release/taggenator dump search yup -sort reverse
 #time ~/.cargo-target/release/taggenator dump search yup -sort random
 #time ~/.cargo-target/release/taggenator dump search_inclusive yup sup
