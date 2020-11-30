@@ -2,8 +2,11 @@ use crate::taggenator::database::writer::Query;
 use crate::taggenator::database::writer::Writer;
 use crate::taggenator::errors::BError;
 use crate::taggenator::models;
+use crate::taggenator::models::record::MiniRecord;
+use multimap::MultiMap;
 use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OpenFlags};
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::Path;
 use std::sync::mpsc::channel;
@@ -102,21 +105,46 @@ impl Database {
 		)
 	}
 
-	pub fn get_filenames(&self) -> Result<HashSet<String>, BError> {
-		let mut stmt = self.conn.prepare("SELECT (Name) FROM Records")?;
-		let rows = stmt.query_map(NO_PARAMS, |row| row.get(0))?;
-
-		let mut names = HashSet::new();
-		for name_result in rows {
-			names.insert(name_result?);
-		}
-		Ok(names)
+	pub fn update_location(&mut self, recordID: i32, location: &str) -> Result<(), BError> {
+		self.async_write(
+			"UPDATE Records SET Location = ?
+			WHERE Records.RecordID = ?",
+			vec![location.to_string(), recordID.to_string()],
+		)
 	}
 
-	pub fn delete_record(&mut self, recordName: &str) -> Result<(), BError> {
+	pub fn get_filenames_to_locations(&self) -> Result<MultiMap<String, MiniRecord>, BError> {
+		let mut stmt = self
+			.conn
+			.prepare("SELECT RecordID, Name, Location FROM Records")?;
+		let mut rows = stmt.query(NO_PARAMS)?;
+
+		let mut map: MultiMap<String, MiniRecord> = MultiMap::new();
+		loop {
+			let row = rows.next()?;
+			match row {
+				None => break,
+				Some(row) => {
+					let id = row.get(0)?;
+					let name = row.get(1)?;
+					let location = row.get(2)?;
+					map.insert(
+						name,
+						MiniRecord {
+							RecordID: id,
+							Location: location,
+						},
+					);
+				}
+			}
+		}
+		Ok(map)
+	}
+
+	pub fn delete_record(&mut self, recordID: i32) -> Result<(), BError> {
 		self.async_write(
-			"DELETE FROM Records WHERE Name=?",
-			vec![recordName.to_string()],
+			"DELETE FROM Records WHERE RecordID=?",
+			vec![recordID.to_string()],
 		)
 	}
 

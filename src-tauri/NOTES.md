@@ -13,7 +13,12 @@
         - SQL or KVS?
     - [x] Make writes async and batch them together if possible
     - [x] Create schema
-    - [ ] Implement dump_tags
+    - [x] Implement dump_tags
+    - [x] Implement dump
+    - [x] Implement Duplicate checking
+    - [x] Implement renaming
+    - [x] Get rid of unique name requirement?
+    - [ ] Implement batching in Async SQL queries
 2. GUI
 
     - [x] POC

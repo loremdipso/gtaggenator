@@ -413,7 +413,6 @@ fn loose_search_exclusive(record: &Record, search_terms: &Vec<String>) -> bool {
 // any search term needs to match
 fn loose_search_inclusive(record: &Record, search_terms: &Vec<String>) -> bool {
 	// special case: if there are no args, let's just assume this is true
-	// NOTE: this is different from SQL
 	if search_terms.len() == 0 {
 		return true;
 	}
@@ -453,7 +452,6 @@ fn search_tags_exclusive(record: &Record, search_terms: &Vec<String>) -> bool {
 // any search term needs to match
 fn search_tags_inclusive(record: &Record, search_terms: &Vec<String>) -> bool {
 	// special case: if there are no args, let's just assume this is true
-	// NOTE: this is different from SQL
 	if search_terms.len() == 0 {
 		return true;
 	}

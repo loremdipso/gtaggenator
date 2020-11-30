@@ -5,6 +5,7 @@ name = "taggenator"
 version = "0.1.0"
 [dependencies]
 itertools = "*"
+multimap = "*"
 rand = "*"
 rusqlite = "*"
 serde_yaml = "*"

@@ -672,6 +672,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "multimap"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1255076139a83bb467426e7f8d0134968a8118844faa755985e077cf31850333"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "native-tls"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1301,6 +1310,7 @@ name = "taggenator"
 version = "0.1.0"
 dependencies = [
  "itertools",
+ "multimap",
  "rand",
  "rusqlite",
  "rustbreak",

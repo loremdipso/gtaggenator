@@ -6,6 +6,13 @@ pub struct Record {
 	pub Tags: Vec<String>,
 }
 
+// TODO: probably we don't need to clone
+#[derive(Debug, Clone)]
+pub struct MiniRecord {
+	pub RecordID: i32,
+	pub Location: String,
+}
+
 pub const SQL: &str = "
 	CREATE TABLE Records (
 		RecordID INTEGER PRIMARY KEY,
