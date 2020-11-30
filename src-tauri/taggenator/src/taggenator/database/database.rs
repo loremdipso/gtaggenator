@@ -17,7 +17,7 @@ use std::thread::JoinHandle;
 static SETTINGS_FILENAME: &str = "tagg.db";
 
 pub struct Database {
-	conn: Connection,
+	pub conn: Connection,
 	sender: Sender<Option<Query>>,
 	writer: Writer,
 
@@ -95,10 +95,10 @@ impl Database {
 		return Ok(());
 	}
 
-	pub fn add_record(&mut self, filename: &str) -> Result<(), BError> {
+	pub fn add_record(&mut self, filename: &str, location: &str) -> Result<(), BError> {
 		self.async_write(
-			"INSERT INTO records (Name) VALUES (?)",
-			vec![filename.to_string()],
+			"INSERT INTO records (Name, Location) VALUES (?, ?)",
+			vec![filename.to_string(), location.to_string()],
 		)
 	}
 

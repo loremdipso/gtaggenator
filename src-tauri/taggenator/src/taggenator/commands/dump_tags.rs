@@ -4,8 +4,11 @@ use crate::taggenator::errors::BError;
 use crate::Taggenator;
 
 pub fn dump_tags(db: &mut Taggenator, args: Vec<String>) -> Result<(), BError> {
-	let searcher = Searcher::new(args)?;
-	dbg!(searcher.run(&db.database));
+	let mut searcher = Searcher::new(args)?;
+
+	let result = searcher.get_tags(&db.database)?;
+	dbg!(result);
+
 	// if args.len() == 0 {
 	// 	// Special Case: no search arguments, just print all tags
 	// 	tags, err := getAllTags(db)

@@ -31,15 +31,16 @@ impl Taggenator {
 	pub fn parse_args(&mut self, mut args: Vec<String>) -> Result<(), BError> {
 		let (num_added, num_deleted) = self.update_files()?;
 
-		let command = args[0].clone();
-		args.remove(0);
-		RunCommand(self, command, args)?;
-
 		// self.settings.save();
 		// self.database.test_write(100000)?;
 		// self.database.test_write(10)?;
 		// dbg!(self.database.test_read()?.len());
-		// self.database.add_tag("1000016", vec!["sup".to_string()]);
+		// self.database.add_tag("2", vec!["sup".to_string()]);
+		// self.database.add_tag("100", vec!["yup".to_string()]);
+
+		let command = args[0].clone();
+		args.remove(0);
+		RunCommand(self, command, args)?;
 
 		Ok(())
 	}
@@ -65,13 +66,15 @@ impl Taggenator {
 			match value {
 				None => break,
 				Some(entry) => {
-					if let Some(name) = entry?.file_name().to_str() {
-						if !files.contains(name) {
+					let entry = entry.unwrap();
+					if let Some(name) = &entry.file_name().to_str() {
+						if !files.contains(*name) {
 							num_added += 1;
-							self.database.add_record(name);
+							self.database
+								.add_record(name, &entry.path().to_str().unwrap());
 						}
 
-						if seen.contains(name) {
+						if seen.contains(*name) {
 							return Err(Box::new(MyCustomError::DuplicateFile {
 								name: name.to_string(),
 							}));
