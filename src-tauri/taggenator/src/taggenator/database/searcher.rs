@@ -157,7 +157,7 @@ impl Searcher {
 		}
 
 		// dbg!(&self.filters);
-		// println!("{}", sql);
+		println!("{}", sql);
 		return sql;
 	}
 }
@@ -252,9 +252,12 @@ impl Filter {
 					rv.append("\nor ");
 
 					rv.append(format!(
-						"(\"{}\" in (
-	SELECT Tags.TagName from Tags
-	WHERE Tags.RecordID = Records.RecordID))",
+						"EXISTS(
+		SELECT 1 FROM TagsFTS where TagsFTS.RecordID = Records.RecordID
+	and TagsFTS MATCH '{}')",
+						// "(\"{}\" in (
+						// SELECT Tags.TagName from Tags
+						// WHERE Tags.RecordID = Records.RecordID))",
 						&arg
 					));
 					rv.append("\n)");

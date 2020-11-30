@@ -31,7 +31,7 @@ pub struct Database {
 impl Database {
 	pub fn new() -> Result<Database, BError> {
 		// TODO: remove
-		// std::fs::remove_file(SETTINGS_FILENAME);
+		std::fs::remove_file(SETTINGS_FILENAME);
 
 		let did_exist = Path::new(SETTINGS_FILENAME).exists();
 
