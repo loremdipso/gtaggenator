@@ -22,7 +22,7 @@ pub struct Query {
 
 pub enum Sqlizable {
 	Text(String),
-	Number(i32),
+	Number(i64),
 	Boolean(bool),
 	Date(Option<DateTime<Utc>>),
 }

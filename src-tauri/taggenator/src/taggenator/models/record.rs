@@ -23,7 +23,7 @@ pub struct Record {
 // TODO: probably we don't need to clone
 #[derive(Debug, Clone)]
 pub struct MiniRecord {
-	pub RecordID: i32,
+	pub RecordID: i64,
 	pub Location: String,
 }
 

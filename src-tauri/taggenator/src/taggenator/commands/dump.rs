@@ -10,6 +10,7 @@ pub fn dump(db: &mut Taggenator, args: Vec<String>) -> Result<(), BError> {
 
 	// println!("Num records: {}", records.len());
 	for record in records {
+		// dbg!(record);
 		println!("{}", record.Location);
 	}
 

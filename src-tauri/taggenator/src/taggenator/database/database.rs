@@ -15,6 +15,7 @@ use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OpenFlags};
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::fs;
 use std::path::Path;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::Receiver;
@@ -44,7 +45,7 @@ pub struct Database {
 impl Database {
 	pub fn new() -> Result<Database, BError> {
 		// TODO: remove
-		std::fs::remove_file(DATABASE_FILENAME);
+		// std::fs::remove_file(DATABASE_FILENAME);
 
 		let did_exist = Path::new(DATABASE_FILENAME).exists();
 
@@ -111,11 +112,13 @@ impl Database {
 	}
 
 	pub fn add_record(&mut self, filename: &str, location: &str) -> Result<(), BError> {
-		let size = 42;
-		let length = 42;
+		let metadata = fs::metadata(location)?;
+
+		let size = metadata.len() as i64;
+		let length = -1; // TODO: fetch the length of video files
 		let times_opened = 0;
 		let date_added = Some(Utc::now());
-		let date_created = Some(Utc::now());
+		let date_created = Some(DateTime::<Utc>::from(metadata.created()?));
 		let date_last_touched = None;
 		let have_manually_touched = false;
 
@@ -150,7 +153,7 @@ impl Database {
 		)
 	}
 
-	pub fn update_location(&mut self, recordID: i32, location: &str) -> Result<(), BError> {
+	pub fn update_location(&mut self, recordID: i64, location: &str) -> Result<(), BError> {
 		self.async_write(
 			"UPDATE Records SET Location = ?
 			WHERE Records.RecordID = ?",
@@ -186,7 +189,7 @@ impl Database {
 		Ok(map)
 	}
 
-	pub fn delete_record(&mut self, recordID: i32) -> Result<(), BError> {
+	pub fn delete_record(&mut self, recordID: i64) -> Result<(), BError> {
 		self.async_write(
 			"DELETE FROM Records WHERE RecordID=?",
 			vec![Number(recordID)],
