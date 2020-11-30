@@ -1,4 +1,4 @@
 #!/bin/bash
 
-filewatcher ./src/ ./taggenator 'printf "\ec" && ./test.sh'
+filewatcher ./src/ ./taggenator test.sh 'printf "\ec" && ./test.sh'
 

@@ -189,21 +189,32 @@ impl Filter {
 				}
 
 				for (i, arg) in self.args.iter().enumerate() {
+					let mut arg = arg.clone();
+					let mut exclude = false;
+					if arg.starts_with("-") {
+						arg = (&arg[1..]).to_string();
+						exclude = true;
+					}
+
 					if i > 0 {
-						match &self.name[..] {
-							"search_inclusive" => {
-								rv.append("\nor ");
-							}
-							_ => {
-								// default
-								rv.append("\nand ");
+						if exclude {
+							rv.append("\nand not ");
+						} else {
+							match &self.name[..] {
+								"search_inclusive" => {
+									rv.append("\nor ");
+								}
+								_ => {
+									// default
+									rv.append("\nand ");
+								}
 							}
 						}
 					}
 
 					rv.append(" (");
-					rv.append(format!("(Records.Location LIKE \"%{}%\")", &arg));
 
+					rv.append(format!("(Records.Location LIKE \"%{}%\")", &arg));
 					rv.append("\nor ");
 
 					rv.append(format!(
@@ -216,7 +227,9 @@ impl Filter {
 				}
 				self.args.clear();
 				rv.append(")");
-				return format!("{} {}", sql, rv.string().unwrap());
+
+				let rv = format!("{} {}", sql, rv.string().unwrap());
+				return rv;
 			}
 
 			_ => return sql,
