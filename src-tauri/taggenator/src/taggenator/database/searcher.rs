@@ -1,6 +1,8 @@
 use crate::taggenator::database::Database;
 use crate::taggenator::errors::BError;
 use crate::taggenator::models::record::Record;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 use rusqlite::NO_PARAMS;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -73,13 +75,7 @@ impl Searcher {
 
 	pub fn get_records(&mut self, db: &Database) -> Result<Vec<Record>, BError> {
 		let query = &"\nSelect * From Records Left Join Tags On Records.RecordID = Tags.RecordID";
-		// let query = &"\nSelect * From Records";
 		let query = &self.format_query(&query);
-		// let query = format!(
-		// 	"{} Left Join Tags On Records.RecordID = Tags.RecordID",
-		// 	query
-		// );
-		// println!("{}", &query);
 		let mut stmt = db.conn.prepare(&query)?;
 
 		// TODO: how can we make this less bad?
@@ -124,6 +120,10 @@ impl Searcher {
 			records.push(current_record.take().unwrap());
 		}
 
+		for filter in &self.filters {
+			filter.execute(&mut records);
+		}
+
 		return Ok(records);
 	}
 
@@ -139,8 +139,10 @@ impl Searcher {
 		let mut sql = query.to_string();
 
 		let mut is_first = true;
-		for mut filter in &mut self.filters.drain(..) {
+		let mut count = 0;
+		for mut filter in &mut self.filters {
 			if filter.sqlizable() {
+				count += 1;
 				sql = filter.sqlize(sql, is_first);
 				is_first = false;
 			} else {
@@ -148,8 +150,14 @@ impl Searcher {
 			}
 		}
 
-		println!("{}", sql);
+		// TODO: something prettier
+		while count > 0 {
+			self.filters.remove(0);
+			count -= 1;
+		}
 
+		// dbg!(&self.filters);
+		// println!("{}", sql);
 		return sql;
 	}
 }
@@ -172,6 +180,27 @@ impl Filter {
 		return match &self.name[..] {
 			"search" | "search_inclusive" | "search_exclusive" => return true,
 			_ => return false,
+		};
+	}
+
+	pub fn execute(&self, records: &mut Vec<Record>) {
+		match &self.name[..] {
+			"random" => {
+				records.shuffle(&mut thread_rng());
+			}
+
+			"reverse" => {
+				records.reverse();
+			}
+
+			"alpha" | "alphabetical" => {
+				records.sort_by(|a, b| a.Name.cmp(&b.Name));
+			}
+
+			_ => {
+				// TODO: figure out error logging
+				println!("Unknown option: {}", self.name);
+			}
 		};
 	}
 
