@@ -19,7 +19,8 @@
     - [x] Implement renaming
     - [x] Get rid of unique name requirement?
     - [ ] Test renaming code/deduplication work
-    - [ ] Implement batching in Async SQL queries
+    - [x] Implement batching in Async SQL queries
+    - [ ] Add dates
 2. GUI
 
     - [x] POC

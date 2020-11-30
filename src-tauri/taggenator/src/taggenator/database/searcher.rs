@@ -12,7 +12,7 @@ use string_builder::Builder;
 // TODO: is there some way to clean this up? Diesel, for ex?
 const RECORD_ID_INDEX: usize = 0;
 const RECORD_NAME_INDEX: usize = 1;
-const TAG_INDEX: usize = 8;
+const TAG_INDEX: usize = 12;
 const LOCATION_INDEX: usize = 2;
 
 #[derive(Debug)]
@@ -84,7 +84,6 @@ impl Searcher {
 		let mut current_record: Option<Record> = None;
 
 		// We're handling query args ourselves
-		// let mut rows = stmt.query(&self.get_query_args())?;
 		let mut rows = stmt.query(NO_PARAMS)?;
 
 		loop {
@@ -105,12 +104,24 @@ impl Searcher {
 						}
 					}
 
+					// TODO: finish deserializing
+
 					if should_create {
 						let mut record = Record {
 							RecordID: row.get(RECORD_ID_INDEX)?,
 							Name: row.get(RECORD_NAME_INDEX)?,
 							Location: row.get(LOCATION_INDEX)?,
 							Tags: vec![],
+
+							Size: -1,
+							Length: -1,
+							TimesOpened: 0,
+
+							DateAdded: None,
+							DateCreated: None,
+							DateLastAccessed: None,
+
+							HaveManuallyTouched: false,
 						};
 						if let Ok(tag) = row.get(TAG_INDEX) {
 							record.Tags.push(tag);
@@ -136,14 +147,6 @@ impl Searcher {
 
 		return Ok(records);
 	}
-
-	// fn get_query_args(&self) -> Vec<String> {
-	// 	let mut rv = vec![];
-	// 	for filter in &self.filters {
-	// 		rv.extend(filter.args.clone());
-	// 	}
-	// 	return rv;
-	// }
 
 	fn format_query(&mut self, query: &str) -> String {
 		let mut sql = query.to_string();
@@ -188,8 +191,8 @@ impl Filter {
 
 	pub fn sqlizable(&self) -> bool {
 		return match &self.name[..] {
-			// "search" | "search_inclusive" | "search_exclusive" | "tags" | "tags_exclusive"
-			// | "tags_inclusive" => return true,
+			"search" | "search_inclusive" | "search_exclusive" | "tags" | "tags_exclusive"
+			| "tags_inclusive" => return true,
 			_ => return false,
 		};
 	}
