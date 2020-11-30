@@ -10,6 +10,7 @@ use string_builder::Builder;
 const RECORD_ID_INDEX: usize = 0;
 const RECORD_NAME_INDEX: usize = 1;
 const TAG_INDEX: usize = 7;
+const LOCATION_INDEX: usize = 2;
 
 #[derive(Debug)]
 pub struct Searcher {
@@ -107,6 +108,7 @@ impl Searcher {
 						let mut record = Record {
 							RecordID: row.get(RECORD_ID_INDEX)?,
 							Name: row.get(RECORD_NAME_INDEX)?,
+							Location: row.get(LOCATION_INDEX)?,
 							Tags: vec![],
 						};
 						if let Ok(tag) = row.get(TAG_INDEX) {

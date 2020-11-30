@@ -39,6 +39,12 @@ impl Taggenator {
 		// self.database.add_tag("100", vec!["yup".to_string()]);
 		// self.database.add_tag("100", vec!["group".to_string()]);
 
+		if args.len() == 0 {
+			// TODO: print help
+			println!("ERROR: invalid command");
+			return Ok(());
+		}
+
 		let command = args[0].clone();
 		args.remove(0);
 		RunCommand(self, command, args)?;

@@ -2,6 +2,7 @@
 pub struct Record {
 	pub RecordID: i32,
 	pub Name: String,
+	pub Location: String,
 	pub Tags: Vec<String>,
 }
 

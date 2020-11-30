@@ -1,3 +1,4 @@
+mod dump;
 mod dump_tags;
 use crate::taggenator::database::Database;
 use crate::taggenator::errors::BError;
@@ -10,6 +11,9 @@ pub fn RunCommand(
 	args: Vec<String>,
 ) -> Result<(), BError> {
 	match &command_name[..] {
+		"dump" => {
+			return dump::dump(taggenator, args);
+		}
 		"dump_tags" => {
 			return dump_tags::dump_tags(taggenator, args);
 		}
