@@ -2,6 +2,7 @@
 extensions:
   - ".txt"
   - sup
+  - yaml
 synonyms:
   pre: prefix
   post: postfix

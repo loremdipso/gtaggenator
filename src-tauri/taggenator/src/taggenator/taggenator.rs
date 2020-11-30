@@ -5,12 +5,14 @@ use crate::taggenator::errors::BError;
 use crate::taggenator::errors::MyCustomError;
 use crate::taggenator::models::record::MiniRecord;
 use crate::taggenator::settings::Settings;
+use crate::taggenator::utils::files::get_extension_from_filename;
 use multimap::MultiMap;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs::File;
 use std::include_str;
 use std::io::prelude::*;
+use std::path::Path;
 use std::sync::mpsc::channel;
 use std::thread;
 use toml::{de::Error, Value};
@@ -81,6 +83,10 @@ impl Taggenator {
 				Some(entry) => {
 					let entry = entry.unwrap();
 					if let Some(name) = &entry.file_name().to_str() {
+						if entry.path().is_dir() || !self.valid_extension(entry.path()) {
+							continue;
+						}
+
 						let location = entry.path().to_str().unwrap();
 						let mut did_create = false;
 						if !file_map.contains_key(*name) {
@@ -94,17 +100,8 @@ impl Taggenator {
 							if !matches.iter().any(|el| (*el).Location == location) {
 								possibly_moved.insert(name.to_string(), location.to_string());
 							}
-							// println!("Updating location: {}", location);
-							// self.database.update_location(name, location);
 						}
 
-						// if seen.contains_key(*name) {
-						// // possibly_moved.insert(name.to_string(), location.to_string());
-						// return Err(Box::new(MyCustomError::DuplicateFile {
-						// 	a: seen.get(*name).unwrap().to_string(),
-						// 	b: location.to_string(),
-						// }));
-						// }
 						seen.insert(name.to_string(), location.to_string());
 					}
 				}
@@ -114,7 +111,7 @@ impl Taggenator {
 		self.database.flush_writes();
 
 		// try our best to handle moved files
-		dbg!(&possibly_moved);
+		// dbg!(&possibly_moved);
 		for (name, values) in possibly_moved.iter_all() {
 			// If multiple files with the same name have all changed position,
 			// we have no way to handle that
@@ -140,10 +137,10 @@ impl Taggenator {
 				}
 			}
 
-			dbg!(&do_update);
+			// dbg!(&do_update);
 			match do_update.len() {
 				0 => {
-					println!("Adding {} at {}", name, location);
+					// println!("Adding {} at {}", name, location);
 					self.database.add_record(name, location);
 					seen.insert(name.to_string(), location.to_string());
 					num_added += 1;
@@ -151,7 +148,7 @@ impl Taggenator {
 
 				1 => {
 					let mini_record = do_update.first().unwrap();
-					println!("Moving {} to {}", (*mini_record).Location, location);
+					// println!("Moving {} to {}", (*mini_record).Location, location);
 					self.database
 						.update_location((*mini_record).RecordID, location);
 
@@ -178,7 +175,7 @@ impl Taggenator {
 					.iter()
 					.any(|location| record.Location == *location)
 				{
-					println!("Deleting {}", record.Location);
+					// println!("Deleting {}", record.Location);
 					self.database.delete_record(record.RecordID);
 					num_deleted += 1;
 				}
@@ -191,5 +188,14 @@ impl Taggenator {
 		self.database.flush_writes();
 
 		return Ok((num_added, num_deleted));
+	}
+
+	fn valid_extension(&self, path: &Path) -> bool {
+		if let Some(extension) = get_extension_from_filename(&path) {
+			if self.settings.extensions.iter().any(|ext| ext == extension) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

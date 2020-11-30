@@ -18,6 +18,7 @@
     - [x] Implement Duplicate checking
     - [x] Implement renaming
     - [x] Get rid of unique name requirement?
+    - [ ] Test renaming code/deduplication work
     - [ ] Implement batching in Async SQL queries
 2. GUI
 

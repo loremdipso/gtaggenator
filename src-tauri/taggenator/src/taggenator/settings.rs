@@ -54,7 +54,12 @@ impl Settings {
 				file.read_to_string(&mut content)
 					.unwrap_or_else(|err| panic!("Error while reading config: [{}]", err));
 
-				let settings = serde_yaml::from_str(&content)?;
+				let mut settings: Settings = serde_yaml::from_str(&content)?;
+				for extension in &mut settings.extensions {
+					if extension.chars().nth(0).unwrap() == '.' {
+						extension.remove(0);
+					}
+				}
 				return Ok(settings);
 			}
 			Err(error) => {
