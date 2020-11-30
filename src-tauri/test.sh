@@ -20,7 +20,12 @@ cargo build --release -q -p taggenator
 cd ../tests
 #time ~/.cargo-target/release/taggenator dump tags_inclusive yup yupp
 #time ~/.cargo-target/release/taggenator dump tags_inclusive yupp yup
-time ~/.cargo-target/release/taggenator dump search yup
+time ~/.cargo-target/release/taggenator dump touched
+#time ~/.cargo-target/release/taggenator dump untouched
+#time ~/.cargo-target/release/taggenator dump -sort alpha -sort least_frequently_opened
+#time ~/.cargo-target/release/taggenator dump -sort alpha -sort biggest
+#time ~/.cargo-target/release/taggenator dump -sort alpha -sort oldest
+#time ~/.cargo-target/release/taggenator dump -sort alpha -sort newest -sort reverse
 #time ~/.cargo-target/release/taggenator dump_tags search yup
 #time ~/.cargo-target/release/taggenator dump search yup -sort reverse
 #time ~/.cargo-target/release/taggenator dump search yup -sort random

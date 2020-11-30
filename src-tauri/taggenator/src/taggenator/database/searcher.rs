@@ -348,6 +348,7 @@ impl Filter {
 		match records {
 			Some(mut records) => {
 				match &self.name[..] {
+					// sorting
 					"random" => {
 						records.shuffle(&mut thread_rng());
 					}
@@ -356,8 +357,65 @@ impl Filter {
 						records.reverse();
 					}
 
+					"largest" | "biggest" => {
+						records.sort_by(|a, b| b.Size.cmp(&a.Size));
+					}
+
+					"smallest" => {
+						records.sort_by(|a, b| a.Size.cmp(&b.Size));
+					}
+
 					"alpha" | "alphabetical" => {
 						records.sort_by(|a, b| a.Name.cmp(&b.Name));
+					}
+
+					"newest" => {
+						records.sort_by(|a, b| {
+							(b.DateAdded, b.DateCreated).cmp(&(a.DateAdded, a.DateCreated))
+						});
+					}
+
+					"oldest" => {
+						records.sort_by(|a, b| {
+							(a.DateAdded, a.DateCreated).cmp(&(b.DateAdded, b.DateCreated))
+						});
+					}
+
+					"most_recently_opened" => {
+						records.sort_by(|a, b| {
+							(b.DateLastAccessed, b.DateAdded)
+								.cmp(&(a.DateLastAccessed, a.DateAdded))
+						});
+					}
+
+					"least_recently_opened" => {
+						records.sort_by(|a, b| {
+							(a.DateLastAccessed, a.DateAdded)
+								.cmp(&(b.DateLastAccessed, b.DateAdded))
+						});
+					}
+
+					"most_frequently_opened" => {
+						records.sort_by(|a, b| b.TimesOpened.cmp(&a.TimesOpened));
+					}
+
+					"least_frequently_opened" => {
+						records.sort_by(|a, b| a.TimesOpened.cmp(&b.TimesOpened));
+					}
+
+					// filters
+					"touched" => {
+						records = records
+							.drain(..)
+							.filter(|record| record.HaveManuallyTouched)
+							.collect();
+					}
+
+					"untouched" => {
+						records = records
+							.drain(..)
+							.filter(|record| !record.HaveManuallyTouched)
+							.collect();
 					}
 
 					"tags" | "tags_exclusive" => {
@@ -390,7 +448,7 @@ impl Filter {
 
 					_ => {
 						// TODO: figure out error logging
-						println!("Unknown option: {}", self.name);
+						panic!("Unknown option: {}", self.name);
 					}
 				};
 
