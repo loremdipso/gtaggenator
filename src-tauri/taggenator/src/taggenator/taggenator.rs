@@ -110,8 +110,6 @@ impl Taggenator {
 			}
 		}
 
-		self.database.flush_writes();
-
 		// try our best to handle moved files
 		// dbg!(&possibly_moved);
 		for (name, values) in possibly_moved.iter_all() {
