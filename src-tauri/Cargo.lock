@@ -1049,6 +1049,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e3d4791ab5517217f51216a84a688b53c1ebf7988736469c538d02f46ddba68"
 dependencies = [
  "bitflags 1.2.1",
+ "chrono",
  "fallible-iterator",
  "fallible-streaming-iterator",
  "hashlink",
@@ -1309,6 +1310,7 @@ dependencies = [
 name = "taggenator"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "itertools",
  "multimap",
  "rand",

@@ -12,6 +12,7 @@ set -e
 #image_name="TB.jpg"
 cd ./taggenator
 cargo build --release -q -p taggenator
+#cargo build --verbose --release -p taggenator
 
 # thanks! https://github.com/rust-lang/cargo/issues/3591#issuecomment-673356426
 #cargo build --release 2>&1 | rg -i --multiline "(^error.*\n.*)|(aborting)|(warnings)"

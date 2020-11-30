@@ -1,3 +1,6 @@
+use chrono::DateTime;
+use chrono::Utc;
+
 #[derive(Debug)]
 pub struct Record {
 	pub RecordID: i32,
@@ -10,9 +13,9 @@ pub struct Record {
 	pub Length: i32,
 	pub TimesOpened: i32,
 
-	pub DateAdded: Option<String>,
-	pub DateCreated: Option<String>,
-	pub DateLastAccessed: Option<String>,
+	pub DateAdded: Option<DateTime<Utc>>,
+	pub DateCreated: Option<DateTime<Utc>>,
+	pub DateLastAccessed: Option<DateTime<Utc>>,
 
 	pub HaveManuallyTouched: bool,
 }
@@ -34,10 +37,10 @@ pub const SQL: &str = "
 		Length INTEGER DEFAULT -1,
 		TimesOpened INTEGER DEFAULT 0,
 
-		DateAdded String,
-		DateCreated String,
-		DateLastAccessed String,
+		DateAdded DateTime,
+		DateCreated DateTime,
+		DateLastAccessed DateTime,
 
-		HaveManuallyTouched BOOLEAN
+		HaveManuallyTouched BOOLEAN DEFAULT 0
 	);
 ";

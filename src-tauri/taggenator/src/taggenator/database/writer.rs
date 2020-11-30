@@ -1,6 +1,9 @@
 use crate::taggenator::database::END_OF_WRITES;
 use crate::taggenator::database::SETTINGS_FILENAME;
 use crate::taggenator::errors::BError;
+use chrono::DateTime;
+use chrono::Utc;
+use rusqlite::types::ToSqlOutput;
 use rusqlite::ToSql;
 use rusqlite::{Connection, OpenFlags};
 use std::sync::mpsc::Receiver;
@@ -14,7 +17,26 @@ pub const MAX_BATCH_SIZE: usize = 1000; // TODO: what should this number be?
 
 pub struct Query {
 	pub sql: String,
-	pub params: Vec<String>,
+	pub params: Vec<Sqlizable>,
+}
+
+pub enum Sqlizable {
+	Text(String),
+	Number(i32),
+	Boolean(bool),
+	Date(Option<DateTime<Utc>>),
+}
+
+// TODO: I wouldn't think this was necessary. Get rid of, please?
+impl ToSql for Sqlizable {
+	fn to_sql(&self) -> std::result::Result<rusqlite::types::ToSqlOutput<'_>, rusqlite::Error> {
+		match self {
+			Sqlizable::Text(s) => Ok(ToSqlOutput::from(s.clone())),
+			Sqlizable::Number(n) => Ok(ToSqlOutput::from(*n)),
+			Sqlizable::Boolean(b) => Ok(ToSqlOutput::from(*b)),
+			Sqlizable::Date(d) => Ok(ToSql::to_sql(d)?),
+		}
+	}
 }
 
 pub struct Writer {

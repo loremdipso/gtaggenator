@@ -1,9 +1,15 @@
 use crate::taggenator::database::writer::Query;
+use crate::taggenator::database::writer::Sqlizable;
+use crate::taggenator::database::writer::Sqlizable::Boolean;
+use crate::taggenator::database::writer::Sqlizable::Date;
+use crate::taggenator::database::writer::Sqlizable::Number;
+use crate::taggenator::database::writer::Sqlizable::Text;
 use crate::taggenator::database::writer::Writer;
 use crate::taggenator::database::writer::MAX_BATCH_SIZE;
 use crate::taggenator::errors::BError;
 use crate::taggenator::models;
 use crate::taggenator::models::record::MiniRecord;
+use chrono::prelude::*;
 use multimap::MultiMap;
 use rusqlite::NO_PARAMS;
 use rusqlite::{Connection, OpenFlags};
@@ -38,7 +44,7 @@ pub struct Database {
 impl Database {
 	pub fn new() -> Result<Database, BError> {
 		// TODO: remove
-		// std::fs::remove_file(DATABASE_FILENAME);
+		std::fs::remove_file(DATABASE_FILENAME);
 
 		let did_exist = Path::new(DATABASE_FILENAME).exists();
 
@@ -105,9 +111,42 @@ impl Database {
 	}
 
 	pub fn add_record(&mut self, filename: &str, location: &str) -> Result<(), BError> {
+		let size = 42;
+		let length = 42;
+		let times_opened = 0;
+		let date_added = Some(Utc::now());
+		let date_created = Some(Utc::now());
+		let date_last_touched = None;
+		let have_manually_touched = false;
+
 		self.async_write(
-			"INSERT INTO records (Name, Location) VALUES (?, ?)",
-			vec![filename.to_string(), location.to_string()],
+			"
+			INSERT INTO records (
+				Name,
+				Location,
+
+				Size,
+				Length,
+				TimesOpened,
+
+				DateAdded,
+				DateCreated,
+				DateLastAccessed,
+
+				HaveManuallyTouched
+			)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			vec![
+				Text(filename.to_string()),
+				Text(location.to_string()),
+				Number(size),
+				Number(length),
+				Number(times_opened),
+				Date(date_added),
+				Date(date_created),
+				Date(date_last_touched),
+				Boolean(have_manually_touched),
+			],
 		)
 	}
 
@@ -115,7 +154,7 @@ impl Database {
 		self.async_write(
 			"UPDATE Records SET Location = ?
 			WHERE Records.RecordID = ?",
-			vec![location.to_string(), recordID.to_string()],
+			vec![Text(location.to_string()), Text(recordID.to_string())],
 		)
 	}
 
@@ -150,13 +189,15 @@ impl Database {
 	pub fn delete_record(&mut self, recordID: i32) -> Result<(), BError> {
 		self.async_write(
 			"DELETE FROM Records WHERE RecordID=?",
-			vec![recordID.to_string()],
+			vec![Number(recordID)],
 		)
 	}
 
 	pub fn add_tag(&mut self, recordId: &str, tags: Vec<String>) -> Result<(), BError> {
-		let mut args = vec![recordId.to_string()];
-		args.extend(tags);
+		let mut args = vec![Text(recordId.to_string())];
+		for tag in tags {
+			args.push(Text(tag));
+		}
 		self.async_write("INSERT INTO Tags (RecordID, TagName) VALUES (?1, ?2)", args)
 	}
 
@@ -169,7 +210,7 @@ impl Database {
 		self.send_batch();
 	}
 
-	fn async_write(&mut self, sql: &str, params: Vec<String>) -> Result<(), BError> {
+	fn async_write(&mut self, sql: &str, params: Vec<Sqlizable>) -> Result<(), BError> {
 		let query = Query {
 			sql: sql.to_string(),
 			params: params,

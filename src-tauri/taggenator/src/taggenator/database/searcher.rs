@@ -10,10 +10,18 @@ use std::error::Error;
 use string_builder::Builder;
 
 // TODO: is there some way to clean this up? Diesel, for ex?
-const RECORD_ID_INDEX: usize = 0;
-const RECORD_NAME_INDEX: usize = 1;
-const TAG_INDEX: usize = 12;
+const ID_INDEX: usize = 0;
+const NAME_INDEX: usize = 1;
 const LOCATION_INDEX: usize = 2;
+const SIZE_INDEX: usize = 3;
+const LENGTH_INDEX: usize = 4;
+const TIMES_OPENED_INDEX: usize = 5;
+const DATE_ADDED_INDEX: usize = 6;
+const DATE_CREATED_INDEX: usize = 7;
+const DATE_LAST_ACCESSED_INDEX: usize = 8;
+const HAVE_MANUALLY_TOUCHED_INDEX: usize = 9;
+
+const TAG_INDEX: usize = 12;
 
 #[derive(Debug)]
 pub struct Searcher {
@@ -104,28 +112,30 @@ impl Searcher {
 						}
 					}
 
-					// TODO: finish deserializing
-
 					if should_create {
 						let mut record = Record {
-							RecordID: row.get(RECORD_ID_INDEX)?,
-							Name: row.get(RECORD_NAME_INDEX)?,
+							RecordID: row.get(ID_INDEX)?,
+							Name: row.get(NAME_INDEX)?,
 							Location: row.get(LOCATION_INDEX)?,
+
 							Tags: vec![],
 
-							Size: -1,
-							Length: -1,
-							TimesOpened: 0,
+							Size: row.get(SIZE_INDEX)?,
+							Length: row.get(LENGTH_INDEX)?,
+							TimesOpened: row.get(TIMES_OPENED_INDEX)?,
 
-							DateAdded: None,
-							DateCreated: None,
-							DateLastAccessed: None,
+							DateAdded: row.get(DATE_ADDED_INDEX)?,
+							DateCreated: row.get(DATE_CREATED_INDEX)?,
+							DateLastAccessed: row.get(DATE_LAST_ACCESSED_INDEX)?,
 
-							HaveManuallyTouched: false,
+							HaveManuallyTouched: row.get(HAVE_MANUALLY_TOUCHED_INDEX)?,
 						};
 						if let Ok(tag) = row.get(TAG_INDEX) {
 							record.Tags.push(tag);
 						}
+
+						// dbg!(&record);
+
 						current_record = Some(record);
 					}
 				}
