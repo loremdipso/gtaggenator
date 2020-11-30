@@ -148,7 +148,8 @@ impl Searcher {
 			}
 		}
 
-		// println!("{}", &sql);
+		println!("{}", sql);
+
 		return sql;
 	}
 }
@@ -196,10 +197,14 @@ impl Filter {
 						exclude = true;
 					}
 
-					if i > 0 {
-						if exclude {
+					if exclude {
+						if i > 0 {
 							rv.append("\nand not ");
 						} else {
+							rv.append("\nnot ");
+						}
+					} else {
+						if i > 0 {
 							match &self.name[..] {
 								"search_inclusive" => {
 									rv.append("\nor ");
