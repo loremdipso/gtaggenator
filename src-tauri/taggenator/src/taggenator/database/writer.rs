@@ -10,13 +10,15 @@ use std::sync::Mutex;
 use std::thread;
 use std::thread::JoinHandle;
 
+pub const MAX_BATCH_SIZE: usize = 1000; // TODO: what should this number be?
+
 pub struct Query {
 	pub sql: String,
 	pub params: Vec<String>,
 }
 
 pub struct Writer {
-	sender: Sender<Option<Query>>,
+	sender: Sender<Option<Vec<Query>>>,
 	worker: Option<JoinHandle<()>>,
 }
 
@@ -32,8 +34,8 @@ impl Drop for Writer {
 
 impl Writer {
 	pub fn new(
-		sender: Sender<Option<Query>>,
-		receiver: Receiver<Option<Query>>,
+		sender: Sender<Option<Vec<Query>>>,
+		receiver: Receiver<Option<Vec<Query>>>,
 		todo_sender: Sender<usize>,
 	) -> Result<Writer, BError> {
 		let mut conn = Connection::open_with_flags(
@@ -49,13 +51,13 @@ impl Writer {
 
 					match value {
 						None => return,
-						Some(actual_value) => batch.push(actual_value),
+						Some(actual_value) => batch.extend(actual_value),
 					}
 
 					while let Ok(value) = receiver.try_recv() {
 						match value {
 							None => should_return = true,
-							Some(actual_value) => batch.push(actual_value),
+							Some(actual_value) => batch.extend(actual_value),
 						}
 					}
 
@@ -83,9 +85,7 @@ impl Writer {
 	}
 
 	fn write_batch(conn: &mut Connection, batch: &Vec<Query>) -> Result<(), BError> {
-		let max_batch_size = 1000; // TODO: what should this number be?
-
-		for chunk in batch.chunks(max_batch_size) {
+		for chunk in batch.chunks(MAX_BATCH_SIZE) {
 			let tx = conn.transaction()?;
 			for action in chunk {
 				match tx.execute(&action.sql, &action.params) {

@@ -1,5 +1,6 @@
 use crate::taggenator::database::writer::Query;
 use crate::taggenator::database::writer::Writer;
+use crate::taggenator::database::writer::MAX_BATCH_SIZE;
 use crate::taggenator::errors::BError;
 use crate::taggenator::models;
 use crate::taggenator::models::record::MiniRecord;
@@ -21,7 +22,7 @@ static DATABASE_FILENAME: &str = "tagg.db";
 
 pub struct Database {
 	pub conn: Connection,
-	sender: Sender<Option<Query>>,
+	sender: Sender<Option<Vec<Query>>>,
 	writer: Writer,
 
 	// the idea here is we want to wait until the write thread
@@ -29,6 +30,9 @@ pub struct Database {
 	// written and use that to decrement our todo count
 	todo_receiver: Receiver<usize>,
 	todo_count: i64,
+
+	am_batching: bool,
+	batch: Vec<Query>,
 }
 
 impl Database {
@@ -62,6 +66,8 @@ impl Database {
 			writer: writer,
 			todo_receiver: todo_receiver,
 			todo_count: 0,
+			am_batching: false,
+			batch: vec![],
 		});
 	}
 
@@ -154,14 +160,33 @@ impl Database {
 		self.async_write("INSERT INTO Tags (RecordID, TagName) VALUES (?1, ?2)", args)
 	}
 
+	pub fn start_batch(&mut self) {
+		self.am_batching = true;
+	}
+
+	pub fn end_batch(&mut self) {
+		self.am_batching = false;
+		self.send_batch();
+	}
+
 	fn async_write(&mut self, sql: &str, params: Vec<String>) -> Result<(), BError> {
-		self.sender.send(Some(Query {
+		let query = Query {
 			sql: sql.to_string(),
 			params: params,
-		}))?;
+		};
+
+		self.batch.push(query);
+		if !self.am_batching || self.batch.len() >= MAX_BATCH_SIZE {
+			self.send_batch();
+		}
 
 		self.todo_count += 1;
 
+		return Ok(());
+	}
+
+	fn send_batch(&mut self) -> Result<(), BError> {
+		self.sender.send(Some(self.batch.drain(..).collect()))?;
 		return Ok(());
 	}
 

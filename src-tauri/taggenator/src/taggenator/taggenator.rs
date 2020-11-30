@@ -83,6 +83,7 @@ impl Taggenator {
 		let mut seen: MultiMap<String, String> = MultiMap::new();
 		let mut possibly_moved: MultiMap<String, String> = MultiMap::new();
 
+		self.database.start_batch();
 		loop {
 			let value = receiver.recv()?;
 			match value {
@@ -181,6 +182,7 @@ impl Taggenator {
 				}
 			}
 		}
+		self.database.end_batch();
 
 		println!("# Added {} new files", num_added);
 		println!("# Renamed {} files", num_renamed);
