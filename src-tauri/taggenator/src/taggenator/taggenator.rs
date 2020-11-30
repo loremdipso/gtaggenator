@@ -93,8 +93,8 @@ impl Taggenator {
 			}
 		}
 
-		println!("Added {} new files", num_added);
-		println!("Deleted {} files", num_deleted);
+		println!("# Added {} new files", num_added);
+		println!("# Deleted {} files", num_deleted);
 		self.database.flush_writes();
 
 		return Ok((num_added, num_deleted));

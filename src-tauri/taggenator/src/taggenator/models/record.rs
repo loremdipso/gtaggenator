@@ -1,6 +1,8 @@
 #[derive(Debug)]
 pub struct Record {
-	Name: String,
+	pub RecordID: i32,
+	pub Name: String,
+	pub Tags: Vec<String>,
 }
 
 pub const SQL: &str = "
