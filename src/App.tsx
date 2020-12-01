@@ -6,11 +6,15 @@ import { IRecord } from "./interfaces";
 import { ChangeEvent } from "react";
 import { Content } from "./Content";
 import { IDelta, getDelta, DisplayDeltas } from "./Deltas";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
 	const [search, setSearch] = useState("");
 	const [tagLine, setTagLine] = useState("");
 	const [records, setRecords] = useState([] as IRecord[]);
+
+	const [lastExecutedSearch, setLastExecutedSearch] = useState("");
 
 	const [tagFocusEpoch, setTagFocusEpoch] = useState(0);
 	const [searchFocusEpoch, setSearchFocusEpoch] = useState(0);
@@ -43,8 +47,24 @@ function App() {
 		}
 		let records = await bridge.get_records({ args: tempSearch.split(" ") });
 		setRecords(records);
-		setRecordIndex(0);
+
+		let newIndex = 0;
+		if (lastExecutedSearch === search && currentRecord) {
+			// special case: if we're refreshing, try to find the record we were just on
+			newIndex = records.findIndex(
+				(record) => record.RecordID === currentRecord.RecordID
+			);
+			if (newIndex < 0) {
+				newIndex = 0;
+			}
+
+			toast("Reloaded");
+		} else {
+			toast("Loaded");
+		}
+		setRecordIndex(newIndex);
 		setTagFocusEpoch(tagFocusEpoch + 1);
+		setLastExecutedSearch(search);
 	};
 
 	const addTag = (tag: string) => {
@@ -197,7 +217,7 @@ function App() {
 						/>
 
 						<ul>
-							{currentRecord.Tags.map((tag) => (
+							{fixRecord(currentRecord).Tags.map((tag) => (
 								<li key={tag}>{tag}</li>
 							))}
 						</ul>
@@ -216,6 +236,13 @@ function App() {
 			</div>
 
 			<div className="content">{<Content record={currentRecord} />}</div>
+
+			<ToastContainer
+				draggable={false}
+				autoClose={2000}
+				hideProgressBar
+				position="bottom-right"
+			/>
 		</div>
 	);
 }
@@ -292,6 +319,14 @@ function sortTags(newTags: string[], oldTags: string[]): string[] {
 
 function printSize(bytes: number) {
 	return `${bytes}b`;
+}
+
+function fixRecord(record: IRecord): IRecord {
+	if (!record.OpenedInGUI) {
+		record.Tags.sort();
+		record.OpenedInGUI = true;
+	}
+	return record;
 }
 
 export default App;

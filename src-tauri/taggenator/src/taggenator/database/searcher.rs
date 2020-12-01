@@ -418,6 +418,20 @@ impl Filter {
 							.collect();
 					}
 
+					"seen" => {
+						records = records
+							.drain(..)
+							.filter(|record| record.TimesOpened > 0)
+							.collect();
+					}
+
+					"unseen" => {
+						records = records
+							.drain(..)
+							.filter(|record| record.TimesOpened == 0)
+							.collect();
+					}
+
 					"tags" | "tags_exclusive" => {
 						records = records
 							.drain(..)

@@ -31,6 +31,7 @@
     - [x] How do we load files?
         - [x] Make sure we aren't leaking memory/crashing
     - [ ] Am I re-requesting an image anytime I change anything?
+    - [x] Add toasts
 
 3. Backburner
     - [ ] Figure out migrations
