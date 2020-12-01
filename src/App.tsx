@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import "./App.css";
 import { bridge } from "./Commands";
@@ -11,6 +11,9 @@ function App() {
 	const [search, setSearch] = useState("");
 	const [tagLine, setTagLine] = useState("");
 	const [records, setRecords] = useState([] as IRecord[]);
+
+	const [tagFocusEpoch, setTagFocusEpoch] = useState(0);
+	const [searchFocusEpoch, setSearchFocusEpoch] = useState(0);
 
 	const [recordIndex, setRecordIndex] = useState(0);
 	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
@@ -27,6 +30,7 @@ function App() {
 		} else if (recordIndex >= records.length) {
 			// TODO: exit?
 			setRecords([]);
+			setSearchFocusEpoch(searchFocusEpoch + 1);
 		} else if (records.length > recordIndex) {
 			setCurrentRecord(records[recordIndex]);
 		}
@@ -40,6 +44,7 @@ function App() {
 		let records = await bridge.get_records({ args: tempSearch.split(" ") });
 		setRecords(records);
 		setRecordIndex(0);
+		setTagFocusEpoch(tagFocusEpoch + 1);
 	};
 
 	const addTag = (tag: string) => {
@@ -170,6 +175,7 @@ function App() {
 					action={loadData}
 					value={search}
 					prefix="Search"
+					focusEpoch={searchFocusEpoch}
 				/>
 
 				{currentRecord ? (
@@ -187,6 +193,7 @@ function App() {
 							action={handleTagLine}
 							value={tagLine}
 							actionName="Add"
+							focusEpoch={tagFocusEpoch}
 						/>
 
 						<ul>
@@ -221,6 +228,8 @@ interface ISpecialInput {
 	value: string;
 	actionName?: string;
 	prefix?: string;
+
+	focusEpoch?: number;
 }
 function SpecialInput({
 	className,
@@ -230,12 +239,22 @@ function SpecialInput({
 	value,
 	actionName,
 	prefix,
+	focusEpoch, // used to force focus
 }: ISpecialInput) {
+	const thisInput = useRef<HTMLInputElement>(null);
+	useEffect(() => {
+		if (focusEpoch && thisInput.current) {
+			thisInput.current.focus();
+			thisInput.current.select();
+		}
+	}, [thisInput, focusEpoch]);
+
 	return (
 		<div className="special-input">
 			{prefix ? <span onClick={() => action()}>{prefix}</span> : null}
 
 			<input
+				ref={thisInput}
 				value={value}
 				className={className}
 				onChange={onChange}
