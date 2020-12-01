@@ -10,3 +10,6 @@ config.json
 bundle.json
 tests/tmp
 tests/*.db
+
+tagg.db
+tsettings.yaml

@@ -19,7 +19,8 @@ function App() {
 	});
 
 	const doit = async () => {
-		let newTags = await bridge.get_tags();
+		await bridge.add_tags(["search", "yup"]);
+		let newTags = await bridge.get_tags(["search", "yup"]);
 		setTags(newTags);
 	};
 

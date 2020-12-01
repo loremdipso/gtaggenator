@@ -42,6 +42,17 @@ impl Settings {
 		Settings::load(SETTINGS_FILENAME)
 	}
 
+	pub fn new_headless() -> Result<Settings, BError> {
+		if !Path::new(SETTINGS_FILENAME).exists() {
+			// TODO: ask user if they actually want to make a file
+			// for now we'll just assume they do :D
+			println!("Creating...");
+			fs::write(SETTINGS_FILENAME, Settings::get_default()).expect("Unable to write file");
+		}
+
+		Settings::load(SETTINGS_FILENAME)
+	}
+
 	fn get_default() -> &'static str {
 		include_str!("../data/tsettings.yaml")
 	}

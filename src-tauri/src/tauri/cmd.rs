@@ -24,9 +24,16 @@ pub enum Cmd {
 		error: String,
 	},
 
+	AddTags {
+		callback: String,
+		error: String,
+		tags: Vec<String>,
+	},
+
 	GetTags {
 		callback: String,
 		error: String,
+		args: Vec<String>,
 	},
 }
 

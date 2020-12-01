@@ -1,10 +1,17 @@
-use crate::Taggenator;
+use std::sync::Arc;
+use std::sync::Mutex;
+use taggenator::taggenator::database::searcher::Searcher;
+use taggenator::BError;
+use taggenator::Taggenator;
 
 mod cmd;
 
-pub fn start_tauri(taggenator: Taggenator) {
+pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
+	taggenator.update_files()?;
+	let taggenator = Arc::new(Mutex::new(taggenator));
+
 	tauri::AppBuilder::new()
-		.invoke_handler(|_webview, arg| {
+		.invoke_handler(move |_webview, arg| {
 			use cmd::Cmd::*;
 			use cmd::*;
 			match serde_json::from_str(arg) {
@@ -40,12 +47,45 @@ pub fn start_tauri(taggenator: Taggenator) {
 							error,
 						),
 
-						GetTags { callback, error } => tauri::execute_promise(
-							_webview,
-							move || Ok(vec!["A", "B"]),
+						AddTags {
 							callback,
 							error,
-						),
+							tags,
+						} => {
+							let mut taggenator = taggenator.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let mut taggenator = taggenator.lock().unwrap();
+									taggenator.database.add_tags(2, tags);
+									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
+
+						GetTags {
+							callback,
+							error,
+							args,
+						} => {
+							let mut taggenator = taggenator.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let taggenator = taggenator.lock().unwrap();
+									println!("{:?}", &args);
+									let mut searcher = Searcher::new(args).unwrap(); // TODO: how do we bubble errors up?
+
+									let tags = searcher.get_tags(&taggenator.database).unwrap();
+									println!("tags: {:?}", tags);
+									return Ok(tags);
+								},
+								callback,
+								error,
+							);
+						}
 					}
 					Ok(())
 				}
@@ -53,4 +93,6 @@ pub fn start_tauri(taggenator: Taggenator) {
 		})
 		.build()
 		.run();
+
+	Ok(())
 }

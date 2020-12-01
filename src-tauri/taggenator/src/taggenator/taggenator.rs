@@ -22,6 +22,7 @@ use walkdir;
 pub struct Taggenator {
 	pub settings: Settings,
 	pub database: Database,
+	pub headless: bool,
 }
 
 impl Taggenator {
@@ -31,6 +32,17 @@ impl Taggenator {
 		return Ok(Taggenator {
 			settings: settings,
 			database: database,
+			headless: false,
+		});
+	}
+
+	pub fn new_headless() -> Result<Taggenator, BError> {
+		let settings = Settings::new()?;
+		let database = Database::new()?;
+		return Ok(Taggenator {
+			settings: settings,
+			database: database,
+			headless: true,
 		});
 	}
 
@@ -40,10 +52,7 @@ impl Taggenator {
 		// self.settings.save();
 		// self.database.test_write(100000)?;
 		// self.database.test_write(10)?;
-		// dbg!(self.database.test_read()?.len());
-
-		// self.database.add_tag("100", vec!["yup".to_string()]);
-		// self.database.flush_writes(); // TODO: remove
+		self.database.add_tag(100, "yup".to_string());
 
 		if args.len() == 0 {
 			// TODO: print help
@@ -58,7 +67,7 @@ impl Taggenator {
 		Ok(())
 	}
 
-	fn update_files(&mut self) -> Result<(i32, i32), BError> {
+	pub fn update_files(&mut self) -> Result<(i32, i32), BError> {
 		let (sender, receiver) = channel();
 
 		// start a thread to run through the fs while the main thread talks to the DB

@@ -10,10 +10,11 @@ mod tauri;
 
 fn main() {
 	let args: Vec<String> = env::args().skip(1).collect();
-	let taggenator = Taggenator::new().unwrap();
 	if args.len() == 0 {
+		let mut taggenator = Taggenator::new_headless().unwrap();
 		tauri::start_tauri(taggenator);
 	} else {
+		let mut taggenator = Taggenator::new().unwrap();
 		taggenator.parse_args(args);
 	}
 }

@@ -6,9 +6,17 @@ class Bridge {
 		// });
 	}
 
-	async get_tags(): Promise<String[]> {
+	async add_tags(tags: string[]): Promise<never> {
 		return promisified({
-			cmd: "GetTags"
+			cmd: "AddTags",
+			tags
+		});
+	}
+
+	async get_tags(args: string[]): Promise<String[]> {
+		return promisified({
+			cmd: "GetTags",
+			args
 		});
 	}
 }

@@ -9,11 +9,12 @@ mod settings;
 mod utils;
 
 mod errors;
+pub use errors::BError;
 
-mod database;
+pub mod database;
 
-mod query_processor;
+pub mod query_processor;
 
 mod commands;
 
-mod models;
+pub mod models;
