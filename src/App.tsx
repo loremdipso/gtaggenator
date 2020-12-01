@@ -8,21 +8,46 @@ import { bridge } from "./Commands";
 import { IRecord } from "./interfaces";
 import { setUncaughtExceptionCaptureCallback } from "process";
 import { ChangeEvent } from "react";
+import { sortedLastIndex } from "lodash-es";
 
 function App() {
 	const [search, setSearch] = useState("");
+	const [tagLine, setTagLine] = useState("");
 	const [records, setRecords] = useState([] as IRecord[]);
 
+	const [recordIndex, setRecordIndex] = useState(0);
+	const [currentRecord, setCurrentRecord] = useState(null as null | IRecord);
+
 	const loadData = async () => {
-		// let newTags = await bridge.get_tags({ args: ["search", "yup"] });
-		let records = await bridge.get_records({ args: [] });
+		let records = await bridge.get_records({ args: search.split(" ") });
 		setRecords(records);
+		setRecordIndex(0);
 	};
 
+	useEffect(() => {
+		if (records.length == 0) {
+			if (currentRecord) {
+				setRecordIndex(0);
+				setCurrentRecord(null);
+			}
+		} else if (recordIndex < 0) {
+			setRecordIndex(0);
+		} else if (recordIndex >= records.length) {
+			// TODO: exit?
+			setRecords([]);
+		} else if (records.length > recordIndex) {
+			setCurrentRecord(records[recordIndex]);
+		}
+	}, [recordIndex, records]);
+
 	const addTags = async () => {
+		if (!currentRecord) {
+			return;
+		}
+
 		let newRecord = await bridge.add_tags({
-			record: records[0],
-			tag_line: search,
+			record: currentRecord,
+			tag_line: tagLine,
 		});
 
 		setRecords(
@@ -32,32 +57,87 @@ function App() {
 		);
 	};
 
+	const updateTagLine = (event: ChangeEvent<HTMLInputElement>) => {
+		setTagLine(event.target.value);
+	};
+
 	const updateSearch = (event: ChangeEvent<HTMLInputElement>) => {
 		setSearch(event.target.value);
 	};
 
+	const handleTagLine = () => {
+		setTagLine("");
+		if (tagLine.length > 0) {
+			if (tagLine[0] === "<" || tagLine[0] === ">") {
+				let direction = tagLine[0] === "<" ? -1 : 1;
+				let amount = parseInt(tagLine.substring(1));
+				if (isNaN(amount)) {
+					amount = 1;
+				}
+				setRecordIndex(recordIndex + direction * amount);
+			} else if (
+				tagLine[tagLine.length - 1] === "<" ||
+				tagLine[tagLine.length - 1] === ">"
+			) {
+				let direction = tagLine[0] === "<" ? -1 : 1;
+				let amount = parseInt(tagLine.substring(0, tagLine.length - 1));
+				if (isNaN(amount)) {
+					amount = 1;
+				}
+				setRecordIndex(recordIndex + direction * amount);
+			} else {
+				addTags();
+			}
+		} else {
+			setRecordIndex(recordIndex + 1);
+		}
+	};
+
 	return (
 		<div className="App">
-			<button onClick={loadData}>Refresh</button>
-			<div>
-				<h1>Names</h1>
-				<ul>
-					{records.map((record) => (
-						<>
-							<li key={record.RecordID}>{record.Name}</li>
+			<div className="sidebar">
+				<input onChange={updateSearch} value={search} />
+				<button onClick={loadData}>Refresh</button>
+				<div>
+					<h1>Names</h1>
+					<ul>
+						{records.map((record) => (
+							<>
+								<li
+									key={record.RecordID}
+									className={
+										record === currentRecord
+											? "special"
+											: ""
+									}
+								>
+									{record.Name}
+								</li>
 
-							<ul>
-								{record.Tags.map((tag) => (
-									<li key={tag}>{tag}</li>
-								))}
-							</ul>
-						</>
-					))}
-				</ul>
+								<ul>
+									{record.Tags.map((tag) => (
+										<li key={tag}>{tag}</li>
+									))}
+								</ul>
+							</>
+						))}
+					</ul>
+				</div>
+
+				{currentRecord ? (
+					<input
+						onChange={updateTagLine}
+						onKeyPress={(event) => {
+							if ((event.keyCode || event.which) === 13) {
+								handleTagLine();
+							}
+						}}
+						value={tagLine}
+					/>
+				) : null}
 			</div>
 
-			<input onChange={updateSearch} value={search} />
-			<button onClick={() => addTags()}>Add Tags</button>
+			<div className="content"></div>
 			{/* <header className="App-header">
 				<div className="overlay" />
 				<div className="sticker">

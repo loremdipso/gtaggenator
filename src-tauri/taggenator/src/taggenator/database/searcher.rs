@@ -446,6 +446,8 @@ impl Filter {
 							.collect();
 					}
 
+					"" => {}
+
 					_ => {
 						// TODO: figure out error logging
 						panic!("Unknown option: {}", self.name);
