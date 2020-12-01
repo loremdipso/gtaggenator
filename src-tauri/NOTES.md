@@ -27,6 +27,7 @@
     - [ ] Figure out plugin architecture
         - Load how?
         - Can they be dynamic?
+	- [ ] How do we load files?
 
 3. Backburner
     - [ ] Figure out migrations
