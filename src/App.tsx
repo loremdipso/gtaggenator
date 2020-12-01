@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import "./App.css";
 import { bridge } from "./Commands";
@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Dropdown } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import DisplayRecord from "./DisplayRecord";
 
 interface IFilter {
 	display: string;
@@ -41,6 +42,39 @@ function App() {
 	const [deltas, setDeltas] = useState([] as IDelta[]);
 
 	const [currentFilter, setCurrentFilter] = useState(filters[0]);
+	const [lastOpenedRecordID, setLastOpenedRecordID] = useState(
+		null as number | null
+	);
+
+	const updateRecord = useCallback(
+		(updatedRecord: IRecord) => {
+			setRecords(
+				records.map((record) =>
+					record.RecordID === updatedRecord.RecordID
+						? updatedRecord
+						: record
+				)
+			);
+		},
+		[records, setRecords]
+	);
+
+	useEffect(() => {
+		(async () => {
+			if (
+				currentRecord &&
+				currentRecord.RecordID !== lastOpenedRecordID
+			) {
+				// we've got to keep track of this, otherwise we get an infinite loop, which is no bueno
+				setLastOpenedRecordID(currentRecord.RecordID);
+				updateRecord(
+					await bridge.open_record({
+						record: currentRecord,
+					})
+				);
+			}
+		})();
+	}, [currentRecord, lastOpenedRecordID, updateRecord]);
 
 	useEffect(() => {
 		if (records.length === 0) {
@@ -53,7 +87,7 @@ function App() {
 		} else if (recordIndex >= records.length) {
 			// TODO: exit?
 			setRecords([]);
-			setSearchFocusEpoch(searchFocusEpoch + 1);
+			setSearchFocusEpoch((oldEpoch) => oldEpoch + 1);
 		} else if (records.length > recordIndex) {
 			setCurrentRecord(records[recordIndex]);
 		}
@@ -122,12 +156,7 @@ function App() {
 		}
 
 		newRecord.Tags = sortTags(newRecord.Tags, oldRecord.Tags);
-
-		setRecords(
-			records.map((record) =>
-				record.RecordID === newRecord.RecordID ? newRecord : record
-			)
-		);
+		updateRecord(newRecord);
 	};
 
 	// will undo a delta
@@ -234,6 +263,7 @@ function App() {
 					<Dropdown.Menu>
 						{filters.map((filter) => (
 							<Dropdown.Item
+								key={filter.display}
 								onClick={() => setCurrentFilter(filter)}
 							>
 								{filter.display}
@@ -244,13 +274,11 @@ function App() {
 
 				{currentRecord ? (
 					<div>
-						<div>
-							<div>
-								{recordIndex + 1} / {records.length}
-							</div>
-							<div>{currentRecord.Name}</div>
-							<div>{printSize(currentRecord.Size)}</div>
-						</div>
+						<DisplayRecord
+							record={currentRecord}
+							recordIndex={recordIndex}
+							numRecords={records.length}
+						/>
 
 						<SpecialInput
 							onChange={updateTagLine}
@@ -261,7 +289,7 @@ function App() {
 						/>
 
 						<ul>
-							{fixRecord(currentRecord).Tags.map((tag) => (
+							{sortRecordTags(currentRecord).Tags.map((tag) => (
 								<li key={tag}>{tag}</li>
 							))}
 						</ul>
@@ -336,7 +364,9 @@ function SpecialInput({
 				}}
 			/>
 
-			{actionName ? <a onClick={() => action()}>{actionName}</a> : null}
+			{actionName ? (
+				<button onClick={() => action()}>{actionName}</button>
+			) : null}
 		</div>
 	);
 }
@@ -361,11 +391,7 @@ function sortTags(newTags: string[], oldTags: string[]): string[] {
 	return netNew.concat(existing);
 }
 
-function printSize(bytes: number) {
-	return `${bytes}b`;
-}
-
-function fixRecord(record: IRecord): IRecord {
+function sortRecordTags(record: IRecord): IRecord {
 	if (!record.OpenedInGUI) {
 		record.Tags.sort();
 		record.OpenedInGUI = true;

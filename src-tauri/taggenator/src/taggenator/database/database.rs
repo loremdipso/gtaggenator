@@ -212,6 +212,14 @@ impl Database {
 		)
 	}
 
+	pub fn set_times_opened(&mut self, recordId: i64, times_opened: i32) -> Result<(), BError> {
+		self.async_write(
+			"UPDATE Records SET TimesOpened = ?
+			WHERE Records.RecordID = ?",
+			vec![Number(times_opened.into()), Number(recordId)],
+		)
+	}
+
 	pub fn remove_tags(&mut self, recordId: i64, tags: Vec<String>) -> Result<(), BError> {
 		self.start_batch();
 		for tag in tags {

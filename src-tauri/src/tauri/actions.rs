@@ -121,6 +121,29 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 								error,
 							);
 						}
+
+						OpenRecord {
+							callback,
+							error,
+							mut record,
+						} => {
+							let mut taggenator = taggenator.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let mut taggenator =
+										taggenator.lock().map_err(|_| UnknownError)?;
+									record.TimesOpened += 1;
+									taggenator
+										.database
+										.set_times_opened(record.RecordID, record.TimesOpened)
+										.map_err(|_| UnknownError)?;
+									return Ok(record);
+								},
+								callback,
+								error,
+							);
+						}
 					}
 					Ok(())
 				}

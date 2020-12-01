@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import "./App.css";
 import { IRecord } from "./interfaces";
 
@@ -12,7 +13,6 @@ export function Content({ record }: IContent) {
 
 	return (
 		<div className="content-container">
-			{/* <h1>{record.Location}</h1> */}
 			{isImage(record.Name) ? (
 				<img alt="content" width={500} height={500} src={path} />
 			) : null}

@@ -43,6 +43,12 @@ pub enum Cmd {
 		error: String,
 		args: Vec<String>,
 	},
+
+	OpenRecord {
+		callback: String,
+		error: String,
+		record: Record,
+	},
 }
 
 #[derive(Serialize)]

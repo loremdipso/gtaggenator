@@ -20,6 +20,10 @@ class Bridge {
 	async add_tags(args: { record: IRecord, tag_line: string }): Promise<IRecord> {
 		return helper("AddTags", args);
 	}
+
+	async open_record(args: { record: IRecord }): Promise<IRecord> {
+		return helper("OpenRecord", args);
+	}
 }
 
 function helper<T>(tagname: string, args: any): Promise<T> {

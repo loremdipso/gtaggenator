@@ -32,6 +32,7 @@
         - [x] Make sure we aren't leaking memory/crashing
     - [ ] Am I re-requesting an image anytime I change anything?
     - [x] Add toasts
+    - [ ] Add scss
 
 3. Backburner
     - [ ] Figure out migrations
