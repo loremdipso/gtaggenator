@@ -5,6 +5,7 @@ import { bridge } from "./Commands";
 import { IRecord } from "./interfaces";
 import { ChangeEvent } from "react";
 import { Content } from "./Content";
+import { IDelta, getDelta, DisplayDeltas } from "./Deltas";
 
 function App() {
 	const [search, setSearch] = useState("");
@@ -13,6 +14,7 @@ function App() {
 
 	const [recordIndex, setRecordIndex] = useState(0);
 	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
+	const [deltas, setDeltas] = useState([] as IDelta[]);
 
 	useEffect(() => {
 		if (records.length === 0) {
@@ -40,24 +42,87 @@ function App() {
 		setRecordIndex(0);
 	};
 
-	const addTags = async () => {
+	const addTag = (tag: string) => {
+		addTags(tag, true);
+	};
+
+	const removeTag = (tag: string) => {
+		addTags(`-${tag}`, true);
+	};
+
+	const addTags = async (line: string, ignoreDelta: boolean = false) => {
 		if (!currentRecord) {
 			return;
 		}
 
+		let oldRecord = currentRecord;
 		let newRecord = await bridge.add_tags({
 			record: currentRecord,
-			tag_line: tagLine,
+			tag_line: line,
 		});
 
-		// TODO: better tag sorting
-		newRecord.Tags.sort();
+		if (!ignoreDelta) {
+			let delta = getDelta(newRecord.Tags, oldRecord.Tags);
+			if (delta.added.length || delta.removed.length) {
+				setDeltas([delta, ...deltas]);
+			}
+		}
+
+		newRecord.Tags = sortTags(newRecord.Tags, oldRecord.Tags);
 
 		setRecords(
 			records.map((record) =>
 				record.RecordID === newRecord.RecordID ? newRecord : record
 			)
 		);
+	};
+
+	// will undo a delta
+	const undo = (delta: IDelta) => {
+		let line = "";
+		for (let added of delta.added) {
+			if (line.length > 0) {
+				line += ", ";
+			}
+			line += `-${added}`;
+		}
+
+		for (let removed of delta.removed) {
+			if (line.length > 0) {
+				line += ", ";
+			}
+			line += removed;
+		}
+
+		if (line.length > 0) {
+			// remove this delta
+			let temp = delta.added;
+			delta.added = delta.removed;
+			delta.removed = temp;
+			setDeltas(deltas); // TODO: something less hacky. We reallllly shouldn't be modifying data like this
+			addTags(line, true);
+		}
+	};
+
+	const redo = (delta: IDelta) => {
+		let line = "";
+		for (let added of delta.added) {
+			if (line.length > 0) {
+				line += ", ";
+			}
+			line += added;
+		}
+
+		for (let removed of delta.removed) {
+			if (line.length > 0) {
+				line += ", ";
+			}
+			line += `-${removed}`;
+		}
+
+		if (line.length > 0) {
+			addTags(line, true);
+		}
 	};
 
 	const updateTagLine = (event: ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +154,8 @@ function App() {
 				}
 				setRecordIndex(recordIndex + direction * amount);
 			} else {
-				addTags();
+				// TODO: is this safe?
+				addTags(tagLine);
 			}
 		} else {
 			setRecordIndex(recordIndex + 1);
@@ -128,6 +194,14 @@ function App() {
 								<li key={tag}>{tag}</li>
 							))}
 						</ul>
+
+						<DisplayDeltas
+							deltas={deltas}
+							undo={undo}
+							redo={redo}
+							addTag={addTag}
+							removeTag={removeTag}
+						/>
 
 						{/* <button>Open Natively</button> */}
 					</div>
@@ -175,6 +249,26 @@ function SpecialInput({
 			{actionName ? <a onClick={() => action()}>{actionName}</a> : null}
 		</div>
 	);
+}
+
+function sortTags(newTags: string[], oldTags: string[]): string[] {
+	// Keeps the order of tags that are in both oldTags and newTags,
+	// but keep the tags that are just in newTags at the top
+	let existing = [];
+	let netNew = [];
+	for (let tag of oldTags) {
+		if (newTags.indexOf(tag) > -1) {
+			existing.push(tag);
+		}
+	}
+
+	for (let tag of newTags) {
+		if (oldTags.indexOf(tag) === -1) {
+			netNew.push(tag);
+		}
+	}
+
+	return netNew.concat(existing);
 }
 
 function printSize(bytes: number) {

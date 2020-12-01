@@ -88,3 +88,15 @@ a {
 	width: 100%;
 	height: auto;
 }
+
+.delta {
+	border: 1px solid black;
+}
+
+.added {
+	color: green;
+}
+
+.removed {
+	color: red;
+}

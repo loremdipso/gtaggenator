@@ -29,7 +29,8 @@
         - Can they be dynamic?
     - [x] How do we load files?
     - [x] How do we load files?
-        - [ ] Make sure we aren't leaking memory/crashing
+        - [x] Make sure we aren't leaking memory/crashing
+    - [ ] Am I re-requesting an image anytime I change anything?
 
 3. Backburner
     - [ ] Figure out migrations

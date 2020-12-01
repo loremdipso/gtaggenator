@@ -8,22 +8,18 @@ export function Content({ record }: IContent) {
 	if (!record) {
 		return null;
 	}
+	let path = getPath(record.Location);
 
 	return (
 		<div className="content-container">
 			{/* <h1>{record.Location}</h1> */}
 			{isImage(record.Name) ? (
-				<img
-					alt="content"
-					width={500}
-					height={500}
-					src={getPath(record.Location)}
-				/>
+				<img alt="content" width={500} height={500} src={path} />
 			) : null}
 
 			{isVideo(record.Name) ? (
 				<video controls autoPlay>
-					<source src={getPath(record.Location)} type="video/mp4" />
+					<source src={path} type="video/mp4" />
 					Your browser does not support the video tag.
 				</video>
 			) : null}
