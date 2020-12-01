@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
-import clamp from "lodash-es/clamp";
-import { useSpring, animated } from "react-spring";
-import { useGesture } from "react-with-gesture";
 
 import "./App.css";
 import { bridge } from "./Commands";
 import { IRecord } from "./interfaces";
-import { setUncaughtExceptionCaptureCallback } from "process";
 import { ChangeEvent } from "react";
-import { sortedLastIndex } from "lodash-es";
+import { Content } from "./Content";
 
 function App() {
 	const [search, setSearch] = useState("");
@@ -16,7 +12,7 @@ function App() {
 	const [records, setRecords] = useState([] as IRecord[]);
 
 	const [recordIndex, setRecordIndex] = useState(0);
-	const [currentRecord, setCurrentRecord] = useState(null as null | IRecord);
+	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
 
 	const loadData = async () => {
 		let records = await bridge.get_records({ args: search.split(" ") });
@@ -25,7 +21,7 @@ function App() {
 	};
 
 	useEffect(() => {
-		if (records.length == 0) {
+		if (records.length === 0) {
 			if (currentRecord) {
 				setRecordIndex(0);
 				setCurrentRecord(null);
@@ -99,38 +95,15 @@ function App() {
 	return (
 		<div className="app">
 			<div className="sidebar">
-				<input onChange={updateSearch} value={search} />
-				<button onClick={loadData}>Refresh</button>
-				{/* <div>
-					<h1>Names</h1>
-					<ul>
-						{records.map((record) => (
-							<>
-								<li
-									key={record.RecordID}
-									className={
-										record === currentRecord
-											? "special"
-											: ""
-									}
-								>
-									{record.Name}
-								</li>
-
-								<ul>
-									{record.Tags.map((tag) => (
-										<li key={tag}>{tag}</li>
-									))}
-								</ul>
-							</>
-						))}
-					</ul>
-				</div> */}
+				<div className="fw">
+					<input onChange={updateSearch} value={search} />
+					<button onClick={loadData}>Refresh</button>
+				</div>
 
 				{currentRecord ? (
 					<div>
 						<div>
-							{recordIndex} / {records.length}
+							{recordIndex + 1} / {records.length}
 						</div>
 
 						<ul>
@@ -140,6 +113,7 @@ function App() {
 						</ul>
 
 						<input
+							className="fw"
 							onChange={updateTagLine}
 							onKeyPress={(event) => {
 								if ((event.keyCode || event.which) === 13) {
@@ -148,33 +122,13 @@ function App() {
 							}}
 							value={tagLine}
 						/>
+
+						<button>Open Natively</button>
 					</div>
 				) : null}
 			</div>
 
-			<div className="content"></div>
-			{/* <header className="App-header">
-				<div className="overlay" />
-				<div className="sticker">
-					<animated.div
-						{...bind()}
-						style={{
-							transform: xy.interpolate(
-								((x: any, y: any) =>
-									`translate3d(${x}px,${y}px,0)`) as any
-							),
-						}}
-					>
-						<span onClick={_onClick}>
-							{!clicked ? "gtaggenator" : "Sup!"}
-							{tags.map((tag, i) => (
-								<span key={i}>sup{tag}</span>
-							))}
-						</span>
-					</animated.div>
-				</div>
-				<div className="container"></div>
-			</header> */}
+			<div className="content">{<Content record={currentRecord} />}</div>
 		</div>
 	);
 }

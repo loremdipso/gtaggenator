@@ -35,11 +35,25 @@ body {
 	background-color: white;
 }
 
+.fw {
+	display: flex;
+	width: 100%;
+	padding-right: 0px;
+	margin-right: 0px;
+	padding-left: 0px;
+	margin-left: 0px;
+}
+
+.fw > :first-child {
+	flex-grow: 1;
+}
+
 .special {
 	color: white;
 }
 
 .content {
+	color: white;
 	background-color: black;
 	height: 100vh;
 	flex-grow: 1;
