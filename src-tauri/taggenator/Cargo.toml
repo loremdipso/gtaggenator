@@ -6,11 +6,16 @@ version = "0.1.0"
 [dependencies]
 itertools = "*"
 multimap = "*"
+pathdiff = "*"
 rand = "*"
 serde_yaml = "*"
 string-builder = "*"
 toml = "0.5.7"
 walkdir = "2"
+
+[dependencies.chrono]
+features = ["serde"]
+version = "*"
 
 [dependencies.rusqlite]
 features = ["chrono"]
@@ -23,7 +28,3 @@ version = "*"
 [dependencies.serde]
 features = ["derive"]
 version = "1.0"
-
-[dependencies.chrono]
-features = ["serde"]
-version = "*"

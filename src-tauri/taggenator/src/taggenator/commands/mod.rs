@@ -5,6 +5,7 @@ use crate::Taggenator;
 
 mod dump;
 mod dump_tags;
+mod grab_bag;
 mod open;
 
 pub fn RunCommand(
@@ -15,6 +16,9 @@ pub fn RunCommand(
 	match &command_name[..] {
 		"dump" => {
 			return dump::dump(taggenator, args);
+		}
+		"grabbag" | "grab_bag" => {
+			return grab_bag::grab_bag(taggenator, args);
 		}
 		"dump_tags" => {
 			return dump_tags::dump_tags(taggenator, args);

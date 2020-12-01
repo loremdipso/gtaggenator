@@ -1,6 +1,7 @@
 # Roadmap
 
 1. Cli
+
     - [x] POC
     - [x] Separate from GUI so we could also release a less bloated standalone executable
     - [x] Fast file system traversal
@@ -21,6 +22,8 @@
     - [ ] Test renaming code/deduplication work
     - [x] Implement batching in Async SQL queries
     - [ ] Add dates
+    - [ ] Flush before reads? Yay or nay?
+
 2. GUI
 
     - [x] POC

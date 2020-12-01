@@ -52,7 +52,7 @@ impl Taggenator {
 		// self.settings.save();
 		// self.database.test_write(100000)?;
 		// self.database.test_write(10)?;
-		self.database.add_tag(100, "yup".to_string());
+		// self.database.add_tag(100, "yup".to_string());
 
 		if args.len() == 0 {
 			// TODO: print help

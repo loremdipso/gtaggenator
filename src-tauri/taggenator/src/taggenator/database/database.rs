@@ -7,16 +7,20 @@ use crate::taggenator::database::writer::Sqlizable::Text;
 use crate::taggenator::database::writer::Writer;
 use crate::taggenator::database::writer::MAX_BATCH_SIZE;
 use crate::taggenator::errors::BError;
+use crate::taggenator::errors::MyCustomError;
+use crate::taggenator::errors::MyCustomError::UnknownError;
 use crate::taggenator::models;
 use crate::taggenator::models::record::MiniRecord;
 use chrono::prelude::*;
 use multimap::MultiMap;
+use pathdiff::diff_paths;
 use rusqlite::NO_PARAMS;
-use rusqlite::{Connection, OpenFlags};
+use rusqlite::{params, Connection, OpenFlags};
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
+use std::path::PathBuf;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
@@ -56,9 +60,10 @@ impl Database {
 
 		if !did_exist {
 			conn.execute_batch(&format!(
-				"BEGIN; {} {} COMMIT;",
+				"BEGIN; {} {} {} COMMIT;",
 				models::record::SQL,
-				models::tags::SQL
+				models::tags::SQL,
+				models::grabbag::SQL
 			))?;
 		}
 
@@ -207,8 +212,123 @@ impl Database {
 
 	pub fn add_tag(&mut self, recordId: i64, tag: String) -> Result<(), BError> {
 		self.async_write(
-			"INSERT INTO Tags (RecordID, TagName) VALUES (?1, ?2)",
-			vec![Number(recordId), Text(tag)],
+			"INSERT INTO Tags (RecordID, TagName, DateAdded) VALUES (?1, ?2, ?3)",
+			vec![Number(recordId), Text(tag), Date(Some(Utc::now()))],
+		)
+	}
+
+	pub fn grabbag_get(&mut self, recordId: i64, key: String) -> Result<String, BError> {
+		return Ok(self.conn.query_row(
+			"SELECT Value FROM grabbag WHERE RecordID = ? AND Key = ?",
+			params![&recordId, &key],
+			|row| row.get(0),
+		)?);
+	}
+	pub fn grabbag_get_by_location(
+		&mut self,
+		location: String,
+		key: String,
+	) -> Result<String, BError> {
+		let location = self.get_location_relative_to_base(&location)?;
+		return Ok(self.conn.query_row(
+			"SELECT Value FROM grabbag WHERE Key = ?
+			AND EXISTS(
+				SELECT Records.RecordID FROM Records
+				WHERE Records.Location = ?
+				AND Records.RecordID = grabbag.RecordID 
+			)",
+			params![&key, &location],
+			|row| row.get(0),
+		)?);
+	}
+
+	pub fn grabbag_get_all(&mut self, recordId: i64) -> Result<HashMap<String, String>, BError> {
+		let mut stmt = self
+			.conn
+			.prepare("SELECT Key, Value FROM grabbag WHERE RecordID = ?")?;
+		let mut rows = stmt.query(params![&recordId])?;
+
+		let mut map: HashMap<String, String> = HashMap::new();
+		loop {
+			let row = rows.next()?;
+			if let Some(row) = row {
+				let key = row.get(0)?;
+				let value = row.get(1)?;
+				map.insert(key, value);
+			} else {
+				return Ok(map);
+			}
+		}
+		return Ok(map);
+	}
+	pub fn grabbag_get_all_by_location(
+		&mut self,
+		location: String,
+	) -> Result<HashMap<String, String>, BError> {
+		let location = self.get_location_relative_to_base(&location)?;
+		let mut stmt = self.conn.prepare(
+			"SELECT Key, Value FROM grabbag WHERE EXISTS(
+				SELECT Records.RecordID FROM Records
+				WHERE Records.Location = ?
+				AND Records.RecordID = grabbag.RecordID 
+			)",
+		)?;
+		let mut rows = stmt.query(params![&location])?;
+
+		let mut map: HashMap<String, String> = HashMap::new();
+		loop {
+			let row = rows.next()?;
+			if let Some(row) = row {
+				let key = row.get(0)?;
+				let value = row.get(1)?;
+				map.insert(key, value);
+			} else {
+				return Ok(map);
+			}
+		}
+	}
+
+	pub fn grabbag_upsert(
+		&mut self,
+		recordId: i64,
+		key: String,
+		value: String,
+	) -> Result<(), BError> {
+		self.async_write(
+			"REPLACE INTO grabbag (RecordID, Key, Value) VALUES(?, ?, ?)",
+			vec![Number(recordId), Text(key), Text(value)],
+		)
+	}
+	pub fn grabbag_upsert_by_location(
+		&mut self,
+		location: String,
+		key: String,
+		value: String,
+	) -> Result<(), BError> {
+		let location = self.get_location_relative_to_base(&location)?;
+		self.async_write(
+			"REPLACE INTO grabbag (RecordID, Key, Value)
+			SELECT RecordID, ?, ?
+			FROM Records WHERE Records.Location = ?",
+			vec![Text(key), Text(value), Text(location)],
+		)
+	}
+
+	pub fn grabbag_delete(&mut self, recordId: i64, key: String) -> Result<(), BError> {
+		self.async_write(
+			"DELETE FROM grabbag WHERE RecordID = ?1 AND Key = ?2",
+			vec![Number(recordId), Text(key)],
+		)
+	}
+	pub fn grabbag_delete_by_location(
+		&mut self,
+		location: String,
+		key: String,
+	) -> Result<(), BError> {
+		let location = self.get_location_relative_to_base(&location)?;
+		self.async_write(
+			"DELETE FROM grabbag WHERE Location = ?1 AND Key = ?2",
+			vec![Text(location), Text(key)],
 		)
 	}
 
@@ -274,5 +394,19 @@ impl Database {
 			self.todo_count -= value as i64;
 		}
 		Ok(())
+	}
+
+	fn get_location_relative_to_base(&self, location: &String) -> Result<String, BError> {
+		if location.chars().nth(0).unwrap_or_default() == '.' {
+			return Ok(location.clone());
+		}
+
+		let mut base = std::env::current_dir()?; // TODO: perf, calculate once
+		let mut diff = diff_paths(Path::new(location), base).unwrap();
+		let mut real = PathBuf::new();
+		real.push(".");
+		real.push(diff);
+
+		return Ok(real.to_string_lossy().to_string());
 	}
 }
