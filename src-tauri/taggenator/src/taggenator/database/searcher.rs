@@ -357,6 +357,14 @@ impl Filter {
 						records.reverse();
 					}
 
+					"most_tags" => {
+						records.sort_by(|a, b| b.Tags.len().cmp(&a.Tags.len()));
+					}
+
+					"fewest_tags" => {
+						records.sort_by(|a, b| a.Tags.len().cmp(&b.Tags.len()));
+					}
+
 					"largest" | "biggest" => {
 						records.sort_by(|a, b| b.Size.cmp(&a.Size));
 					}

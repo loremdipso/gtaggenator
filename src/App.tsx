@@ -9,6 +9,23 @@ import { IDelta, getDelta, DisplayDeltas } from "./Deltas";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { Dropdown } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+interface IFilter {
+	display: string;
+	command: string;
+}
+const filters: IFilter[] = [
+	{ display: "None", command: "" },
+	{ display: "Untouched", command: "-sort untouched" },
+	{ display: "Touched", command: "-sort touched" },
+	{ display: "Seen", command: "-sort seen" },
+	{ display: "Unseen", command: "-sort unseen" },
+	{ display: "Most Tags", command: "-sort most_tags" },
+	{ display: "Fewest Tags", command: "-sort fewest_tags" },
+];
+
 function App() {
 	const [search, setSearch] = useState("");
 	const [tagLine, setTagLine] = useState("");
@@ -22,6 +39,8 @@ function App() {
 	const [recordIndex, setRecordIndex] = useState(0);
 	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
 	const [deltas, setDeltas] = useState([] as IDelta[]);
+
+	const [currentFilter, setCurrentFilter] = useState(filters[0]);
 
 	useEffect(() => {
 		if (records.length === 0) {
@@ -40,16 +59,25 @@ function App() {
 		}
 	}, [recordIndex, records, currentRecord]);
 
-	const loadData = async () => {
+	const getSearch = () => {
 		let tempSearch = search;
-		if (!search.startsWith("search")) {
-			tempSearch = `search ${search}`;
+		if (search.length > 0) {
+			if (!search.startsWith("search")) {
+				tempSearch = `search ${search}`;
+			}
 		}
+
+		tempSearch += ` ${currentFilter.command}`;
+		return tempSearch;
+	};
+
+	const loadData = async () => {
+		let tempSearch = getSearch();
 		let records = await bridge.get_records({ args: tempSearch.split(" ") });
 		setRecords(records);
 
 		let newIndex = 0;
-		if (lastExecutedSearch === search && currentRecord) {
+		if (lastExecutedSearch === tempSearch && currentRecord) {
 			// special case: if we're refreshing, try to find the record we were just on
 			newIndex = records.findIndex(
 				(record) => record.RecordID === currentRecord.RecordID
@@ -64,7 +92,7 @@ function App() {
 		}
 		setRecordIndex(newIndex);
 		setTagFocusEpoch(tagFocusEpoch + 1);
-		setLastExecutedSearch(search);
+		setLastExecutedSearch(tempSearch);
 	};
 
 	const addTag = (tag: string) => {
@@ -197,6 +225,22 @@ function App() {
 					prefix="Search"
 					focusEpoch={searchFocusEpoch}
 				/>
+
+				<Dropdown>
+					<Dropdown.Toggle variant="primary" id="dropdown-basic">
+						Filter
+					</Dropdown.Toggle>
+
+					<Dropdown.Menu>
+						{filters.map((filter) => (
+							<Dropdown.Item
+								onClick={() => setCurrentFilter(filter)}
+							>
+								{filter.display}
+							</Dropdown.Item>
+						))}
+					</Dropdown.Menu>
+				</Dropdown>
 
 				{currentRecord ? (
 					<div>
