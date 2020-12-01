@@ -226,6 +226,12 @@ impl Taggenator {
 					record.Tags.remove(&tag.to_string());
 					to_remove.push(tag.to_string());
 				}
+			} else if tag.chars().last().unwrap_or_default() == '-' {
+				let tag = &tag[..tag.chars().count() - 1];
+				if record.Tags.contains(tag) {
+					record.Tags.remove(&tag.to_string());
+					to_remove.push(tag.to_string());
+				}
 			} else if !record.Tags.contains(tag) {
 				record.Tags.insert(tag.to_string());
 				to_add.push(tag.to_string());

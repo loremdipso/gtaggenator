@@ -38,7 +38,7 @@ function App() {
 		} else if (records.length > recordIndex) {
 			setCurrentRecord(records[recordIndex]);
 		}
-	}, [recordIndex, records]);
+	}, [recordIndex, records, currentRecord]);
 
 	const addTags = async () => {
 		if (!currentRecord) {
@@ -49,6 +49,9 @@ function App() {
 			record: currentRecord,
 			tag_line: tagLine,
 		});
+
+		// TODO: better tag sorting
+		newRecord.Tags.sort();
 
 		setRecords(
 			records.map((record) =>
@@ -94,11 +97,11 @@ function App() {
 	};
 
 	return (
-		<div className="App">
+		<div className="app">
 			<div className="sidebar">
 				<input onChange={updateSearch} value={search} />
 				<button onClick={loadData}>Refresh</button>
-				<div>
+				{/* <div>
 					<h1>Names</h1>
 					<ul>
 						{records.map((record) => (
@@ -122,18 +125,30 @@ function App() {
 							</>
 						))}
 					</ul>
-				</div>
+				</div> */}
 
 				{currentRecord ? (
-					<input
-						onChange={updateTagLine}
-						onKeyPress={(event) => {
-							if ((event.keyCode || event.which) === 13) {
-								handleTagLine();
-							}
-						}}
-						value={tagLine}
-					/>
+					<div>
+						<div>
+							{recordIndex} / {records.length}
+						</div>
+
+						<ul>
+							{currentRecord.Tags.map((tag) => (
+								<li key={tag}>{tag}</li>
+							))}
+						</ul>
+
+						<input
+							onChange={updateTagLine}
+							onKeyPress={(event) => {
+								if ((event.keyCode || event.which) === 13) {
+									handleTagLine();
+								}
+							}}
+							value={tagLine}
+						/>
+					</div>
 				) : null}
 			</div>
 

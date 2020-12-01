@@ -14,7 +14,7 @@ body {
 	font-family: Tahoma, Geneva, serif;
 }
 
-.overlay {
+/* .overlay {
 	width: 100vw;
 	height: 100vh;
 	position: absolute;
@@ -24,8 +24,23 @@ body {
 		transparent 0%,
 		rgba(98, 35, 210, 0.85) 100%
 	);
+} */
+
+.app {
+	display: flex;
+}
+
+.sidebar {
+	width: 300px;
+	background-color: white;
 }
 
 .special {
 	color: white;
+}
+
+.content {
+	background-color: black;
+	height: 100vh;
+	flex-grow: 1;
 }
