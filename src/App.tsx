@@ -14,12 +14,6 @@ function App() {
 	const [recordIndex, setRecordIndex] = useState(0);
 	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
 
-	const loadData = async () => {
-		let records = await bridge.get_records({ args: search.split(" ") });
-		setRecords(records);
-		setRecordIndex(0);
-	};
-
 	useEffect(() => {
 		if (records.length === 0) {
 			if (currentRecord) {
@@ -35,6 +29,16 @@ function App() {
 			setCurrentRecord(records[recordIndex]);
 		}
 	}, [recordIndex, records, currentRecord]);
+
+	const loadData = async () => {
+		let tempSearch = search;
+		if (!search.startsWith("search")) {
+			tempSearch = `search ${search}`;
+		}
+		let records = await bridge.get_records({ args: tempSearch.split(" ") });
+		setRecords(records);
+		setRecordIndex(0);
+	};
 
 	const addTags = async () => {
 		if (!currentRecord) {
@@ -95,16 +99,29 @@ function App() {
 	return (
 		<div className="app">
 			<div className="sidebar">
-				<div className="fw">
-					<input onChange={updateSearch} value={search} />
-					<button onClick={loadData}>Refresh</button>
-				</div>
+				<SpecialInput
+					onChange={updateSearch}
+					action={loadData}
+					value={search}
+					prefix="Search"
+				/>
 
 				{currentRecord ? (
 					<div>
 						<div>
-							{recordIndex + 1} / {records.length}
+							<div>
+								{recordIndex + 1} / {records.length}
+							</div>
+							<div>{currentRecord.Name}</div>
+							<div>{printSize(currentRecord.Size)}</div>
 						</div>
+
+						<SpecialInput
+							onChange={updateTagLine}
+							action={handleTagLine}
+							value={tagLine}
+							actionName="Add"
+						/>
 
 						<ul>
 							{currentRecord.Tags.map((tag) => (
@@ -112,18 +129,7 @@ function App() {
 							))}
 						</ul>
 
-						<input
-							className="fw"
-							onChange={updateTagLine}
-							onKeyPress={(event) => {
-								if ((event.keyCode || event.which) === 13) {
-									handleTagLine();
-								}
-							}}
-							value={tagLine}
-						/>
-
-						<button>Open Natively</button>
+						{/* <button>Open Natively</button> */}
 					</div>
 				) : null}
 			</div>
@@ -131,6 +137,48 @@ function App() {
 			<div className="content">{<Content record={currentRecord} />}</div>
 		</div>
 	);
+}
+
+interface ISpecialInput {
+	className?: string;
+	key?: string;
+	action: Function;
+	onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+	value: string;
+	actionName?: string;
+	prefix?: string;
+}
+function SpecialInput({
+	className,
+	key,
+	action,
+	onChange,
+	value,
+	actionName,
+	prefix,
+}: ISpecialInput) {
+	return (
+		<div className="special-input">
+			{prefix ? <span onClick={() => action()}>{prefix}</span> : null}
+
+			<input
+				value={value}
+				className={className}
+				onChange={onChange}
+				onKeyPress={(event) => {
+					if ((event.keyCode || event.which) === 13) {
+						action();
+					}
+				}}
+			/>
+
+			{actionName ? <a onClick={() => action()}>{actionName}</a> : null}
+		</div>
+	);
+}
+
+function printSize(bytes: number) {
+	return `${bytes}b`;
 }
 
 export default App;

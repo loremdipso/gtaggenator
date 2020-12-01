@@ -10,8 +10,8 @@ export function Content({ record }: IContent) {
 	}
 
 	return (
-		<div>
-			<h1>{record.Location}</h1>
+		<div className="content-container">
+			{/* <h1>{record.Location}</h1> */}
 			{isImage(record.Name) ? (
 				<img
 					alt="content"
@@ -22,7 +22,7 @@ export function Content({ record }: IContent) {
 			) : null}
 
 			{isVideo(record.Name) ? (
-				<video width="320" height="240" controls>
+				<video controls autoPlay>
 					<source src={getPath(record.Location)} type="video/mp4" />
 					Your browser does not support the video tag.
 				</video>

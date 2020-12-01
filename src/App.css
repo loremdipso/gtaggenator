@@ -11,7 +11,7 @@ body {
 	-moz-user-select: none; /* Firefox */
 	-ms-user-select: none; /* Internet Explorer/Edge */
 	user-select: none;
-	font-family: Tahoma, Geneva, serif;
+	font-family: Monaco, monospace;
 }
 
 /* .overlay {
@@ -35,7 +35,7 @@ body {
 	background-color: white;
 }
 
-.fw {
+.special-input {
 	display: flex;
 	width: 100%;
 	padding-right: 0px;
@@ -44,17 +44,47 @@ body {
 	margin-left: 0px;
 }
 
-.fw > :first-child {
-	flex-grow: 1;
+.special-input * {
+	border-radius: 0;
 }
 
-.special {
-	color: white;
+.special-input input {
+	flex-grow: 1;
+	margin-right: 0px;
+	vertical-align: center;
+}
+
+.special-input a {
+	margin-left: 0px;
+	border: 1px solid #cccccc;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.special-input span,
+a {
+	display: inline-block;
+	padding: 5px;
+	text-align: center;
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 .content {
 	color: white;
-	background-color: black;
+	background-color: grey;
 	height: 100vh;
 	flex-grow: 1;
+}
+
+.content-container video {
+	width: 100%;
+	height: auto;
+	max-height: 100vh;
+}
+
+.content-container img {
+	object-fit: contain;
+	width: 100%;
+	height: auto;
 }

@@ -8,7 +8,7 @@ mod settings;
 
 mod utils;
 
-mod errors;
+pub mod errors;
 pub use errors::BError;
 
 pub mod database;

@@ -1,5 +1,5 @@
 use crate::taggenator::database::Database;
-use crate::taggenator::errors::BError;
+use crate::taggenator::errors::{BError, MyCustomError::UnknownError};
 use crate::taggenator::models::record::Record;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -151,7 +151,7 @@ impl Searcher {
 			// the idea here is we wrap/unwrap the records array, filtering/sorting
 			// in-between. We could try and optimize by running multiple filters so we
 			// don't need to build several temporary vectors, but for now we don't.
-			temp_records = filter.execute(temp_records);
+			temp_records = filter.execute(temp_records)?;
 		}
 		let records = temp_records.take().unwrap();
 
@@ -344,7 +344,7 @@ impl Filter {
 	// We should have implementations for everything in sqlize,
 	// since the sqlizability depends on both the position of the action
 	// and the action itself
-	pub fn execute(&self, records: Option<Vec<Record>>) -> Option<Vec<Record>> {
+	pub fn execute(&self, records: Option<Vec<Record>>) -> Result<Option<Vec<Record>>, BError> {
 		match records {
 			Some(mut records) => {
 				match &self.name[..] {
@@ -449,15 +449,14 @@ impl Filter {
 					"" => {}
 
 					_ => {
-						// TODO: figure out error logging
-						panic!("Unknown option: {}", self.name);
+						return Err(Box::new(UnknownError));
 					}
 				};
 
-				return Some(records);
+				return Ok(Some(records));
 			}
 
-			None => return None,
+			None => return Err(Box::new(UnknownError)),
 		}
 	}
 }

@@ -1,5 +1,6 @@
 use std::sync::Arc;
 use std::sync::Mutex;
+use taggenator::errors::MyCustomError::UnknownError;
 use taggenator::taggenator::database::searcher::Searcher;
 use taggenator::BError;
 use taggenator::Taggenator;
@@ -10,7 +11,7 @@ mod cmd;
 pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 	// start file server in separate thread
 	std::thread::spawn(move || {
-		start_fs();
+		serve_fs();
 	});
 
 	taggenator.update_files()?;
@@ -63,8 +64,11 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 							tauri::execute_promise(
 								_webview,
 								move || {
-									let mut taggenator = taggenator.lock().unwrap();
-									taggenator.insert_tag_line(&mut record, tag_line).unwrap();
+									let mut taggenator =
+										taggenator.lock().map_err(|_| UnknownError)?;
+									taggenator
+										.insert_tag_line(&mut record, tag_line)
+										.map_err(|_| UnknownError)?;
 									return Ok(record);
 								},
 								callback,
@@ -81,12 +85,14 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 							tauri::execute_promise(
 								_webview,
 								move || {
-									let taggenator = taggenator.lock().unwrap();
+									let taggenator = taggenator.lock().map_err(|_| UnknownError)?;
 									println!("{:?}", &args);
-									let mut searcher = Searcher::new(args).unwrap(); // TODO: how do we bubble errors up?
+									let mut searcher =
+										Searcher::new(args).map_err(|_| UnknownError)?;
 
-									let records =
-										searcher.get_records(&taggenator.database).unwrap();
+									let records = searcher
+										.get_records(&taggenator.database)
+										.map_err(|_| UnknownError)?;
 									// println!("records: {:?}", records);
 									return Ok(records);
 								},
@@ -128,7 +134,7 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 }
 
 #[tokio::main]
-async fn start_fs() {
+async fn serve_fs() {
 	// NOTE: this seems to work fine, but should we use actix-web instead?
 	let route = warp::path("static").and(warp::fs::dir("."));
 	let route = route.with(warp::log("warp-server"));
