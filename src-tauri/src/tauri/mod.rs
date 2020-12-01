@@ -3,10 +3,16 @@ use std::sync::Mutex;
 use taggenator::taggenator::database::searcher::Searcher;
 use taggenator::BError;
 use taggenator::Taggenator;
+use warp::Filter;
 
 mod cmd;
 
 pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
+	// start file server in separate thread
+	std::thread::spawn(move || {
+		start_fs();
+	});
+
 	taggenator.update_files()?;
 	let taggenator = Arc::new(Mutex::new(taggenator));
 
@@ -119,4 +125,12 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 		.run();
 
 	Ok(())
+}
+
+#[tokio::main]
+async fn start_fs() {
+	// NOTE: this seems to work fine, but should we use actix-web instead?
+	let route = warp::path("static").and(warp::fs::dir("."));
+	let route = route.with(warp::log("warp-server"));
+	warp::serve(route).run(([0, 0, 0, 0], 8000)).await;
 }
