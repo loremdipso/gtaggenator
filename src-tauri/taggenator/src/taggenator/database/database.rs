@@ -212,6 +212,22 @@ impl Database {
 		)
 	}
 
+	pub fn remove_tags(&mut self, recordId: i64, tags: Vec<String>) -> Result<(), BError> {
+		self.start_batch();
+		for tag in tags {
+			self.remove_tag(recordId, tag)?;
+		}
+		self.end_batch();
+		Ok(())
+	}
+
+	pub fn remove_tag(&mut self, recordId: i64, tag: String) -> Result<(), BError> {
+		self.async_write(
+			"DELETE FROM Tags WHERE RecordID = ?1 AND TagName = ?2",
+			vec![Number(recordId), Text(tag)],
+		)
+	}
+
 	pub fn start_batch(&mut self) {
 		self.batching_count += 1;
 	}

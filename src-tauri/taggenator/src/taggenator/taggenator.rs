@@ -209,14 +209,23 @@ impl Taggenator {
 			.collect();
 
 		let mut to_add = vec![];
+		let mut to_remove = vec![];
 		for tag in &tags {
-			if !record.Tags.contains(tag) {
+			if tag.chars().nth(0).unwrap_or_default() == '-' {
+				let tag = &tag[1..];
+				if record.Tags.contains(tag) {
+					record.Tags.remove(&tag.to_string());
+					to_remove.push(tag.to_string());
+				}
+			} else if !record.Tags.contains(tag) {
 				record.Tags.insert(tag.to_string());
 				to_add.push(tag.to_string());
 			}
 		}
 
 		// only add the tags that weren't there already
-		return self.database.add_tags(record.RecordID, to_add);
+		self.database.add_tags(record.RecordID, to_add)?;
+		self.database.remove_tags(record.RecordID, to_remove)?;
+		Ok(())
 	}
 }
