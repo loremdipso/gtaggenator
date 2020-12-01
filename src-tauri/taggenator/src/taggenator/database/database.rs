@@ -38,7 +38,7 @@ pub struct Database {
 	todo_receiver: Receiver<usize>,
 	todo_count: i64,
 
-	am_batching: bool,
+	batching_count: i32,
 	batch: Vec<Query>,
 }
 
@@ -73,7 +73,7 @@ impl Database {
 			writer: writer,
 			todo_receiver: todo_receiver,
 			todo_count: 0,
-			am_batching: false,
+			batching_count: 0,
 			batch: vec![],
 		});
 	}
@@ -196,21 +196,31 @@ impl Database {
 		)
 	}
 
-	pub fn add_tag(&mut self, recordId: &str, tags: Vec<String>) -> Result<(), BError> {
-		let mut args = vec![Text(recordId.to_string())];
+	pub fn add_tags(&mut self, recordId: i64, tags: Vec<String>) -> Result<(), BError> {
+		self.start_batch();
 		for tag in tags {
-			args.push(Text(tag));
+			self.add_tag(recordId, tag)?;
 		}
-		self.async_write("INSERT INTO Tags (RecordID, TagName) VALUES (?1, ?2)", args)
+		self.end_batch();
+		Ok(())
+	}
+
+	pub fn add_tag(&mut self, recordId: i64, tag: String) -> Result<(), BError> {
+		self.async_write(
+			"INSERT INTO Tags (RecordID, TagName) VALUES (?1, ?2)",
+			vec![Number(recordId), Text(tag)],
+		)
 	}
 
 	pub fn start_batch(&mut self) {
-		self.am_batching = true;
+		self.batching_count += 1;
 	}
 
 	pub fn end_batch(&mut self) {
-		self.am_batching = false;
-		self.send_batch();
+		self.batching_count -= 1;
+		if self.batching_count <= 0 {
+			self.send_batch();
+		}
 	}
 
 	fn async_write(&mut self, sql: &str, params: Vec<Sqlizable>) -> Result<(), BError> {
@@ -220,7 +230,7 @@ impl Database {
 		};
 
 		self.batch.push(query);
-		if !self.am_batching || self.batch.len() >= MAX_BATCH_SIZE {
+		if self.batching_count == 0 || self.batch.len() >= MAX_BATCH_SIZE {
 			self.send_batch();
 		}
 

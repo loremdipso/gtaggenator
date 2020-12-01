@@ -3,7 +3,6 @@ authors = ["madams <mtadams42@gmail.com>"]
 edition = "2018"
 name = "taggenator"
 version = "0.1.0"
-
 [dependencies]
 chrono = "*"
 itertools = "*"

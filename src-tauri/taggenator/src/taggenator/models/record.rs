@@ -1,13 +1,16 @@
 use chrono::DateTime;
 use chrono::Utc;
+use std::collections::HashSet;
 
 #[derive(Debug)]
 pub struct Record {
-	pub RecordID: i32,
+	pub RecordID: i64,
 	pub Name: String,
 	pub Location: String,
 
-	pub Tags: Vec<String>,
+	// TODO: maybe use vector for speed?
+	// pub Tags: Vec<String>,
+	pub Tags: HashSet<String>,
 
 	pub Size: i32,
 	pub Length: i32,

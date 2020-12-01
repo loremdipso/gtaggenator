@@ -1,9 +1,11 @@
-mod dump;
-mod dump_tags;
 use crate::taggenator::database::Database;
 use crate::taggenator::errors::BError;
 use crate::taggenator::errors::MyCustomError;
 use crate::Taggenator;
+
+mod dump;
+mod dump_tags;
+mod open;
 
 pub fn RunCommand(
 	taggenator: &mut Taggenator,
@@ -16,6 +18,9 @@ pub fn RunCommand(
 		}
 		"dump_tags" => {
 			return dump_tags::dump_tags(taggenator, args);
+		}
+		"open" => {
+			return open::open(taggenator, args);
 		}
 		_ => {
 			return Err(Box::new(MyCustomError::InvalidCommand {

@@ -4,6 +4,7 @@ use crate::taggenator::commands::RunCommand;
 use crate::taggenator::errors::BError;
 use crate::taggenator::errors::MyCustomError;
 use crate::taggenator::models::record::MiniRecord;
+use crate::taggenator::models::record::Record;
 use crate::taggenator::settings::Settings;
 use crate::taggenator::utils::files::get_extension_from_filename;
 use multimap::MultiMap;
@@ -199,5 +200,23 @@ impl Taggenator {
 			}
 		}
 		return false;
+	}
+
+	pub fn insert_tag_line(&mut self, record: &mut Record, line: String) -> Result<(), BError> {
+		let tags: Vec<String> = line
+			.split(",")
+			.map(|piece| piece.trim().to_string())
+			.collect();
+
+		let mut to_add = vec![];
+		for tag in &tags {
+			if !record.Tags.contains(tag) {
+				record.Tags.insert(tag.to_string());
+				to_add.push(tag.to_string());
+			}
+		}
+
+		// only add the tags that weren't there already
+		return self.database.add_tags(record.RecordID, to_add);
 	}
 }

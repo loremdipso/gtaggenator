@@ -99,12 +99,12 @@ impl Searcher {
 			match row {
 				None => break,
 				Some(row) => {
-					let recordID: i32 = row.get(0)?;
+					let recordID: i64 = row.get(0)?;
 					let mut should_create = true;
 					if let Some(ref mut record) = current_record {
 						if record.RecordID == recordID {
 							if let Ok(tag) = row.get(TAG_INDEX) {
-								record.Tags.push(tag);
+								record.Tags.insert(tag);
 								should_create = false;
 							}
 						} else {
@@ -118,7 +118,7 @@ impl Searcher {
 							Name: row.get(NAME_INDEX)?,
 							Location: row.get(LOCATION_INDEX)?,
 
-							Tags: vec![],
+							Tags: HashSet::new(),
 
 							Size: row.get(SIZE_INDEX)?,
 							Length: row.get(LENGTH_INDEX)?,
@@ -131,7 +131,7 @@ impl Searcher {
 							HaveManuallyTouched: row.get(HAVE_MANUALLY_TOUCHED_INDEX)?,
 						};
 						if let Ok(tag) = row.get(TAG_INDEX) {
-							record.Tags.push(tag);
+							record.Tags.insert(tag);
 						}
 
 						// dbg!(&record);

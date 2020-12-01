@@ -30,8 +30,7 @@ impl Settings {
 					SETTINGS_FILENAME
 				)
 				.as_str(),
-			)
-			.unwrap();
+			)?;
 
 			if ret.trim().to_lowercase() == "y" {
 				println!("Creating...");
