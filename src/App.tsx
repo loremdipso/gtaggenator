@@ -6,40 +6,58 @@ import { useGesture } from "react-with-gesture";
 import "./App.css";
 import { bridge } from "./Commands";
 import { IRecord } from "./interfaces";
+import { setUncaughtExceptionCaptureCallback } from "process";
+import { ChangeEvent } from "react";
 
 function App() {
+	const [search, setSearch] = useState("");
 	const [records, setRecords] = useState([] as IRecord[]);
-	const [clicked, setClick] = useState(false);
-	const [{ xy }, set] = useSpring(() => ({ xy: [0, 0] }));
-	const bind = useGesture(({ down, delta, velocity }) => {
-		velocity = clamp(velocity, 1, 8);
-		set({
-			xy: down ? delta : [0, 0],
-			config: { mass: velocity, tension: 500 * velocity, friction: 50 },
-		});
-	});
 
-	const doit = async () => {
-		// await bridge.add_tags({ recordId: 1, tags: ["search", "yup"] });
+	const loadData = async () => {
 		// let newTags = await bridge.get_tags({ args: ["search", "yup"] });
 		let records = await bridge.get_records({ args: [] });
 		setRecords(records);
 	};
 
-	useEffect(() => {
-		doit();
-	}, []);
+	const addTags = async () => {
+		let newRecord = await bridge.add_tags({
+			record: records[0],
+			tag_line: search,
+		});
 
-	const _onClick = (_: any) => {
-		setClick(!clicked);
-		doit();
+		setRecords(
+			records.map((record) =>
+				record.RecordID === newRecord.RecordID ? newRecord : record
+			)
+		);
+	};
+
+	const updateSearch = (event: ChangeEvent<HTMLInputElement>) => {
+		setSearch(event.target.value);
 	};
 
 	return (
 		<div className="App">
-			{records.map((record) => (
-				<span key={record.RecordID}>{record.Name}</span>
-			))}
+			<button onClick={loadData}>Refresh</button>
+			<div>
+				<h1>Names</h1>
+				<ul>
+					{records.map((record) => (
+						<>
+							<li key={record.RecordID}>{record.Name}</li>
+
+							<ul>
+								{record.Tags.map((tag) => (
+									<li key={tag}>{tag}</li>
+								))}
+							</ul>
+						</>
+					))}
+				</ul>
+			</div>
+
+			<input onChange={updateSearch} value={search} />
+			<button onClick={() => addTags()}>Add Tags</button>
 			{/* <header className="App-header">
 				<div className="overlay" />
 				<div className="sticker">

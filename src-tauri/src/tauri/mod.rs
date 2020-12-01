@@ -50,16 +50,16 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 						AddTags {
 							callback,
 							error,
-							recordId,
-							tags,
+							mut record,
+							tag_line,
 						} => {
 							let mut taggenator = taggenator.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
 									let mut taggenator = taggenator.lock().unwrap();
-									taggenator.database.add_tags(recordId, tags);
-									return Ok(());
+									taggenator.insert_tag_line(&mut record, tag_line).unwrap();
+									return Ok(record);
 								},
 								callback,
 								error,

@@ -16,7 +16,8 @@ class Bridge {
 		return helper("GetTags", args);
 	}
 
-	async add_tags(args: { recordId: number, tags: string[] }): Promise<never> {
+	// returns the tags we just added
+	async add_tags(args: { record: IRecord, tag_line: string }): Promise<IRecord> {
 		return helper("AddTags", args);
 	}
 }

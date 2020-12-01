@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use taggenator::taggenator::models::record::Record;
 
 #[derive(Deserialize, Debug)]
 pub struct DoSomethingPayload {
@@ -27,8 +28,8 @@ pub enum Cmd {
 	AddTags {
 		callback: String,
 		error: String,
-		recordId: i64,
-		tags: Vec<String>,
+		record: Record,
+		tag_line: String,
 	},
 
 	GetTags {
