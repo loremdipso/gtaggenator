@@ -50,6 +50,7 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 						AddTags {
 							callback,
 							error,
+							recordId,
 							tags,
 						} => {
 							let mut taggenator = taggenator.clone();
@@ -57,8 +58,31 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 								_webview,
 								move || {
 									let mut taggenator = taggenator.lock().unwrap();
-									taggenator.database.add_tags(2, tags);
+									taggenator.database.add_tags(recordId, tags);
 									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
+
+						GetRecords {
+							callback,
+							error,
+							args,
+						} => {
+							let mut taggenator = taggenator.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let taggenator = taggenator.lock().unwrap();
+									println!("{:?}", &args);
+									let mut searcher = Searcher::new(args).unwrap(); // TODO: how do we bubble errors up?
+
+									let records =
+										searcher.get_records(&taggenator.database).unwrap();
+									// println!("records: {:?}", records);
+									return Ok(records);
 								},
 								callback,
 								error,
@@ -79,7 +103,7 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 									let mut searcher = Searcher::new(args).unwrap(); // TODO: how do we bubble errors up?
 
 									let tags = searcher.get_tags(&taggenator.database).unwrap();
-									println!("tags: {:?}", tags);
+									// println!("tags: {:?}", tags);
 									return Ok(tags);
 								},
 								callback,

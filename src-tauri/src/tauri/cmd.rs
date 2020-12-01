@@ -27,10 +27,17 @@ pub enum Cmd {
 	AddTags {
 		callback: String,
 		error: String,
+		recordId: i64,
 		tags: Vec<String>,
 	},
 
 	GetTags {
+		callback: String,
+		error: String,
+		args: Vec<String>,
+	},
+
+	GetRecords {
 		callback: String,
 		error: String,
 		args: Vec<String>,

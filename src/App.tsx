@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import clamp from "lodash-es/clamp";
 import { useSpring, animated } from "react-spring";
 import { useGesture } from "react-with-gesture";
 
 import "./App.css";
 import { bridge } from "./Commands";
+import { IRecord } from "./interfaces";
 
 function App() {
-	const [tags, setTags] = useState([] as String[]);
+	const [records, setRecords] = useState([] as IRecord[]);
 	const [clicked, setClick] = useState(false);
 	const [{ xy }, set] = useSpring(() => ({ xy: [0, 0] }));
 	const bind = useGesture(({ down, delta, velocity }) => {
@@ -19,10 +20,15 @@ function App() {
 	});
 
 	const doit = async () => {
-		await bridge.add_tags(["search", "yup"]);
-		let newTags = await bridge.get_tags(["search", "yup"]);
-		setTags(newTags);
+		// await bridge.add_tags({ recordId: 1, tags: ["search", "yup"] });
+		// let newTags = await bridge.get_tags({ args: ["search", "yup"] });
+		let records = await bridge.get_records({ args: [] });
+		setRecords(records);
 	};
+
+	useEffect(() => {
+		doit();
+	}, []);
 
 	const _onClick = (_: any) => {
 		setClick(!clicked);
@@ -31,7 +37,10 @@ function App() {
 
 	return (
 		<div className="App">
-			<header className="App-header">
+			{records.map((record) => (
+				<span key={record.RecordID}>{record.Name}</span>
+			))}
+			{/* <header className="App-header">
 				<div className="overlay" />
 				<div className="sticker">
 					<animated.div
@@ -52,7 +61,7 @@ function App() {
 					</animated.div>
 				</div>
 				<div className="container"></div>
-			</header>
+			</header> */}
 		</div>
 	);
 }

@@ -4,7 +4,6 @@ edition = "2018"
 name = "taggenator"
 version = "0.1.0"
 [dependencies]
-chrono = "*"
 itertools = "*"
 multimap = "*"
 rand = "*"
@@ -24,3 +23,7 @@ version = "*"
 [dependencies.serde]
 features = ["derive"]
 version = "1.0"
+
+[dependencies.chrono]
+features = ["serde"]
+version = "*"
