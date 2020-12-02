@@ -36,6 +36,7 @@
     - [ ] Am I re-requesting an image anytime I change anything?
     - [x] Add toasts
     - [ ] Add scss
+    - [ ] Make handle prettier
 
 3. Backburner
     - [ ] Figure out migrations

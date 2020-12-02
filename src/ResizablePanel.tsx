@@ -1,4 +1,3 @@
-import { RSA_PSS_SALTLEN_AUTO } from "constants";
 import React from "react";
 import { ReactChildren, useEffect, useState } from "react";
 import Draggable from "react-draggable";
@@ -40,7 +39,10 @@ export default function ResizablePanel({
 	const onStart = () => {};
 	const onStop = () => {};
 
-	let containerStyle = axis === "x" ? { width: value } : { height: value };
+	let containerStyle =
+		axis === "x"
+			? { width: value, minWidth: value }
+			: { height: value, minHeight: value };
 
 	let handleMargin = startingValue - HANDLE_WIDTH / 2;
 	let handleStyle: any = // react doesn't like position absolute for some reason
