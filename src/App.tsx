@@ -327,37 +327,43 @@ function App() {
 				</Dropdown>
 
 				{currentRecord ? (
-					<div>
-						<DisplayRecord
-							record={currentRecord}
-							recordIndex={recordIndex}
-							numRecords={records.length}
-						/>
+					<>
+						<div className="tag-input-container">
+							<DisplayRecord
+								record={currentRecord}
+								recordIndex={recordIndex}
+								numRecords={records.length}
+							/>
 
-						<SpecialInput
-							onChange={updateTagLine}
-							action={handleTagLine}
-							value={tagLine}
-							actionName="Add"
-							focusEpoch={tagFocusEpoch}
-						/>
+							<SpecialInput
+								onChange={updateTagLine}
+								action={handleTagLine}
+								value={tagLine}
+								actionName="Add"
+								focusEpoch={tagFocusEpoch}
+							/>
 
-						<div className="tag-container-container">
-							<div className="tag-container">
-								{sortRecordTags(currentRecord).Tags.map(
-									(tag) => (
-										<DisplayTagLineGroup
-											tag={tag}
-											key={tag}
-											variant="success"
-											action={removeTagLine}
-											secondaryAction={(
-												tagName: string
-											) => toast(`hooray for ${tagName}`)}
-											secondaryTitle="?"
-										/>
-									)
-								)}
+							<div className="tag-container-container">
+								<div className="tag-container">
+									{sortRecordTags(currentRecord).Tags.map(
+										(tag) => (
+											<DisplayTagLineGroup
+												tag={tag}
+												key={tag}
+												variant="success"
+												action={removeTagLine}
+												secondaryAction={(
+													tagName: string
+												) =>
+													toast(
+														`hooray for ${tagName}`
+													)
+												}
+												secondaryTitle="?"
+											/>
+										)
+									)}
+								</div>
 							</div>
 						</div>
 
@@ -372,7 +378,7 @@ function App() {
 
 						{/* TODO: this */}
 						{/* <button>Open Natively</button> */}
-					</div>
+					</>
 				) : null}
 			</ResizablePanel>
 

@@ -32,7 +32,7 @@ body {
 
 .sidebar {
 	width: 300px;
-	background-color: black;
+	background-color: rgb(65, 65, 65);
 	color: white;
 	height: 100vs !important; /* override ResizableBox */
 }
@@ -91,6 +91,10 @@ a {
 	height: auto;
 }
 
+.delta-container > * {
+	margin-bottom: 5px;
+}
+
 .delta-container .card-header {
 	padding: 0;
 }
@@ -134,4 +138,10 @@ button.truncate {
 .tag-container-container {
 	height: 250px;
 	overflow-y: scroll;
+}
+
+.tag-input-container {
+	margin-top: 10px;
+	background-color: black;
+	margin-bottom: 10px;
 }

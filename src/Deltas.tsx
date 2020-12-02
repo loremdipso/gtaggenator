@@ -97,6 +97,12 @@ function DisplayDelta({
 							</Button>
 						) : null}
 
+						{/* {shouldShow ? (
+							<Accordion.Toggle eventKey="0">
+								{">"}
+							</Accordion.Toggle>
+						) : null} */}
+
 						<Button
 							onClick={() => addTagLine(delta.originalString)}
 							variant={variant}
@@ -105,14 +111,9 @@ function DisplayDelta({
 						>
 							{delta.originalString}
 						</Button>
-
-						{shouldShow ? (
-							<Accordion.Toggle eventKey="0">
-								{">"}
-							</Accordion.Toggle>
-						) : null}
 					</div>
 				</Card.Header>
+
 				<Accordion.Collapse eventKey="0">
 					<Card.Body>
 						<div className="delta-container">
