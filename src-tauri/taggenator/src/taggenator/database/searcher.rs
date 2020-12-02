@@ -255,11 +255,6 @@ impl Filter {
 					rv.append("\nor ");
 
 					rv.append(format!(
-						// tags exclusive
-						// "(\"{}\" in (
-						// SELECT Tags.TagName from Tags
-						// WHERE Tags.RecordID = Records.RecordID))",
-
 						// loose search
 						"EXISTS(
 							SELECT Tags.TagName from Tags

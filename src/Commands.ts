@@ -24,6 +24,10 @@ class Bridge {
 	async open_record(args: { record: IRecord }): Promise<IRecord> {
 		return helper("OpenRecord", args);
 	}
+
+	async get_grab_bag(args: { record: IRecord }): Promise<{ [key: string]: string }> {
+		return helper("GetGrabBag", args);
+	}
 }
 
 function helper<T>(tagname: string, args: any): Promise<T> {

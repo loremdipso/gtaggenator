@@ -144,6 +144,54 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 								error,
 							);
 						}
+
+						GetGrabBag {
+							callback,
+							error,
+							mut record,
+						} => {
+							let mut taggenator = taggenator.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let mut taggenator =
+										taggenator.lock().map_err(|_| UnknownError)?;
+
+									let grab_bag = taggenator
+										.database
+										.grabbag_get_all(record.RecordID)
+										.map_err(|_| UnknownError)?;
+									return Ok(grab_bag);
+								},
+								callback,
+								error,
+							);
+						}
+
+						SetGrabBagKey {
+							callback,
+							error,
+							mut record,
+							key,
+							value,
+						} => {
+							let mut taggenator = taggenator.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let mut taggenator =
+										taggenator.lock().map_err(|_| UnknownError)?;
+
+									let grab_bag = taggenator
+										.database
+										.grabbag_upsert(record.RecordID, key, value)
+										.map_err(|_| UnknownError)?;
+									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
 					}
 					Ok(())
 				}

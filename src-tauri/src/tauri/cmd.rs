@@ -49,6 +49,20 @@ pub enum Cmd {
 		error: String,
 		record: Record,
 	},
+
+	GetGrabBag {
+		callback: String,
+		error: String,
+		record: Record,
+	},
+
+	SetGrabBagKey {
+		callback: String,
+		error: String,
+		record: Record,
+		key: String,
+		value: String,
+	},
 }
 
 #[derive(Serialize)]

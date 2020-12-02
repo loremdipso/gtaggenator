@@ -1,4 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useState } from "react";
+import { bridge } from "./Commands";
+import { toast } from "react-toastify";
 import "./App.css";
 import { IRecord } from "./interfaces";
 
@@ -6,6 +8,27 @@ interface IContent {
 	record: IRecord | null;
 }
 export function Content({ record }: IContent) {
+	let [grabBag, setGrabBag] = useState({} as { [key: string]: string });
+	useEffect(() => {
+		getGrabBag();
+	}, [record]);
+
+	const getGrabBag = () => {
+		if (record) {
+			(async () => {
+				// TODO: show this somewhere
+				// also, should we actually load this all the time?
+				try {
+					let grabBag = await bridge.get_grab_bag({ record: record });
+					setGrabBag(grabBag);
+					console.log(grabBag);
+				} catch (e) {
+					console.log(e);
+				}
+			})();
+		}
+	};
+
 	if (!record) {
 		return null;
 	}
@@ -13,6 +36,13 @@ export function Content({ record }: IContent) {
 
 	return (
 		<div className="content-container">
+			<button onClick={() => getGrabBag()}>DOIT</button>
+			{Object.keys(grabBag).map((key) => (
+				<div key={key}>
+					<div>Key = {key}</div>
+					<div>Value = {grabBag[key]}</div>
+				</div>
+			))}
 			{isImage(record.Name) ? (
 				<img alt="content" width={500} height={500} src={path} />
 			) : null}

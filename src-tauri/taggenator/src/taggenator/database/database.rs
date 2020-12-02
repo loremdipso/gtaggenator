@@ -245,7 +245,7 @@ impl Database {
 	pub fn grabbag_get_all(&mut self, recordId: i64) -> Result<HashMap<String, String>, BError> {
 		let mut stmt = self
 			.conn
-			.prepare("SELECT Key, Value FROM grabbag WHERE RecordID = ?")?;
+			.prepare("SELECT Key, Value FROM grabbag WHERE grabbag.RecordID = ?")?;
 		let mut rows = stmt.query(params![&recordId])?;
 
 		let mut map: HashMap<String, String> = HashMap::new();
@@ -259,7 +259,6 @@ impl Database {
 				return Ok(map);
 			}
 		}
-		return Ok(map);
 	}
 	pub fn grabbag_get_all_by_location(
 		&mut self,
