@@ -282,7 +282,8 @@ impl Taggenator {
 
 	fn handle_tagger(&mut self, record: &mut Record, tags: &mut Vec<String>) -> Result<(), BError> {
 		let mut to_add: Vec<String> = vec![];
-		for tag in tags.iter() {
+		let mut to_remove: Vec<usize> = vec![];
+		for (i, tag) in tags.iter().enumerate() {
 			if let Some(tagger_command) = self.settings.tagger.get(tag) {
 				// NOTE: need to jump through hoops because of COW
 				let temp_tagger_command =
@@ -290,13 +291,23 @@ impl Taggenator {
 				let temp_tagger_command = temp_tagger_command.deref();
 
 				let result = run_command_string(&temp_tagger_command.to_string())?;
+				let mut do_remove = false;
 				for new_tag in result.split("\n") {
+					do_remove = true;
 					if !record.Tags.contains(new_tag) {
 						// NOTE: could lead to duplicates, but we're okay with that
 						to_add.push(new_tag.to_string());
 					}
 				}
+
+				if do_remove {
+					to_remove.push(i);
+				}
 			}
+		}
+
+		for i in to_remove.iter().rev() {
+			tags.remove(*i);
 		}
 
 		tags.append(&mut to_add);
