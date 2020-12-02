@@ -32,7 +32,7 @@ body {
 
 .sidebar {
 	width: 300px;
-	background-color: rgb(65, 65, 65);
+	background-color: rgb(148, 148, 148);
 	color: white;
 	height: 100vs !important; /* override ResizableBox */
 }
@@ -91,11 +91,20 @@ a {
 	height: auto;
 }
 
-.delta-container > * {
+.delta-container > .accordion {
 	margin-bottom: 5px;
 }
 
-.delta-container .card-header {
+.delta-container .card {
+	background-color: transparent;
+}
+
+.delta-container .card-body {
+	background-color: white;
+}
+
+.delta-container .card-header,
+.delta-container .card-body {
 	padding: 0;
 }
 

@@ -252,6 +252,23 @@ function App() {
 		}
 	};
 
+	const clearTags = () => {
+		if (currentRecord) {
+			let line = "";
+			for (let tag of currentRecord.Tags) {
+				if (line.length > 0) {
+					line += ", ";
+				}
+
+				line += `-${tag}`;
+			}
+
+			if (line.length > 0) {
+				addTags(line, true);
+			}
+		}
+	};
+
 	const undoRemoves = (delta: IDelta) => {
 		let line = "";
 		for (let removed of delta.removed) {
@@ -348,6 +365,11 @@ function App() {
 								value={tagLine}
 								actionName="Add"
 								focusEpoch={tagFocusEpoch}
+								extra={
+									<button onClick={() => clearTags()}>
+										Clear
+									</button>
+								}
 							/>
 
 							<div className="tag-container-container">
@@ -410,6 +432,7 @@ interface ISpecialInput {
 	value: string;
 	actionName?: string;
 	prefix?: string;
+	extra?: React.ReactElement;
 
 	focusEpoch?: number;
 }
@@ -420,6 +443,7 @@ function SpecialInput({
 	value,
 	actionName,
 	prefix,
+	extra,
 	focusEpoch, // used to force focus
 }: ISpecialInput) {
 	const thisInput = useRef<HTMLInputElement>(null);
@@ -432,7 +456,7 @@ function SpecialInput({
 
 	return (
 		<div className="special-input">
-			{prefix ? <span onClick={() => action()}>{prefix}</span> : null}
+			{prefix ? <button onClick={() => action()}>{prefix}</button> : null}
 
 			<input
 				ref={thisInput}
@@ -449,6 +473,8 @@ function SpecialInput({
 			{actionName ? (
 				<button onClick={() => action()}>{actionName}</button>
 			) : null}
+
+			{extra}
 		</div>
 	);
 }
