@@ -7,6 +7,7 @@ use crate::taggenator::models::record::MiniRecord;
 use crate::taggenator::models::record::Record;
 use crate::taggenator::settings::Settings;
 use crate::taggenator::utils::files::get_extension_from_filename;
+use crate::taggenator::utils::flags::take_flag;
 use multimap::MultiMap;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -47,7 +48,9 @@ impl Taggenator {
 	}
 
 	pub fn parse_args(&mut self, mut args: Vec<String>) -> Result<(), BError> {
-		let (num_added, num_deleted) = self.update_files()?;
+		if !take_flag(&mut args, "--ignore-update") {
+			let (num_added, num_deleted) = self.update_files()?;
+		}
 
 		// self.settings.save();
 		// self.database.test_write(100000)?;

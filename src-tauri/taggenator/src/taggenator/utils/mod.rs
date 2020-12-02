@@ -1,2 +1,2 @@
 pub mod files;
-pub mod input;
+pub mod flags;pub mod input;

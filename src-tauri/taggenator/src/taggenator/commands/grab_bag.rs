@@ -5,12 +5,26 @@ use crate::taggenator::errors::BError;
 use crate::taggenator::models::record::Record;
 use crate::taggenator::utils::input::readline;
 use crate::Taggenator;
+extern crate shell_words;
 
 pub fn grab_bag(taggenator: &mut Taggenator, args: Vec<String>) -> Result<(), BError> {
 	if args.len() > 0 {
 		run_grab_bag(taggenator, args)?;
 	} else {
 		// TODO: interactive version
+		println!("TODO");
+		loop {
+			match readline("> ") {
+				Ok(line) => {
+					println!("{}", line);
+					run_grab_bag(taggenator, shell_words::split(&line)?)?;
+				}
+
+				Err(_) => {
+					break;
+				}
+			};
+		}
 	}
 
 	return Ok(());

@@ -19,11 +19,12 @@ cargo build --release -q -p taggenator
 
 cd ../tests
 #~/.cargo-target/release/taggenator open
-#time ~/.cargo-target/release/taggenator grabbag add "./tmp/B.txt" huh welp2
+time ~/.cargo-target/release/taggenator grabbag add "./tmp/B.txt" huh welp2 --ignore-update
 #time ~/.cargo-target/release/taggenator grabbag delete "./tmp/B.txt" sup
 #time ~/.cargo-target/release/taggenator grabbag get "./tmp/B.txt" sup
-time ~/.cargo-target/release/taggenator grabbag get_all "./tmp/B.txt"
-time ~/.cargo-target/release/taggenator grabbag get_all "/home/madams/Projects/gtaggenator/src-tauri/tests/tmp/B.txt"
+#time ~/.cargo-target/release/taggenator grabbag get_all "./tmp/B.txt"
+#time ~/.cargo-target/release/taggenator grabbag get_all "./tmp/B.txt"
+#time ~/.cargo-target/release/taggenator grabbag get_all "/home/madams/Projects/gtaggenator/src-tauri/tests/tmp/B.txt"
 #echo tag1,tag1,tag2 | ~/.cargo-target/release/taggenator open
 #time ~/.cargo-target/release/taggenator dump tags_inclusive yup yupp
 #time ~/.cargo-target/release/taggenator dump tags_inclusive yupp yup

@@ -266,7 +266,8 @@ impl Database {
 	) -> Result<HashMap<String, String>, BError> {
 		let location = self.get_location_relative_to_base(&location)?;
 		let mut stmt = self.conn.prepare(
-			"SELECT Key, Value FROM grabbag WHERE EXISTS(
+			"SELECT Key, Value, RecordID FROM grabbag
+			WHERE EXISTS(
 				SELECT Records.RecordID FROM Records
 				WHERE Records.Location = ?
 				AND Records.RecordID = grabbag.RecordID 
@@ -305,6 +306,7 @@ impl Database {
 		value: String,
 	) -> Result<(), BError> {
 		let location = self.get_location_relative_to_base(&location)?;
+		println!("{}", location);
 		self.async_write(
 			"REPLACE INTO grabbag (RecordID, Key, Value)
 			SELECT RecordID, ?, ?
