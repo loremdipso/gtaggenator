@@ -22,6 +22,7 @@ import DisplayRecord from "./DisplayRecord";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import ResizablePanel from "./ResizablePanel";
+import { useHotkeysHelper } from "./Utils";
 
 interface IFilter {
 	display: string;
@@ -88,21 +89,18 @@ function App() {
 		[nextRecord]
 	);
 
-	useHotkeys(
-		"*",
-		(event: KeyboardEvent) => {
-			if (event.key === "*") {
-				nextRecord();
-			} else if (event.key === "/") {
-				previousRecord();
-			} else {
-				return;
-			}
-
-			event.preventDefault();
+	useHotkeysHelper(
+		"alt+numpad*",
+		() => {
+			nextRecord();
 		},
-		{
-			enableOnTags: ["INPUT"],
+		[nextRecord, previousRecord]
+	);
+
+	useHotkeysHelper(
+		"alt+numpad/",
+		() => {
+			previousRecord();
 		},
 		[nextRecord, previousRecord]
 	);
