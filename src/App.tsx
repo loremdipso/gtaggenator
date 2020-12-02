@@ -11,8 +11,12 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Dropdown } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+
 import DisplayRecord from "./DisplayRecord";
 import { useHotkeys } from "react-hotkeys-hook";
+
+import "react-resizable/css/styles.css";
+import ResizablePanel from "./ResizablePanel";
 
 interface IFilter {
 	display: string;
@@ -303,7 +307,7 @@ function App() {
 
 	return (
 		<div className="app">
-			<div className="sidebar">
+			<ResizablePanel startingValue={350} axis="x" className="sidebar">
 				<SpecialInput
 					onChange={updateSearch}
 					action={loadData}
@@ -362,8 +366,7 @@ function App() {
 						{/* <button>Open Natively</button> */}
 					</div>
 				) : null}
-			</div>
-
+			</ResizablePanel>
 			<div className="content">{<Content record={currentRecord} />}</div>
 
 			<ToastContainer

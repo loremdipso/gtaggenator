@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { bridge } from "./Commands";
 import { toast } from "react-toastify";
-import "./App.css";
 import { IRecord } from "./interfaces";
 
 interface IContent {

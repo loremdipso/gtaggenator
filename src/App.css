@@ -33,6 +33,7 @@ body {
 .sidebar {
 	width: 300px;
 	background-color: white;
+	height: 100vs !important; /* override ResizableBox */
 }
 
 .special-input {
