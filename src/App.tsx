@@ -5,7 +5,13 @@ import { bridge } from "./Commands";
 import { IRecord } from "./interfaces";
 import { ChangeEvent } from "react";
 import { Content } from "./Content";
-import { IDelta, getDelta, DisplayDeltas, DisplayTagLineGroup } from "./Deltas";
+import {
+	IDelta,
+	createDelta,
+	DisplayDeltas,
+	DisplayTagLineGroup,
+	appendDeltaImmutable,
+} from "./Deltas";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -209,9 +215,10 @@ function App() {
 		});
 
 		if (!ignoreDelta) {
-			let delta = getDelta(newRecord.Tags, oldRecord.Tags, line);
+			let delta = createDelta(newRecord.Tags, oldRecord.Tags, line);
 			if (delta.added.length || delta.removed.length) {
-				setDeltas([delta, ...deltas]);
+				// insert after all our favorite deltas
+				setDeltas((deltas) => appendDeltaImmutable(deltas, delta));
 			}
 		}
 
@@ -369,6 +376,7 @@ function App() {
 
 						<DisplayDeltas
 							deltas={deltas}
+							setDeltas={setDeltas}
 							undoAdds={undoAdds}
 							undoRemoves={undoRemoves}
 							// redo={redo}

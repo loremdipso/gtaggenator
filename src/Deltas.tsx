@@ -5,6 +5,7 @@ export interface IDelta {
 	added: string[];
 	removed: string[];
 	originalString: string;
+	favorite: boolean;
 	id: number;
 }
 
@@ -15,6 +16,8 @@ const getDeltaID = (() => {
 
 interface IDeltas {
 	deltas: IDelta[];
+	// setDeltas: (deltas: IDelta[]) => any;
+	setDeltas: any;
 	undoAdds: (delta: IDelta) => any;
 	undoRemoves: (delta: IDelta) => any;
 	addTagLine: (tag: string) => any;
@@ -23,11 +26,27 @@ interface IDeltas {
 
 export function DisplayDeltas({
 	deltas,
+	setDeltas,
 	undoAdds,
 	undoRemoves,
 	addTagLine,
 	removeTagLine,
 }: IDeltas) {
+	const removeDelta = (deltaToRemove: IDelta) => {
+		setDeltas((deltas: IDelta[]) =>
+			deltas.filter((delta) => delta.id !== deltaToRemove.id)
+		);
+	};
+
+	const toggleFavorite = (deltaToToggle: IDelta) => {
+		setDeltas((deltas: IDelta[]) =>
+			appendDeltaImmutable(deltas, {
+				...deltaToToggle,
+				favorite: !deltaToToggle.favorite,
+			})
+		);
+	};
+
 	return (
 		<div className="delta-container">
 			{deltas.map((delta, i) => (
@@ -35,7 +54,9 @@ export function DisplayDeltas({
 					key={delta.id}
 					delta={delta}
 					undoAdds={undoAdds}
+					toggleFavorite={toggleFavorite}
 					undoRemoves={undoRemoves}
+					removeDelta={removeDelta}
 					addTagLine={addTagLine}
 					removeTagLine={removeTagLine}
 				/>
@@ -48,6 +69,8 @@ interface IDisplayDelta {
 	delta: IDelta;
 	undoAdds: (delta: IDelta) => any;
 	undoRemoves: (delta: IDelta) => any;
+	toggleFavorite: (delta: IDelta) => any;
+	removeDelta: (delta: IDelta) => any;
 	addTagLine: (tag: string) => any;
 	removeTagLine: (tag: string) => any;
 }
@@ -56,6 +79,8 @@ function DisplayDelta({
 	delta,
 	undoAdds,
 	undoRemoves,
+	toggleFavorite,
+	removeDelta,
 	addTagLine,
 	removeTagLine,
 }: IDisplayDelta) {
@@ -111,6 +136,23 @@ function DisplayDelta({
 						>
 							{delta.originalString}
 						</Button>
+
+						<Button
+							variant="dark"
+							onClick={() => toggleFavorite(delta)}
+							size="sm"
+							style={{ minWidth: 25 }}
+						>
+							{delta.favorite ? "*" : "O"}
+						</Button>
+						<Button
+							variant="dark"
+							onClick={() => removeDelta(delta)}
+							size="sm"
+							style={{ minWidth: 25 }}
+						>
+							X
+						</Button>
 					</div>
 				</Card.Header>
 
@@ -152,7 +194,7 @@ function DisplayDelta({
 	);
 }
 
-export function getDelta(
+export function createDelta(
 	newTags: string[],
 	oldTags: string[],
 	originalString: string
@@ -173,7 +215,13 @@ export function getDelta(
 		}
 	}
 
-	return { added, removed, originalString, id: getDeltaID() };
+	return {
+		added,
+		removed,
+		originalString,
+		favorite: false,
+		id: getDeltaID(),
+	};
 }
 
 interface IDisplayTagLineGroup {
@@ -227,4 +275,34 @@ function DisplayTagLine({ tag, variant, action }: IDisplayTagLine) {
 			{tag}
 		</Button>
 	);
+}
+
+export function appendDeltaImmutable(
+	deltas: IDelta[],
+	newDelta: IDelta
+): IDelta[] {
+	if (newDelta.favorite) {
+		return [
+			newDelta,
+			...deltas.filter((delta) => delta.id !== newDelta.id),
+		];
+	} else {
+		let newDeltas = [];
+		let didSet = false;
+		for (let oldDelta of deltas) {
+			if (!didSet && !oldDelta.favorite) {
+				newDeltas.push(newDelta);
+				didSet = true;
+			}
+			if (oldDelta.id !== newDelta.id) {
+				newDeltas.push(oldDelta);
+			}
+		}
+
+		if (!didSet) {
+			newDeltas.push(newDelta);
+		}
+
+		return newDeltas;
+	}
 }
