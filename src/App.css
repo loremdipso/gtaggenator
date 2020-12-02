@@ -111,7 +111,7 @@ a {
 	width: 100%;
 }
 
-.delta-container button.truncate {
+button.truncate {
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
@@ -120,14 +120,18 @@ a {
 .tag-container {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: center;
 }
 
-.tag-container .tag {
-	/* display: inline-block;
-	border: 1px solid black;
-	border-radius: 10%;
-	padding-right: 3px;
-	padding-left: 3px;
-	margin: 5px; */
+.tag-container > * {
+	margin: 5px;
+	height: 30px;
+}
+
+.tag-container button.truncate {
+	max-width: 150px;
+}
+
+.tag-container-container {
+	height: 250px;
+	overflow-y: scroll;
 }

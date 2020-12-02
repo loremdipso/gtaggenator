@@ -5,7 +5,7 @@ import { bridge } from "./Commands";
 import { IRecord } from "./interfaces";
 import { ChangeEvent } from "react";
 import { Content } from "./Content";
-import { IDelta, getDelta, DisplayDeltas } from "./Deltas";
+import { IDelta, getDelta, DisplayDeltas, DisplayTagLineGroup } from "./Deltas";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -342,11 +342,24 @@ function App() {
 							focusEpoch={tagFocusEpoch}
 						/>
 
-						<ul>
-							{sortRecordTags(currentRecord).Tags.map((tag) => (
-								<li key={tag}>{tag}</li>
-							))}
-						</ul>
+						<div className="tag-container-container">
+							<div className="tag-container">
+								{sortRecordTags(currentRecord).Tags.map(
+									(tag) => (
+										<DisplayTagLineGroup
+											tag={tag}
+											key={tag}
+											variant="success"
+											action={removeTagLine}
+											secondaryAction={(
+												tagName: string
+											) => toast(`hooray for ${tagName}`)}
+											secondaryTitle="?"
+										/>
+									)
+								)}
+							</div>
+						</div>
 
 						<DisplayDeltas
 							deltas={deltas}

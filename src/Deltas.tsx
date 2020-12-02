@@ -32,6 +32,7 @@ export function DisplayDeltas({
 		<div className="delta-container">
 			{deltas.map((delta, i) => (
 				<DisplayDelta
+					key={delta.id}
 					delta={delta}
 					undoAdds={undoAdds}
 					undoRemoves={undoRemoves}
@@ -78,6 +79,7 @@ function DisplayDelta({
 								variant="dark"
 								onClick={() => undoAdds(delta)}
 								size="sm"
+								style={{ minWidth: 50 }}
 							>
 								-
 							</Button>
@@ -89,6 +91,7 @@ function DisplayDelta({
 								variant="dark"
 								onClick={() => undoRemoves(delta)}
 								size="sm"
+								style={{ minWidth: 50 }}
 							>
 								+
 							</Button>
@@ -116,24 +119,26 @@ function DisplayDelta({
 							<div className="tag-container">
 								{delta.added.length
 									? delta.added.map((tag) => (
-											<DisplayTag
+											<DisplayTagLineGroup
 												tag={tag}
 												key={tag}
 												variant="success"
-												add={addTagLine}
-												remove={removeTagLine}
+												action={addTagLine}
+												secondaryAction={removeTagLine}
+												secondaryTitle="-"
 											/>
 									  ))
 									: null}
 
 								{delta.removed.length
 									? delta.removed.map((tag) => (
-											<DisplayTag
+											<DisplayTagLineGroup
 												tag={tag}
 												key={tag}
 												variant="danger"
-												add={addTagLine}
-												remove={removeTagLine}
+												action={removeTagLine}
+												secondaryAction={addTagLine}
+												secondaryTitle="+"
 											/>
 									  ))
 									: null}
@@ -170,18 +175,55 @@ export function getDelta(
 	return { added, removed, originalString, id: getDeltaID() };
 }
 
-interface IDisplayTag {
+interface IDisplayTagLineGroup {
 	tag: string;
 	variant: "success" | "danger";
-	add: Function;
-	remove: Function;
+	action: (tag: string) => any;
+	secondaryAction: (tag: string) => any;
+	secondaryTitle: string;
 }
-function DisplayTag({ tag, variant, add, remove }: IDisplayTag) {
+
+export function DisplayTagLineGroup({
+	tag,
+	variant,
+	action,
+	secondaryAction,
+	secondaryTitle,
+}: IDisplayTagLineGroup) {
 	return (
-		<Button className="tag truncate" size="sm" variant={variant}>
+		<div>
+			<DisplayTagLine
+				tag={tag}
+				key={tag}
+				variant={variant}
+				action={action}
+			/>
+
+			<Button
+				size="sm"
+				variant="dark"
+				onClick={() => secondaryAction(tag)}
+			>
+				{secondaryTitle}
+			</Button>
+		</div>
+	);
+}
+
+interface IDisplayTagLine {
+	tag: string;
+	variant: "success" | "danger";
+	action: (tag: string) => any;
+}
+function DisplayTagLine({ tag, variant, action }: IDisplayTagLine) {
+	return (
+		<Button
+			className="tag truncate"
+			size="sm"
+			variant={variant}
+			onClick={() => action(tag)}
+		>
 			{tag}
-			{/* <button onClick={() => remove(tag)}>Remove</button>
-			<button onClick={() => add(tag)}>Add</button> */}
 		</Button>
 	);
 }
