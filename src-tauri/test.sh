@@ -18,13 +18,19 @@ cargo build --release -q -p taggenator
 #cargo build --release 2>&1 | rg -i --multiline "(^error.*\n.*)|(aborting)|(warnings)"
 
 cd ../tests
+
+#cargo test --release -p taggenator
+
+#echo thing | ~/.cargo-target/release/taggenator open
 #~/.cargo-target/release/taggenator open
-time ~/.cargo-target/release/taggenator grabbag add "./tmp/B.txt" huh welp2 --ignore-update
+#time ~/.cargo-target/release/taggenator grabbag add "./tmp/B.txt" huh welp2 --ignore-update
 #time ~/.cargo-target/release/taggenator grabbag delete "./tmp/B.txt" sup
 #time ~/.cargo-target/release/taggenator grabbag get "./tmp/B.txt" sup
 #time ~/.cargo-target/release/taggenator grabbag get_all "./tmp/B.txt"
 #time ~/.cargo-target/release/taggenator grabbag get_all "./tmp/B.txt"
 #time ~/.cargo-target/release/taggenator grabbag get_all "/home/madams/Projects/gtaggenator/src-tauri/tests/tmp/B.txt"
+echo test | ~/.cargo-target/release/taggenator open
+#echo pre | ~/.cargo-target/release/taggenator open
 #echo tag1,tag1,tag2 | ~/.cargo-target/release/taggenator open
 #time ~/.cargo-target/release/taggenator dump tags_inclusive yup yupp
 #time ~/.cargo-target/release/taggenator dump tags_inclusive yupp yup

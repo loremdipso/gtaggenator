@@ -6,14 +6,18 @@ use crate::taggenator::errors::MyCustomError;
 use crate::taggenator::models::record::MiniRecord;
 use crate::taggenator::models::record::Record;
 use crate::taggenator::settings::Settings;
+use crate::taggenator::utils::commands::run_command_string;
 use crate::taggenator::utils::files::get_extension_from_filename;
 use crate::taggenator::utils::flags::take_flag;
+use crate::taggenator::utils::lists::dedup;
 use multimap::MultiMap;
+use regex::Regex;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs::File;
 use std::include_str;
 use std::io::prelude::*;
+use std::ops::Deref;
 use std::path::Path;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -215,14 +219,21 @@ impl Taggenator {
 	}
 
 	pub fn insert_tag_line(&mut self, record: &mut Record, line: String) -> Result<(), BError> {
-		let tags: Vec<String> = line
+		let mut tags: Vec<String> = line
 			.split(",")
 			.map(|piece| piece.trim().to_string())
 			.collect();
 
+		self.handle_tagger(record, &mut tags)?;
+
 		let mut to_add = vec![];
 		let mut to_remove = vec![];
-		for tag in &tags {
+		for tag in tags.iter() {
+			// don't add empty tags
+			if tag.len() == 0 {
+				continue;
+			}
+
 			if tag.chars().nth(0).unwrap_or_default() == '-' {
 				let tag = &tag[1..];
 				if record.Tags.contains(tag) {
@@ -241,9 +252,72 @@ impl Taggenator {
 			}
 		}
 
+		self.add_derived(record, &mut to_add)?;
+		self.handle_synonyms(record, &mut to_add)?;
+
+		dedup(&mut to_add);
+
 		// only add the tags that weren't there already
 		self.database.add_tags(record.RecordID, to_add)?;
 		self.database.remove_tags(record.RecordID, to_remove)?;
 		Ok(())
+	}
+
+	fn add_derived(&mut self, record: &mut Record, tags: &mut Vec<String>) -> Result<(), BError> {
+		let mut to_add: Vec<String> = vec![];
+		for tag in tags.iter() {
+			let matches = self.settings.derived.get(tag);
+			if let Some(matches) = matches {
+				for new_tag in matches {
+					if !record.Tags.contains(new_tag) && !tags.contains(new_tag) {
+						to_add.push(new_tag.to_string());
+					}
+				}
+			}
+		}
+
+		tags.append(&mut to_add);
+		return Ok(());
+	}
+
+	fn handle_tagger(&mut self, record: &mut Record, tags: &mut Vec<String>) -> Result<(), BError> {
+		let mut to_add: Vec<String> = vec![];
+		for tag in tags.iter() {
+			if let Some(tagger_command) = self.settings.tagger.get(tag) {
+				// NOTE: need to jump through hoops because of COW
+				let temp_tagger_command =
+					Regex::new("%s")?.replace(&tagger_command, record.Location.as_str());
+				let temp_tagger_command = temp_tagger_command.deref();
+
+				let result = run_command_string(&temp_tagger_command.to_string())?;
+				for new_tag in result.split("\n") {
+					if !record.Tags.contains(new_tag) {
+						// NOTE: could lead to duplicates, but we're okay with that
+						to_add.push(new_tag.to_string());
+					}
+				}
+			}
+		}
+
+		tags.append(&mut to_add);
+		return Ok(());
+	}
+
+	fn handle_synonyms(
+		&mut self,
+		record: &mut Record,
+		tags: &mut Vec<String>,
+	) -> Result<(), BError> {
+		for tag in tags {
+			if let Some(synonym) = self.settings.synonyms.get(tag) {
+				// NOTE: since we aren't checking if the synonym exists in the tags vec
+				// we need to de-dup outselves
+				if !record.Tags.contains(synonym) {
+					*tag = synonym.clone();
+				}
+			}
+		}
+
+		return Ok(());
 	}
 }

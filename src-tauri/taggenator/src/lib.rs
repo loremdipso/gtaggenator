@@ -1,5 +1,6 @@
+// crate taggenator;
 pub mod taggenator;
 
-pub use taggenator::errors;
-pub use taggenator::BError;
-pub use taggenator::Taggenator;
+pub use crate::taggenator::errors;
+pub use crate::taggenator::BError;
+pub use crate::taggenator::Taggenator;

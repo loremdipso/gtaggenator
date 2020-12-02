@@ -2,7 +2,7 @@
 #![allow(dead_code, warnings, unused)]
 
 mod taggenator;
-pub use taggenator::Taggenator;
+pub use self::taggenator::Taggenator;
 
 mod settings;
 
