@@ -28,7 +28,6 @@ export default function ResizablePanel({
 	}, [deltaPosition, startingValue]);
 
 	const handleDrag = (e: any, ui: any) => {
-		console.log("sup");
 		const { x, y } = deltaPosition;
 		setDeltaPosition({
 			x: x + ui.deltaX,

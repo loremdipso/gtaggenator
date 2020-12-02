@@ -31,7 +31,6 @@ mod dedup_tests {
 
 	#[test]
 	fn basic() {
-		println!("sup");
 		let mut a = vec!["A", "A", "C", "D", "E", "A"];
 		dedup(&mut a);
 		assert_eq!(a, vec!["C", "D", "E", "A"]);

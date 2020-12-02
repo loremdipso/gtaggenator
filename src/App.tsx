@@ -219,8 +219,7 @@ function App() {
 		updateRecord(newRecord);
 	};
 
-	// will undo a delta
-	const undo = (delta: IDelta) => {
+	const undoAdds = (delta: IDelta) => {
 		let line = "";
 		for (let added of delta.added) {
 			if (line.length > 0) {
@@ -229,40 +228,35 @@ function App() {
 			line += `-${added}`;
 		}
 
-		for (let removed of delta.removed) {
-			if (line.length > 0) {
-				line += ", ";
-			}
-			line += removed;
-		}
+		// for (let removed of delta.removed) {
+		// 	if (line.length > 0) {
+		// 		line += ", ";
+		// 	}
+		// 	line += removed;
+		// }
 
 		if (line.length > 0) {
 			// remove this delta
-			let temp = delta.added;
-			delta.added = delta.removed;
-			delta.removed = temp;
+			// let temp = delta.added;
+			// delta.added = delta.removed;
+			// delta.removed = temp;
 			setDeltas(deltas); // TODO: something less hacky. We reallllly shouldn't be modifying data like this
 			addTags(line, true);
 		}
 	};
 
-	const redo = (delta: IDelta) => {
+	const undoRemoves = (delta: IDelta) => {
 		let line = "";
-		for (let added of delta.added) {
-			if (line.length > 0) {
-				line += ", ";
-			}
-			line += added;
-		}
-
 		for (let removed of delta.removed) {
 			if (line.length > 0) {
 				line += ", ";
 			}
-			line += `-${removed}`;
+
+			line += removed;
 		}
 
 		if (line.length > 0) {
+			setDeltas(deltas); // TODO: something less hacky. We reallllly shouldn't be modifying data like this
 			addTags(line, true);
 		}
 	};
@@ -356,17 +350,20 @@ function App() {
 
 						<DisplayDeltas
 							deltas={deltas}
-							undo={undo}
-							redo={redo}
+							undoAdds={undoAdds}
+							undoRemoves={undoRemoves}
+							// redo={redo}
 							addTagLine={addTagLine}
 							removeTagLine={removeTagLine}
 						/>
 
+						{/* TODO: this */}
 						{/* <button>Open Natively</button> */}
 					</div>
 				) : null}
 			</ResizablePanel>
-			<div className="content">{<Content record={currentRecord} />}</div>
+
+			<Content record={currentRecord} />
 
 			<ToastContainer
 				draggable={false}

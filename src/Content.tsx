@@ -28,29 +28,35 @@ export function Content({ record }: IContent) {
 		}
 	};
 
-	if (!record) {
-		return null;
-	}
-	let path = getPath(record.Location);
+	let path = record ? getPath(record.Location) : "";
 
 	return (
 		<div className="content-container">
-			<button onClick={() => getGrabBag()}>DOIT</button>
-			{Object.keys(grabBag).map((key) => (
-				<div key={key}>
-					<div>Key = {key}</div>
-					<div>Value = {grabBag[key]}</div>
-				</div>
-			))}
-			{isImage(record.Name) ? (
-				<img alt="content" width={500} height={500} src={path} />
-			) : null}
+			{record ? (
+				<>
+					{/* <button onClick={() => getGrabBag()}>DOIT</button> */}
+					{Object.keys(grabBag).map((key) => (
+						<div key={key}>
+							<div>Key = {key}</div>
+							<div>Value = {grabBag[key]}</div>
+						</div>
+					))}
+					{isImage(record.Name) ? (
+						<img
+							alt="content"
+							width={500}
+							height={500}
+							src={path}
+						/>
+					) : null}
 
-			{isVideo(record.Name) ? (
-				<video controls autoPlay>
-					<source src={path} type="video/mp4" />
-					Your browser does not support the video tag.
-				</video>
+					{isVideo(record.Name) ? (
+						<video controls autoPlay>
+							<source src={path} type="video/mp4" />
+							Your browser does not support the video tag.
+						</video>
+					) : null}
+				</>
 			) : null}
 		</div>
 	);

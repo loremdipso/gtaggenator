@@ -1,3 +1,6 @@
+import React from "react";
+import { Accordion, Button, Card } from "react-bootstrap";
+
 export interface IDelta {
 	added: string[];
 	removed: string[];
@@ -12,64 +15,134 @@ const getDeltaID = (() => {
 
 interface IDeltas {
 	deltas: IDelta[];
-	undo: (delta: IDelta) => any;
-	redo: (delta: IDelta) => any;
+	undoAdds: (delta: IDelta) => any;
+	undoRemoves: (delta: IDelta) => any;
 	addTagLine: (tag: string) => any;
 	removeTagLine: (tag: string) => any;
 }
 
 export function DisplayDeltas({
 	deltas,
-	undo,
-	redo,
+	undoAdds,
+	undoRemoves,
 	addTagLine,
 	removeTagLine,
 }: IDeltas) {
 	return (
-		<div>
+		<div className="delta-container">
 			{deltas.map((delta, i) => (
-				<div className="delta">
-					<button onClick={() => addTagLine(delta.originalString)}>
-						{delta.originalString}
-					</button>
-					{delta.added.length ? (
-						<ul className="added">
-							{delta.added.map((tag) => (
-								<li key={tag}>
-									{" "}
-									{tag}
-									<button onClick={() => removeTagLine(tag)}>
-										Remove
-									</button>
-									<button onClick={() => addTagLine(tag)}>
-										Add
-									</button>
-								</li>
-							))}
-						</ul>
-					) : null}
-
-					{delta.removed.length ? (
-						<ul className="removed">
-							{delta.removed.map((tag) => (
-								<li key={tag}>
-									{tag}
-									<button onClick={() => removeTagLine(tag)}>
-										Remove
-									</button>
-									<button onClick={() => addTagLine(tag)}>
-										Add
-									</button>
-								</li>
-							))}
-						</ul>
-					) : null}
-
-					<button onClick={() => undo(delta)}>Undo</button>
-					<button onClick={() => redo(delta)}>Redo</button>
-				</div>
+				<DisplayDelta
+					delta={delta}
+					undoAdds={undoAdds}
+					undoRemoves={undoRemoves}
+					addTagLine={addTagLine}
+					removeTagLine={removeTagLine}
+				/>
 			))}
 		</div>
+	);
+}
+
+interface IDisplayDelta {
+	delta: IDelta;
+	undoAdds: (delta: IDelta) => any;
+	undoRemoves: (delta: IDelta) => any;
+	addTagLine: (tag: string) => any;
+	removeTagLine: (tag: string) => any;
+}
+
+function DisplayDelta({
+	delta,
+	undoAdds,
+	undoRemoves,
+	addTagLine,
+	removeTagLine,
+}: IDisplayDelta) {
+	let variant = "secondary";
+	if (delta.added.length && !delta.removed.length) {
+		variant = "success";
+	} else if (delta.removed.length && !delta.added.length) {
+		variant = "danger";
+	}
+
+	let shouldShow = delta.added.length + delta.removed.length > 1;
+
+	return (
+		<Accordion defaultActiveKey={shouldShow ? "0" : "100"}>
+			<Card>
+				<Card.Header>
+					<div className="tag-header">
+						{delta.added.length > 0 &&
+						delta.removed.length === 0 ? (
+							<Button
+								variant="dark"
+								onClick={() => undoAdds(delta)}
+								size="sm"
+							>
+								-
+							</Button>
+						) : null}
+
+						{delta.removed.length > 0 &&
+						delta.added.length === 0 ? (
+							<Button
+								variant="dark"
+								onClick={() => undoRemoves(delta)}
+								size="sm"
+							>
+								+
+							</Button>
+						) : null}
+
+						<Button
+							onClick={() => addTagLine(delta.originalString)}
+							variant={variant}
+							size="sm"
+							className="truncate fat-child"
+						>
+							{delta.originalString}
+						</Button>
+
+						{shouldShow ? (
+							<Accordion.Toggle eventKey="0">
+								{">"}
+							</Accordion.Toggle>
+						) : null}
+					</div>
+				</Card.Header>
+				<Accordion.Collapse eventKey="0">
+					<Card.Body>
+						<div className="delta-container">
+							<div className="tag-container">
+								{delta.added.length
+									? delta.added.map((tag) => (
+											<DisplayTag
+												tag={tag}
+												key={tag}
+												variant="success"
+												add={addTagLine}
+												remove={removeTagLine}
+											/>
+									  ))
+									: null}
+
+								{delta.removed.length
+									? delta.removed.map((tag) => (
+											<DisplayTag
+												tag={tag}
+												key={tag}
+												variant="danger"
+												add={addTagLine}
+												remove={removeTagLine}
+											/>
+									  ))
+									: null}
+							</div>
+						</div>
+					</Card.Body>
+				</Accordion.Collapse>
+			</Card>
+		</Accordion>
 	);
 }
 
@@ -95,4 +168,20 @@ export function getDelta(
 	}
 
 	return { added, removed, originalString, id: getDeltaID() };
+}
+
+interface IDisplayTag {
+	tag: string;
+	variant: "success" | "danger";
+	add: Function;
+	remove: Function;
+}
+function DisplayTag({ tag, variant, add, remove }: IDisplayTag) {
+	return (
+		<Button className="tag truncate" size="sm" variant={variant}>
+			{tag}
+			{/* <button onClick={() => remove(tag)}>Remove</button>
+			<button onClick={() => add(tag)}>Add</button> */}
+		</Button>
+	);
 }

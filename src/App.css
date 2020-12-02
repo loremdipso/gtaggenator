@@ -32,7 +32,8 @@ body {
 
 .sidebar {
 	width: 300px;
-	background-color: white;
+	background-color: black;
+	color: white;
 	height: 100vs !important; /* override ResizableBox */
 }
 
@@ -71,11 +72,12 @@ a {
 	white-space: nowrap;
 }
 
-.content {
+.content-container {
 	color: white;
 	background-color: grey;
 	height: 100vh;
 	flex-grow: 1;
+	display: flex;
 }
 
 .content-container video {
@@ -83,21 +85,49 @@ a {
 	height: auto;
 	max-height: 100vh;
 }
-
 .content-container img {
 	object-fit: contain;
 	width: 100%;
 	height: auto;
 }
 
-.delta {
+.delta-container .card-header {
+	padding: 0;
+}
+
+.added-tag {
+	background-color: green;
+}
+
+.removed-tag {
+	background-color: red;
+}
+
+.tag-header {
+	display: flex;
+}
+
+.tag-header .fat-child {
+	width: 100%;
+}
+
+.delta-container button.truncate {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.tag-container {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.tag-container .tag {
+	/* display: inline-block;
 	border: 1px solid black;
-}
-
-.added {
-	color: green;
-}
-
-.removed {
-	color: red;
+	border-radius: 10%;
+	padding-right: 3px;
+	padding-left: 3px;
+	margin: 5px; */
 }
