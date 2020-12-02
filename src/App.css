@@ -154,3 +154,8 @@ button.truncate {
 	background-color: black;
 	margin-bottom: 10px;
 }
+
+.resizable-panel-handle {
+	background-color: orange;
+	/* border: 5px solid black; */
+}

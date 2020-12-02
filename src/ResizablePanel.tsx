@@ -8,9 +8,6 @@ type IResizablePanel = React.PropsWithChildren<{
 	className?: string;
 }>;
 
-// NOTE: keep in sync with JS
-const HANDLE_WIDTH = 20;
-
 export default function ResizablePanel({
 	startingValue,
 	axis,
@@ -43,14 +40,16 @@ export default function ResizablePanel({
 			? { width: value, minWidth: value }
 			: { height: value, minHeight: value };
 
-	let handleMargin = startingValue - HANDLE_WIDTH / 2;
+	let primarySize = 10;
+	let secondarySize = 50;
+	let handleMargin = startingValue - primarySize / 2;
+
 	let handleStyle: any = // react doesn't like position absolute for some reason
 		axis === "x"
 			? {
-					width: 20,
-					height: 50,
+					width: primarySize,
+					height: secondarySize,
 					marginLeft: handleMargin,
-					backgroundColor: "black",
 					marginTop: "auto",
 					marginBottom: "auto",
 					top: 0,
@@ -58,17 +57,15 @@ export default function ResizablePanel({
 					position: "absolute",
 			  }
 			: {
-					width: 50,
-					height: 20,
+					width: secondarySize,
+					height: primarySize,
 					marginTop: handleMargin,
-					backgroundColor: "black",
 					marginLeft: "auto",
 					marginRight: "auto",
 					left: 0,
 					right: 0,
 					position: "absolute",
 			  };
-
 	return (
 		<div className={className} style={{ ...containerStyle }}>
 			{children}
@@ -79,7 +76,10 @@ export default function ResizablePanel({
 				onDrag={handleDrag}
 				onStop={() => {}}
 			>
-				<div style={{ ...handleStyle }} />
+				<div
+					style={{ ...handleStyle }}
+					className="resizable-panel-handle"
+				/>
 			</Draggable>
 		</div>
 	);
