@@ -9,9 +9,12 @@ import { IDelta, getDelta, DisplayDeltas } from "./Deltas";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Dropdown } from "react-bootstrap";
+import { Dropdown, ListGroup } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import DisplayRecord from "./DisplayRecord";
+import { disposeEmitNodes } from "typescript";
+import { useHotkeys } from "react-hotkeys-hook";
+import { nextTick } from "process";
 
 interface IFilter {
 	display: string;
@@ -44,6 +47,57 @@ function App() {
 	const [currentFilter, setCurrentFilter] = useState(filters[0]);
 	const [lastOpenedRecordID, setLastOpenedRecordID] = useState(
 		null as number | null
+	);
+
+	const nextRecord = () => {
+		if (records.length) {
+			if (recordIndex >= records.length) {
+				doEnd();
+			} else {
+				setRecordIndex(recordIndex + 1);
+			}
+		}
+	};
+
+	const previousRecord = () => {
+		if (records.length) {
+			setRecordIndex(Math.max(0, recordIndex - 1));
+		}
+	};
+
+	useHotkeys(
+		"ctrl+j",
+		(event: KeyboardEvent) => {
+			previousRecord();
+		},
+		[previousRecord]
+	);
+
+	useHotkeys(
+		"ctrl+k",
+		(event: KeyboardEvent) => {
+			nextRecord();
+		},
+		[nextRecord]
+	);
+
+	useHotkeys(
+		"*",
+		(event: KeyboardEvent) => {
+			if (event.key === "*") {
+				nextRecord();
+			} else if (event.key === "/") {
+				previousRecord();
+			} else {
+				return;
+			}
+
+			event.preventDefault();
+		},
+		{
+			enableOnTags: ["INPUT"],
+		},
+		[nextRecord, previousRecord]
 	);
 
 	const updateRecord = useCallback(
@@ -86,12 +140,16 @@ function App() {
 			setRecordIndex(0);
 		} else if (recordIndex >= records.length) {
 			// TODO: exit?
-			setRecords([]);
-			setSearchFocusEpoch((oldEpoch) => oldEpoch + 1);
+			doEnd();
 		} else if (records.length > recordIndex) {
 			setCurrentRecord(records[recordIndex]);
 		}
 	}, [recordIndex, records, currentRecord]);
+
+	const doEnd = () => {
+		setRecords([]);
+		setSearchFocusEpoch((oldEpoch) => oldEpoch + 1);
+	};
 
 	const getSearch = () => {
 		let tempSearch = search;
@@ -208,6 +266,7 @@ function App() {
 	};
 
 	const updateTagLine = (event: ChangeEvent<HTMLInputElement>) => {
+		console.log("ugg");
 		setTagLine(event.target.value);
 	};
 
