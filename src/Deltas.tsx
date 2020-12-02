@@ -1,8 +1,7 @@
-import { updateNonNullChain } from "typescript";
-
 export interface IDelta {
 	added: string[];
 	removed: string[];
+	originalString: string;
 	id: number;
 }
 
@@ -15,31 +14,34 @@ interface IDeltas {
 	deltas: IDelta[];
 	undo: (delta: IDelta) => any;
 	redo: (delta: IDelta) => any;
-	addTag: (tag: string) => any;
-	removeTag: (tag: string) => any;
+	addTagLine: (tag: string) => any;
+	removeTagLine: (tag: string) => any;
 }
 
 export function DisplayDeltas({
 	deltas,
 	undo,
 	redo,
-	addTag,
-	removeTag,
+	addTagLine,
+	removeTagLine,
 }: IDeltas) {
 	return (
 		<div>
 			{deltas.map((delta, i) => (
 				<div className="delta">
+					<button onClick={() => addTagLine(delta.originalString)}>
+						{delta.originalString}
+					</button>
 					{delta.added.length ? (
 						<ul className="added">
 							{delta.added.map((tag) => (
 								<li key={tag}>
 									{" "}
 									{tag}
-									<button onClick={() => removeTag(tag)}>
+									<button onClick={() => removeTagLine(tag)}>
 										Remove
 									</button>
-									<button onClick={() => addTag(tag)}>
+									<button onClick={() => addTagLine(tag)}>
 										Add
 									</button>
 								</li>
@@ -52,10 +54,10 @@ export function DisplayDeltas({
 							{delta.removed.map((tag) => (
 								<li key={tag}>
 									{tag}
-									<button onClick={() => removeTag(tag)}>
+									<button onClick={() => removeTagLine(tag)}>
 										Remove
 									</button>
-									<button onClick={() => addTag(tag)}>
+									<button onClick={() => addTagLine(tag)}>
 										Add
 									</button>
 								</li>
@@ -71,7 +73,11 @@ export function DisplayDeltas({
 	);
 }
 
-export function getDelta(newTags: string[], oldTags: string[]): IDelta {
+export function getDelta(
+	newTags: string[],
+	oldTags: string[],
+	originalString: string
+): IDelta {
 	// Keeps the order of tags that are in both oldTags and newTags,
 	// but keep the tags that are just in newTags at the top
 	let removed = [];
@@ -88,5 +94,5 @@ export function getDelta(newTags: string[], oldTags: string[]): IDelta {
 		}
 	}
 
-	return { added, removed, id: getDeltaID() };
+	return { added, removed, originalString, id: getDeltaID() };
 }

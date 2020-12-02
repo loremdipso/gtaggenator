@@ -285,6 +285,8 @@ impl Taggenator {
 		let mut to_remove: Vec<usize> = vec![];
 		for (i, tag) in tags.iter().enumerate() {
 			if let Some(tagger_command) = self.settings.tagger.get(tag) {
+				to_remove.push(i);
+
 				// NOTE: need to jump through hoops because of COW
 				let temp_tagger_command =
 					Regex::new("%s")?.replace(&tagger_command, record.Location.as_str());
@@ -298,10 +300,6 @@ impl Taggenator {
 						// NOTE: could lead to duplicates, but we're okay with that
 						to_add.push(new_tag.to_string());
 					}
-				}
-
-				if do_remove {
-					to_remove.push(i);
 				}
 			}
 		}

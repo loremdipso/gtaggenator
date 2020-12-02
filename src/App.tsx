@@ -9,12 +9,10 @@ import { IDelta, getDelta, DisplayDeltas } from "./Deltas";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Dropdown, ListGroup } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import DisplayRecord from "./DisplayRecord";
-import { disposeEmitNodes } from "typescript";
 import { useHotkeys } from "react-hotkeys-hook";
-import { nextTick } from "process";
 
 interface IFilter {
 	display: string;
@@ -67,7 +65,7 @@ function App() {
 
 	useHotkeys(
 		"ctrl+j",
-		(event: KeyboardEvent) => {
+		() => {
 			previousRecord();
 		},
 		[previousRecord]
@@ -75,7 +73,7 @@ function App() {
 
 	useHotkeys(
 		"ctrl+k",
-		(event: KeyboardEvent) => {
+		() => {
 			nextRecord();
 		},
 		[nextRecord]
@@ -187,11 +185,12 @@ function App() {
 		setLastExecutedSearch(tempSearch);
 	};
 
-	const addTag = (tag: string) => {
+	const addTagLine = (tag: string) => {
 		addTags(tag, true);
 	};
 
-	const removeTag = (tag: string) => {
+	const removeTagLine = (tag: string) => {
+		// TODO: handle multiple tags
 		addTags(`-${tag}`, true);
 	};
 
@@ -207,7 +206,7 @@ function App() {
 		});
 
 		if (!ignoreDelta) {
-			let delta = getDelta(newRecord.Tags, oldRecord.Tags);
+			let delta = getDelta(newRecord.Tags, oldRecord.Tags, line);
 			if (delta.added.length || delta.removed.length) {
 				setDeltas([delta, ...deltas]);
 			}
@@ -266,7 +265,6 @@ function App() {
 	};
 
 	const updateTagLine = (event: ChangeEvent<HTMLInputElement>) => {
-		console.log("ugg");
 		setTagLine(event.target.value);
 	};
 
@@ -357,8 +355,8 @@ function App() {
 							deltas={deltas}
 							undo={undo}
 							redo={redo}
-							addTag={addTag}
-							removeTag={removeTag}
+							addTagLine={addTagLine}
+							removeTagLine={removeTagLine}
 						/>
 
 						{/* <button>Open Natively</button> */}
@@ -391,7 +389,6 @@ interface ISpecialInput {
 }
 function SpecialInput({
 	className,
-	key,
 	action,
 	onChange,
 	value,
