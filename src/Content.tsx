@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { bridge } from "./Commands";
 import { toast } from "react-toastify";
 import { IRecord } from "./interfaces";
@@ -65,16 +65,51 @@ function GrabBag({ record }: IGrabBag) {
 	);
 }
 
+const times = {
+	TINY: 5,
+	SMALL: 10,
+	MEDIUM: 60,
+	LARGE: 60 * 5,
+};
+
 interface IVideoContainer {
 	record: IRecord;
 }
 function VideoContainer({ record }: IVideoContainer) {
+	const videoRef = useRef(null as HTMLVideoElement | null);
+
 	const volumeUp = () => {
-		toast("volume up");
+		if (videoRef?.current) {
+			let current = videoRef.current;
+			current.volume = Math.min(1.0, current.volume + 0.05);
+		}
 	};
 
 	const volumeDown = () => {
-		toast("volume down");
+		if (videoRef?.current) {
+			let current = videoRef.current;
+			current.volume = Math.max(0.0, current.volume - 0.05);
+		}
+	};
+
+	const getNearEnd = (duration: number) => {
+		return duration - 30;
+	};
+
+	const scrub = (delta: number) => {
+		if (videoRef?.current) {
+			let current = videoRef.current;
+
+			let duration = current.duration;
+			let targetTime = current.currentTime + delta;
+			if (targetTime > duration) {
+				targetTime = duration;
+			} else if (targetTime < 0) {
+				targetTime = 0;
+			}
+
+			current.currentTime = targetTime;
+		}
 	};
 
 	useHotkeysHelper("alt+numpad8", () => {
@@ -84,34 +119,60 @@ function VideoContainer({ record }: IVideoContainer) {
 		volumeDown();
 	});
 
-	useHotkeysHelper("alt+k", () => {
-		toast("forward");
-	});
-	useHotkeysHelper("alt+j", () => {
-		toast("back");
+	useHotkeysHelper("alt+space", () => {
+		if (videoRef?.current) {
+			let current = videoRef.current;
+			if (current.paused) {
+				current.play();
+			} else {
+				current.pause();
+			}
+		}
 	});
 
+	useHotkeysHelper("alt+h", () => {
+		// toast("beginning");
+		if (videoRef?.current) {
+			videoRef.current.currentTime = 0;
+		}
+	});
+	useHotkeysHelper("alt+j", () => {
+		// back
+		scrub(-times.MEDIUM);
+	});
+	useHotkeysHelper("alt+k", () => {
+		// forward
+		scrub(times.MEDIUM);
+	});
 	useHotkeysHelper("alt+l", () => {
-		toast("near end");
+		// toast("near end");
+		if (videoRef?.current) {
+			let current = videoRef.current;
+			current.currentTime = getNearEnd(current.duration);
+		}
 	});
 
 	useHotkeysHelper("alt+shift+j", () => {
-		toast("big back");
+		// toast("big back");
+		scrub(times.LARGE);
 	});
 	useHotkeysHelper("alt+shift+k", () => {
-		toast("big forward");
+		// toast("big forward");
+		scrub(-times.LARGE);
 	});
 
 	useHotkeysHelper("alt+numpad0", () => {
-		toast("tiny back");
+		// toast("tiny back");
+		scrub(-times.TINY);
 	});
 	useHotkeysHelper("alt+numpad.", () => {
-		toast("tiny forward");
+		// toast("tiny forward");
+		scrub(times.TINY);
 	});
 
 	let path = record ? getPath(record.Location) : "";
 	return (
-		<video controls autoPlay>
+		<video controls autoPlay ref={videoRef}>
 			<source src={path} type="video/mp4" />
 			Your browser does not support the video tag.
 		</video>

@@ -24,7 +24,7 @@ export function useHotkeysHelper(shortcut: string, callback: Function, deps?: an
 			}
 
 			// TODO: make less hacky
-			// console.log(event);;
+			// console.log(event);
 			let number = oldShortcut[oldShortcut.length - 1];
 			if (number !== event.key) {
 				return;
