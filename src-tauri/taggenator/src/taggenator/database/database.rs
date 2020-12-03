@@ -171,7 +171,7 @@ impl Database {
 				HaveManuallyTouched,
 				Imported
 			)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			vec![
 				Text(filename.to_string()),
 				Text(location.to_string()),
@@ -203,26 +203,22 @@ impl Database {
 		let location = self.get_location_relative_to_base(&location)?;
 		println!("{}", &location);
 		self.async_write(
-			"REPLACE INTO records (
-				Name,
-				Location,
+			"UPDATE records
+			SET
+				Name = ?,
+				Location = ?,
 
-				Size,
-				Length,
-				TimesOpened,
+				Size = ?,
+				Length = ?,
+				TimesOpened = ?,
 
-				DateAdded,
-				DateCreated,
-				DateLastAccessed,
+				DateAdded = ?,
+				DateCreated = ?,
+				DateLastAccessed = ?,
 
-				HaveManuallyTouched,
-				Imported
-			) VALUES (
-				?, ?,
-				?, ?, ?,
-				?, ?, ?,
-				?, ?
-			) WHERE Records.Location = ?",
+				HaveManuallyTouched = ?,
+				Imported = ?
+			WHERE Records.Location = ?",
 			vec![
 				Text(filename.to_string()),
 				Text(location.to_string()),
@@ -294,7 +290,11 @@ impl Database {
 	pub fn add_tag(&mut self, recordId: i64, tag: String) -> Result<(), BError> {
 		self.async_write(
 			"INSERT INTO Tags (RecordID, TagName, DateAdded) VALUES (?1, ?2, ?3)",
-			vec![Number(recordId), Text(tag), Date(Some(Utc::now()))],
+			vec![
+				Number(recordId),
+				Text(tag.to_lowercase().trim().to_string()),
+				Date(Some(Utc::now())),
+			],
 		)
 	}
 

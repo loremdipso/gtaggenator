@@ -5,6 +5,9 @@ use crate::taggenator::errors::BError;
 use crate::taggenator::models::record::Record;
 use crate::taggenator::utils::input::readline;
 use crate::Taggenator;
+use chrono::format::ParseError;
+use chrono::Utc;
+use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
 use std::convert::TryFrom;
 use std::path::Path;
 extern crate shell_words;
@@ -43,8 +46,10 @@ pub fn run_import(taggenator: &mut Taggenator, args: Vec<String>) -> Result<(), 
 		if let Some(ref actual_command) = command {
 			match &actual_command[..] {
 				"add_tag" => {
+					println!("Adding tag!");
 					let location = it.next().unwrap().to_string();
 					let tag = it.next().unwrap().to_string();
+					println!("Adding tag: {}", &tag);
 					taggenator.database.add_tag_by_location(location, tag)?;
 				}
 
@@ -58,11 +63,13 @@ pub fn run_import(taggenator: &mut Taggenator, args: Vec<String>) -> Result<(), 
 					let size = it.next().unwrap().to_string().parse::<i64>()?;
 					let length = it.next().unwrap().to_string().parse::<i64>()?;
 					let times_opened = it.next().unwrap().to_string().parse::<i64>()?;
-					// date_added: Option<DateTime<chrono::Utc>>,
 					let have_manually_touched = it.next().unwrap().to_string().parse::<bool>()?;
-					let date_added = None;
-					let date_created = None;
-					let date_last_touched = None;
+
+					// date_added: Option<DateTime<chrono::Utc>>,
+					// dbg!(&date_added);
+					let date_added = get_date(&it.next().unwrap().to_string())?;
+					let date_created = get_date(&it.next().unwrap().to_string())?;
+					let date_last_touched = get_date(&it.next().unwrap().to_string())?;
 					let imported = true;
 
 					taggenator.database.add_record_by_location_core(
@@ -71,13 +78,15 @@ pub fn run_import(taggenator: &mut Taggenator, args: Vec<String>) -> Result<(), 
 						size,
 						length,
 						times_opened,
-						// date_added: Option<DateTime<chrono::Utc>>,
-						date_added,
+						// date_added,
+						None,
 						date_created,
 						date_last_touched,
 						have_manually_touched,
 						imported,
 					)?;
+
+					println!("success!");
 				}
 
 				_ => {}
@@ -86,4 +95,16 @@ pub fn run_import(taggenator: &mut Taggenator, args: Vec<String>) -> Result<(), 
 	}
 
 	return Ok(());
+}
+
+fn get_date(date_str: &String) -> Result<Option<DateTime<chrono::Utc>>, BError> {
+	println!("{}", &date_str);
+	if let Ok(date) = DateTime::parse_from_str(&date_str, "%Y-%m-%d %H:%M:%S.%f %z %Z") {
+		let utc_date: DateTime<Utc> = DateTime::<Utc>::from(date);
+		return Ok(Some(utc_date));
+	} else {
+		let date = DateTime::parse_from_str(&date_str, "%Y-%m-%d %H:%M:%S %z %Z")?;
+		let utc_date: DateTime<Utc> = DateTime::<Utc>::from(date);
+		return Ok(Some(utc_date));
+	}
 }

@@ -171,33 +171,41 @@ function App() {
 			}
 		}
 
-		console.log(tempSearch);
-
 		return tempSearch;
 	};
 
-	const loadData = async () => {
-		let tempSearch = getSearch();
-		let records = await bridge.get_records({ args: tempSearch.split(" ") });
-		setRecords(records);
-
-		let newIndex = 0;
-		if (lastExecutedSearch === tempSearch && currentRecord) {
-			// special case: if we're refreshing, try to find the record we were just on
-			newIndex = records.findIndex(
-				(record) => record.RecordID === currentRecord.RecordID
-			);
-			if (newIndex < 0) {
-				newIndex = 0;
-			}
-
-			toast("Reloaded");
-		} else {
-			toast("Loaded");
+	const loadData = async (override?: string) => {
+		let tempSearch = override;
+		if (!tempSearch) {
+			tempSearch = getSearch();
 		}
-		setRecordIndex(newIndex);
-		setTagFocusEpoch(tagFocusEpoch + 1);
-		setLastExecutedSearch(tempSearch);
+
+		try {
+			let records = await bridge.get_records({
+				args: tempSearch.split(" "),
+			});
+			setRecords(records);
+
+			let newIndex = 0;
+			if (lastExecutedSearch === tempSearch && currentRecord) {
+				// special case: if we're refreshing, try to find the record we were just on
+				newIndex = records.findIndex(
+					(record) => record.RecordID === currentRecord.RecordID
+				);
+				if (newIndex < 0) {
+					newIndex = 0;
+				}
+
+				toast("Reloaded");
+			} else {
+				toast("Loaded");
+			}
+			setRecordIndex(newIndex);
+			setTagFocusEpoch(tagFocusEpoch + 1);
+			setLastExecutedSearch(tempSearch);
+		} catch (e) {
+			console.log(e);
+		}
 	};
 
 	const addTagLine = (tag: string) => {
@@ -361,11 +369,12 @@ function App() {
 												action={removeTagLine}
 												secondaryAction={(
 													tagName: string
-												) =>
+												) => {
 													toast(
 														`hooray for ${tagName}`
-													)
-												}
+													);
+													loadData(tagName);
+												}}
 												secondaryTitle="?"
 											/>
 										)

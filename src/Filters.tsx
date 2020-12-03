@@ -66,6 +66,12 @@ const baseSorters: ISearchOption[] = [
 		id: id++,
 		type,
 	},
+	{
+		display: "Random",
+		command: "-sort random",
+		id: id++,
+		type,
+	},
 ];
 
 export interface IFilter {
