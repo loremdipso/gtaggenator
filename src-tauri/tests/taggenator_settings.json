@@ -1,5 +1,5 @@
 {
-	"extensions": [".txt"],
+	"extensions": [".txt", ".mp4", ".m4v"],
 
 	"synonyms": {
 		"pre": "prefix",

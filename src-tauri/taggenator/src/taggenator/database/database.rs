@@ -126,7 +126,34 @@ impl Database {
 		let date_created = Some(DateTime::<Utc>::from(metadata.created()?));
 		let date_last_touched = None;
 		let have_manually_touched = false;
+		let was_imported = false;
+		self.add_record_core(
+			filename.to_string(),
+			location.to_string(),
+			size,
+			length,
+			times_opened,
+			date_added,
+			date_created,
+			date_last_touched,
+			have_manually_touched,
+			was_imported,
+		)
+	}
 
+	pub fn add_record_core(
+		&mut self,
+		filename: String,
+		location: String,
+		size: i64,
+		length: i64,
+		times_opened: i64,
+		date_added: Option<DateTime<chrono::Utc>>,
+		date_created: Option<DateTime<chrono::Utc>>,
+		date_last_touched: Option<DateTime<chrono::Utc>>,
+		have_manually_touched: bool,
+		was_imported: bool,
+	) -> Result<(), BError> {
 		self.async_write(
 			"
 			INSERT INTO records (
@@ -141,7 +168,8 @@ impl Database {
 				DateCreated,
 				DateLastAccessed,
 
-				HaveManuallyTouched
+				HaveManuallyTouched,
+				Imported
 			)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			vec![
@@ -154,6 +182,59 @@ impl Database {
 				Date(date_created),
 				Date(date_last_touched),
 				Boolean(have_manually_touched),
+				Boolean(was_imported),
+			],
+		)
+	}
+
+	pub fn add_record_by_location_core(
+		&mut self,
+		filename: String,
+		location: String,
+		size: i64,
+		length: i64,
+		times_opened: i64,
+		date_added: Option<DateTime<chrono::Utc>>,
+		date_created: Option<DateTime<chrono::Utc>>,
+		date_last_touched: Option<DateTime<chrono::Utc>>,
+		have_manually_touched: bool,
+		was_imported: bool,
+	) -> Result<(), BError> {
+		let location = self.get_location_relative_to_base(&location)?;
+		println!("{}", &location);
+		self.async_write(
+			"REPLACE INTO records (
+				Name,
+				Location,
+
+				Size,
+				Length,
+				TimesOpened,
+
+				DateAdded,
+				DateCreated,
+				DateLastAccessed,
+
+				HaveManuallyTouched,
+				Imported
+			) VALUES (
+				?, ?,
+				?, ?, ?,
+				?, ?, ?,
+				?, ?
+			) WHERE Records.Location = ?",
+			vec![
+				Text(filename.to_string()),
+				Text(location.to_string()),
+				Number(size),
+				Number(length),
+				Number(times_opened),
+				Date(date_added),
+				Date(date_created),
+				Date(date_last_touched),
+				Boolean(have_manually_touched),
+				Boolean(was_imported),
+				Text(location.to_string()),
 			],
 		)
 	}
@@ -214,6 +295,17 @@ impl Database {
 		self.async_write(
 			"INSERT INTO Tags (RecordID, TagName, DateAdded) VALUES (?1, ?2, ?3)",
 			vec![Number(recordId), Text(tag), Date(Some(Utc::now()))],
+		)
+	}
+
+	pub fn add_tag_by_location(&mut self, location: String, tag: String) -> Result<(), BError> {
+		let location = self.get_location_relative_to_base(&location)?;
+		println!("{}", location);
+		self.async_write(
+			"INSERT INTO Tags (RecordID, TagName, DateAdded)
+			SELECT RecordID, ?, ?
+			FROM Records WHERE Records.Location = ?",
+			vec![Text(tag), Date(Some(Utc::now())), Text(location)],
 		)
 	}
 

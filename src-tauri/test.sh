@@ -29,8 +29,9 @@ cd ../tests
 #time ~/.cargo-target/release/taggenator grabbag get_all "./tmp/B.txt"
 #time ~/.cargo-target/release/taggenator grabbag get_all "./tmp/B.txt"
 #time ~/.cargo-target/release/taggenator grabbag get_all "/home/madams/Projects/gtaggenator/src-tauri/tests/tmp/B.txt"
-~/.cargo-target/release/taggenator dump -sort limit 20
+#~/.cargo-target/release/taggenator dump -sort limit 20
 #~/.cargo-target/release/taggenator dump -sort limit -20
+echo a add_tag location tag add_tag location2 tag2 | ~/.cargo-target/release/taggenator import
 #echo test | ~/.cargo-target/release/taggenator open
 #echo pre | ~/.cargo-target/release/taggenator open
 #echo tag1,tag1,tag2 | ~/.cargo-target/release/taggenator open

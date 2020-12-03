@@ -16,7 +16,6 @@ pub fn grab_bag(taggenator: &mut Taggenator, args: Vec<String>) -> Result<(), BE
 		loop {
 			match readline("> ") {
 				Ok(line) => {
-					println!("{}", line);
 					run_grab_bag(taggenator, shell_words::split(&line)?)?;
 				}
 
@@ -35,6 +34,8 @@ pub fn run_grab_bag(taggenator: &mut Taggenator, args: Vec<String>) -> Result<()
 	let mut location: Option<String> = None;
 	let mut key: Option<String> = None;
 	let mut value: Option<String> = None;
+
+	dbg!(&args);
 
 	for arg in args {
 		if command.is_none() {

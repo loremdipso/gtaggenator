@@ -21,8 +21,9 @@ const DATE_ADDED_INDEX: usize = 6;
 const DATE_CREATED_INDEX: usize = 7;
 const DATE_LAST_ACCESSED_INDEX: usize = 8;
 const HAVE_MANUALLY_TOUCHED_INDEX: usize = 9;
+const IMPORTED_INDEX: usize = 10;
 
-const TAG_INDEX: usize = 12;
+const TAG_INDEX: usize = 13;
 
 #[derive(Debug)]
 pub struct Searcher {
@@ -130,6 +131,7 @@ impl Searcher {
 							DateLastAccessed: row.get(DATE_LAST_ACCESSED_INDEX)?,
 
 							HaveManuallyTouched: row.get(HAVE_MANUALLY_TOUCHED_INDEX)?,
+							Imported: row.get(IMPORTED_INDEX)?,
 						};
 						if let Ok(tag) = row.get(TAG_INDEX) {
 							record.Tags.insert(tag);

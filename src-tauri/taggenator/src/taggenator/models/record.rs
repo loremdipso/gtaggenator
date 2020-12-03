@@ -22,6 +22,7 @@ pub struct Record {
 	pub DateLastAccessed: Option<DateTime<Utc>>,
 
 	pub HaveManuallyTouched: bool,
+	pub Imported: bool,
 }
 
 // TODO: probably we don't need to clone
@@ -45,6 +46,7 @@ pub const SQL: &str = "
 		DateCreated DateTime,
 		DateLastAccessed DateTime,
 
-		HaveManuallyTouched BOOLEAN DEFAULT 0
+		HaveManuallyTouched BOOLEAN DEFAULT 0,
+		Imported BOOLEAN DEFAULT 0
 	);
 ";
