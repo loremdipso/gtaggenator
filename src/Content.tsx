@@ -194,6 +194,13 @@ function VideoContainer({ record }: IVideoContainer) {
 		}
 	});
 
+	useHotkeysHelper("alt+i", () => {
+		// toast("near middle");
+		if (videoRef?.current) {
+			let current = videoRef.current;
+			current.currentTime = current.duration / 2;
+		}
+	});
 	useHotkeysHelper("alt+h", () => {
 		// toast("beginning");
 		if (videoRef?.current) {
@@ -237,12 +244,12 @@ function VideoContainer({ record }: IVideoContainer) {
 	let path = record ? getPath(record.Location) : "";
 	return (
 		<div className="video-container" ref={containerRef}>
+			<video controls autoPlay ref={videoRef} src={path} />
 			<div className="progress-bar" style={{ width: durationWidth }} />
 			<div
 				className={`volume-bar ${muted ? "muted" : ""}`}
 				style={{ height: volumeHeight }}
 			/>
-			<video controls autoPlay ref={videoRef} src={path} />
 		</div>
 	);
 }
@@ -257,7 +264,6 @@ function ImageContainer({ record }: IImageContainer) {
 
 function getPath(path: string): string {
 	path = path.substring(2); // remove the leading './'
-	console.log(path);
 	return `http://0.0.0.0:8000/static/${path}`;
 }
 

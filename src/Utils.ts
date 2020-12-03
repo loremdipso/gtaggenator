@@ -35,7 +35,7 @@ export function useHotkeysHelper(shortcut: string, callback: Function, deps?: an
 		callback();
 	},
 		{
-			enableOnTags: ["INPUT"],
+			enableOnTags: ["INPUT", "VIDEO"] as any,
 		},
 		deps
 	);

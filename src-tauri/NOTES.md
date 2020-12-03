@@ -37,6 +37,8 @@
     - [x] Add toasts
     - [ ] Add scss
     - [ ] Make handle prettier
+    - [ ] Add keymap, ideally an editable one
+        - Save config to tsettings
 
 3. Backburner
     - [ ] Figure out migrations

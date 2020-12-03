@@ -1,6 +1,7 @@
 import React from "react";
 import { ReactChildren, useEffect, useState } from "react";
 import Draggable from "react-draggable";
+import { transform } from "typescript";
 
 type IResizablePanel = React.PropsWithChildren<{
 	startingValue: number;
@@ -15,6 +16,8 @@ export default function ResizablePanel({
 	children,
 }: IResizablePanel) {
 	const [value, setValue] = useState(startingValue);
+	const [isClosed, setIsClosed] = useState(false);
+	const [didDrag, setDidDrag] = useState(false);
 	const [deltaPosition, setDeltaPosition] = useState({
 		x: 0,
 		y: 0,
@@ -24,21 +27,35 @@ export default function ResizablePanel({
 		setValue(startingValue + deltaPosition.x);
 	}, [deltaPosition, startingValue]);
 
+	const onStart = () => {
+		setDidDrag(false);
+	};
+
 	const handleDrag = (e: any, ui: any) => {
 		const { x, y } = deltaPosition;
 		setDeltaPosition({
 			x: x + ui.deltaX,
 			y: y + ui.deltaY,
 		});
+		setDidDrag(true);
 	};
 
-	const onStart = () => {};
-	const onStop = () => {};
+	const onStop = () => {
+		// click, essentially
+		console.log(didDrag);
+		if (!didDrag) {
+			setIsClosed(true);
+		}
+	};
 
+	let tempValue = value;
+	if (isClosed) {
+		tempValue = 0;
+	}
 	let containerStyle =
 		axis === "x"
-			? { width: value, minWidth: value }
-			: { height: value, minHeight: value };
+			? { width: tempValue, minWidth: tempValue }
+			: { height: tempValue, minHeight: tempValue };
 
 	let primarySize = 10;
 	let secondarySize = 50;
@@ -66,15 +83,33 @@ export default function ResizablePanel({
 					right: 0,
 					position: "absolute",
 			  };
+
+	if (isClosed) {
+		handleStyle.left = 0;
+		handleStyle.transform = null;
+		if (axis === "x") {
+			let margin = -deltaPosition.x;
+			handleStyle.marginLeft = margin;
+		} else {
+			// handleStyle.marginTop = margin;
+		}
+	}
+
 	return (
 		<div className={className} style={{ ...containerStyle }}>
 			{children}
 
 			<Draggable
 				axis={axis}
-				onStart={() => {}}
+				onStart={onStart}
 				onDrag={handleDrag}
-				onStop={() => {}}
+				onStop={onStop}
+				onMouseDown={() => {
+					if (isClosed) {
+						setIsClosed(false);
+					}
+				}}
+				disabled={isClosed}
 			>
 				<div
 					style={{ ...handleStyle }}
