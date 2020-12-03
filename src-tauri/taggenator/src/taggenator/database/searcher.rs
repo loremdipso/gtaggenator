@@ -6,6 +6,7 @@ use rand::thread_rng;
 use rusqlite::NO_PARAMS;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::convert::TryFrom;
 use std::error::Error;
 use string_builder::Builder;
 
@@ -463,6 +464,28 @@ impl Filter {
 							.drain(..)
 							.filter(|record| loose_search_inclusive(&record, &self.args))
 							.collect();
+					}
+
+					"limit" => {
+						// TODO: log error
+						if let Some(limit) = self.args.get(0) {
+							let mut limit: i32 = limit.to_string().parse::<i32>()?;
+							let size: i32 = i32::try_from(records.len())?;
+
+							if limit > 0 {
+								if limit < size {
+									records.drain(usize::try_from(limit)?..);
+								}
+							} else {
+								// support negative indexes, which is just a shortcut for
+								// taking off the front rather than the back
+								limit *= -1;
+								let index = size - limit;
+								if index > 0 {
+									records.drain(..usize::try_from(index)?);
+								}
+							}
+						}
 					}
 
 					"" => {}

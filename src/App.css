@@ -190,3 +190,7 @@ button.truncate {
 	z-index: 1000;
 	/* border: 5px solid black; */
 }
+
+.filter-row {
+	display: flex;
+}

@@ -15,7 +15,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Dropdown } from "react-bootstrap";
+import { Dropdown, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DisplayRecord from "./DisplayRecord";
@@ -23,25 +23,15 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import ResizablePanel from "./ResizablePanel";
 import { useHotkeysHelper } from "./Utils";
-
-interface IFilter {
-	display: string;
-	command: string;
-}
-const filters: IFilter[] = [
-	{ display: "None", command: "" },
-	{ display: "Untouched", command: "-sort untouched" },
-	{ display: "Touched", command: "-sort touched" },
-	{ display: "Seen", command: "-sort seen" },
-	{ display: "Unseen", command: "-sort unseen" },
-	{ display: "Most Tags", command: "-sort most_tags" },
-	{ display: "Fewest Tags", command: "-sort fewest_tags" },
-];
+import { DisplayFilters, IFilter } from "./Filters";
 
 function App() {
 	const [search, setSearch] = useState("");
 	const [tagLine, setTagLine] = useState("");
 	const [records, setRecords] = useState([] as IRecord[]);
+
+	const [filters, setFilters] = useState([] as IFilter[]);
+	const [deltas, setDeltas] = useState([] as IDelta[]);
 
 	const [lastExecutedSearch, setLastExecutedSearch] = useState("");
 
@@ -50,9 +40,7 @@ function App() {
 
 	const [recordIndex, setRecordIndex] = useState(0);
 	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
-	const [deltas, setDeltas] = useState([] as IDelta[]);
 
-	const [currentFilter, setCurrentFilter] = useState(filters[0]);
 	const [lastOpenedRecordID, setLastOpenedRecordID] = useState(
 		null as number | null
 	);
@@ -101,6 +89,14 @@ function App() {
 		"alt+numpad/",
 		() => {
 			previousRecord();
+		},
+		[nextRecord, previousRecord]
+	);
+
+	useHotkeysHelper(
+		"alt+s",
+		() => {
+			setSearchFocusEpoch((epoch) => epoch + 1);
 		},
 		[nextRecord, previousRecord]
 	);
@@ -164,7 +160,15 @@ function App() {
 			}
 		}
 
-		tempSearch += ` ${currentFilter.command}`;
+		for (let filter of filters) {
+			// if we require a value make sure it exists
+			if (filter.base.hasValue === !!filter.value) {
+				tempSearch += ` ${filter.base.command}`;
+				if (filter.base.hasValue) {
+					tempSearch += ` ${filter.value}`;
+				}
+			}
+		}
 		return tempSearch;
 	};
 
@@ -233,19 +237,7 @@ function App() {
 			line += `-${added}`;
 		}
 
-		// for (let removed of delta.removed) {
-		// 	if (line.length > 0) {
-		// 		line += ", ";
-		// 	}
-		// 	line += removed;
-		// }
-
 		if (line.length > 0) {
-			// remove this delta
-			// let temp = delta.added;
-			// delta.added = delta.removed;
-			// delta.removed = temp;
-			setDeltas(deltas); // TODO: something less hacky. We reallllly shouldn't be modifying data like this
 			addTags(line, true);
 		}
 	};
@@ -278,7 +270,6 @@ function App() {
 		}
 
 		if (line.length > 0) {
-			setDeltas(deltas); // TODO: something less hacky. We reallllly shouldn't be modifying data like this
 			addTags(line, true);
 		}
 	};
@@ -326,27 +317,12 @@ function App() {
 				<SpecialInput
 					onChange={updateSearch}
 					action={loadData}
+					actionName="Search"
 					value={search}
-					prefix="Search"
 					focusEpoch={searchFocusEpoch}
 				/>
 
-				<Dropdown>
-					<Dropdown.Toggle variant="primary" id="dropdown-basic">
-						Filter
-					</Dropdown.Toggle>
-
-					<Dropdown.Menu>
-						{filters.map((filter) => (
-							<Dropdown.Item
-								key={filter.display}
-								onClick={() => setCurrentFilter(filter)}
-							>
-								{filter.display}
-							</Dropdown.Item>
-						))}
-					</Dropdown.Menu>
-				</Dropdown>
+				<DisplayFilters filters={filters} setFilters={setFilters} />
 
 				{currentRecord ? (
 					<>
