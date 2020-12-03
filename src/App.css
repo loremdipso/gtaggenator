@@ -37,6 +37,10 @@ body {
 	height: 100vs !important; /* override ResizableBox */
 }
 
+.sidebar.closed > :not(.react-draggable) {
+	display: none;
+}
+
 .special-input {
 	display: flex;
 	width: 100%;

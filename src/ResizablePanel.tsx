@@ -91,12 +91,16 @@ export default function ResizablePanel({
 			let margin = -deltaPosition.x;
 			handleStyle.marginLeft = margin;
 		} else {
-			// handleStyle.marginTop = margin;
+			let margin = -deltaPosition.y;
+			handleStyle.marginTop = margin;
 		}
 	}
 
 	return (
-		<div className={className} style={{ ...containerStyle }}>
+		<div
+			className={`${isClosed ? "closed" : ""} ${className}`}
+			style={{ ...containerStyle }}
+		>
 			{children}
 
 			<Draggable
