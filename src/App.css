@@ -1,7 +1,7 @@
 body {
 	margin: 0;
 	background-color: #6223d2;
-	height: 100vh;
+	/* height: 100vh; */
 	width: 100vw;
 	position: relative;
 	overflow: hidden;
@@ -34,7 +34,9 @@ body {
 	width: 300px;
 	background-color: rgb(148, 148, 148);
 	color: white;
-	height: 100vs !important; /* override ResizableBox */
+	/* height: 100vs !important; override ResizableBox */
+	display: flex;
+	flex-direction: column;
 }
 
 .sidebar.closed > :not(.react-draggable) {
@@ -121,6 +123,16 @@ a {
 	height: auto;
 }
 
+.delta-container {
+	overflow-y: scroll;
+	/* max-height: 250px;
+	min-height: 250px; */
+	/* background-color: green; */
+	height: 250px;
+	border-top: 5px solid grey;
+	padding-top: 10px;
+}
+
 .delta-container > .accordion {
 	margin-bottom: 5px;
 }
@@ -174,14 +186,26 @@ a {
 	max-width: 150px;
 }
 
-.tag-container-container {
-	overflow-y: scroll;
-	height: 500px;
-}
-
 .tag-input-container {
 	background-color: rgb(44, 44, 44);
-	margin-bottom: 10px;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.tag-input-container > * {
+	/* flex-basis: 0; */
+}
+
+.tag-input-container > .growable {
+	/* overflow-y: scroll; */
+	/* min-height: 500px; */
+	flex-grow: 1 !important;
+}
+
+.tab-content,
+.tab-content > * {
+	height: 100%;
 }
 
 .resizable-panel-handle {
@@ -250,4 +274,12 @@ a {
 .my-fancy-table {
 	background-color: black;
 	color: white !important;
+}
+
+.panel-main-content {
+	display: flex;
+}
+
+.panel-main-content > :first-child {
+	flex-grow: 1;
 }

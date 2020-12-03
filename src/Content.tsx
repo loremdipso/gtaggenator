@@ -274,7 +274,7 @@ function isImage(name: string): boolean {
 }
 
 function isVideo(name: string): boolean {
-	let extensions = ["mp4", "wmv", "avi", "m4v", "flv"];
+	let extensions = ["mp4", "wmv", "avi", "m4v", "flv", "mkv"];
 	let extension = getExtension(name);
 	return !!extensions.find((e) => e === extension);
 }

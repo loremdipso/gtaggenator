@@ -410,20 +410,19 @@ function App() {
 						}
 					>
 						{currentRecord ? (
-							<>
-								<div className="tag-input-container">
-									<DisplayRecord record={currentRecord} />
+							<div className="tag-input-container">
+								<DisplayRecord record={currentRecord} />
 
-									<SpecialInput
-										onChange={updateTagLine}
-										action={handleTagLine}
-										value={tagLine}
-										actionName="Add"
-										focusEpoch={tagFocusEpoch}
-									/>
+								<SpecialInput
+									onChange={updateTagLine}
+									action={handleTagLine}
+									value={tagLine}
+									actionName="Add"
+									focusEpoch={tagFocusEpoch}
+								/>
 
-									<div className="fancy-button-bar">
-										{/* <OverlayTrigger
+								<div className="fancy-button-bar">
+									{/* <OverlayTrigger
 											placement="top"
 											overlay={myTooltip(
 												"Try to launch on local machine"
@@ -438,70 +437,66 @@ function App() {
 											</Button>
 										</OverlayTrigger> */}
 
-										<OverlayTrigger
-											placement="top"
-											overlay={myTooltip(
-												"Remove all tags"
-											)}
-										>
-											<Button
-												onClick={() => clearTags()}
-												size="sm"
-												variant="dark"
-												disabled={
-													currentRecord.Tags
-														.length === 0
-												}
-											>
-												Clear
-											</Button>
-										</OverlayTrigger>
-
+									<OverlayTrigger
+										placement="top"
+										overlay={myTooltip("Remove all tags")}
+									>
 										<Button
-											onClick={() => removeSelf()}
-											size="sm"
-											variant="danger"
-										>
-											Delete
-										</Button>
-
-										<Button
-											onClick={() => editSelf()}
-											size="sm"
-											variant="secondary"
-										>
-											Edit
-										</Button>
-
-										<Button
-											onClick={() => reload()}
+											onClick={() => clearTags()}
 											size="sm"
 											variant="dark"
+											disabled={
+												currentRecord.Tags.length === 0
+											}
 										>
-											Reload
+											Clear
 										</Button>
+									</OverlayTrigger>
 
-										<Button
-											onClick={() => previousRecord()}
-											size="sm"
-											variant="dark"
-										>
-											{"<"}
-										</Button>
-										<Button
-											onClick={() => nextRecord()}
-											size="sm"
-											variant="dark"
-										>
-											{">"}
-										</Button>
-									</div>
+									<Button
+										onClick={() => removeSelf()}
+										size="sm"
+										variant="danger"
+									>
+										Delete
+									</Button>
 
-									<div className="tag-container-container">
-										<div className="tag-container">
-											{sortRecordTags(
-												currentRecord
-											).Tags.map((tag) => (
+									<Button
+										onClick={() => editSelf()}
+										size="sm"
+										variant="secondary"
+									>
+										Edit
+									</Button>
+
+									<Button
+										onClick={() => reload()}
+										size="sm"
+										variant="dark"
+									>
+										Reload
+									</Button>
+
+									<Button
+										onClick={() => previousRecord()}
+										size="sm"
+										variant="dark"
+									>
+										{"<"}
+									</Button>
+									<Button
+										onClick={() => nextRecord()}
+										size="sm"
+										variant="dark"
+									>
+										{">"}
+									</Button>
+								</div>
+
+								<div className="growable">
+									<div className="tag-container">
+										{sortRecordTags(currentRecord).Tags.map(
+											(tag) => (
 												<DisplayTagLineGroup
 													tag={tag}
 													key={tag}
@@ -519,8 +514,8 @@ function App() {
 													}}
 													secondaryTitle="?"
 												/>
-											))}
-										</div>
+											)
+										)}
 									</div>
 								</div>
 
@@ -532,7 +527,7 @@ function App() {
 									addTagLine={addTagLine}
 									removeTagLine={removeTagLine}
 								/>
-							</>
+							</div>
 						) : null}
 					</Tab>
 				</Tabs>
