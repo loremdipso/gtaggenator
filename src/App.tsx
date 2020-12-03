@@ -15,7 +15,16 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Dropdown, Form, Nav, Tab, Tabs } from "react-bootstrap";
+import {
+	Button,
+	Dropdown,
+	Form,
+	Nav,
+	OverlayTrigger,
+	Tab,
+	Tabs,
+	Tooltip,
+} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DisplayRecord from "./DisplayRecord";
@@ -281,6 +290,18 @@ function App() {
 		}
 	};
 
+	const reload = () => {
+		loadData();
+	};
+
+	const editSelf = () => {
+		// TODO: this
+	};
+
+	const removeSelf = () => {
+		// TODO: this
+	};
+
 	const clearTags = () => {
 		if (currentRecord) {
 			let line = "";
@@ -391,11 +412,7 @@ function App() {
 						{currentRecord ? (
 							<>
 								<div className="tag-input-container">
-									<DisplayRecord
-										record={currentRecord}
-										recordIndex={recordIndex}
-										numRecords={records.length}
-									/>
+									<DisplayRecord record={currentRecord} />
 
 									<SpecialInput
 										onChange={updateTagLine}
@@ -403,12 +420,82 @@ function App() {
 										value={tagLine}
 										actionName="Add"
 										focusEpoch={tagFocusEpoch}
-										extra={
-											<button onClick={() => clearTags()}>
-												Clear
-											</button>
-										}
 									/>
+
+									<div className="fancy-button-bar">
+										{/* <OverlayTrigger
+											placement="top"
+											overlay={myTooltip(
+												"Try to launch on local machine"
+											)}
+										>
+											<Button
+												onClick={() => reload()}
+												size="sm"
+												variant="dark"
+											>
+												Launch
+											</Button>
+										</OverlayTrigger> */}
+
+										<OverlayTrigger
+											placement="top"
+											overlay={myTooltip(
+												"Remove all tags"
+											)}
+										>
+											<Button
+												onClick={() => clearTags()}
+												size="sm"
+												variant="dark"
+												disabled={
+													currentRecord.Tags
+														.length === 0
+												}
+											>
+												Clear
+											</Button>
+										</OverlayTrigger>
+
+										<Button
+											onClick={() => removeSelf()}
+											size="sm"
+											variant="danger"
+										>
+											Delete
+										</Button>
+
+										<Button
+											onClick={() => editSelf()}
+											size="sm"
+											variant="secondary"
+										>
+											Edit
+										</Button>
+
+										<Button
+											onClick={() => reload()}
+											size="sm"
+											variant="dark"
+										>
+											Reload
+										</Button>
+
+										<Button
+											onClick={() => previousRecord()}
+											size="sm"
+											variant="dark"
+										>
+											{"<"}
+										</Button>
+										<Button
+											onClick={() => nextRecord()}
+											size="sm"
+											variant="dark"
+										>
+											{">"}
+										</Button>
+									</div>
 
 									<div className="tag-container-container">
 										<div className="tag-container">
@@ -442,13 +529,9 @@ function App() {
 									setDeltas={setDeltas}
 									undoAdds={undoAdds}
 									undoRemoves={undoRemoves}
-									// redo={redo}
 									addTagLine={addTagLine}
 									removeTagLine={removeTagLine}
 								/>
-
-								{/* TODO: this */}
-								{/* <button>Open Natively</button> */}
 							</>
 						) : null}
 					</Tab>
@@ -551,3 +634,7 @@ function sortRecordTags(record: IRecord): IRecord {
 }
 
 export default App;
+
+function myTooltip(text: string) {
+	return (props: any) => <Tooltip {...props}>{text}</Tooltip>;
+}

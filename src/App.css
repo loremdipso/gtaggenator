@@ -180,7 +180,7 @@ a {
 }
 
 .tag-input-container {
-	background-color: black;
+	background-color: rgb(44, 44, 44);
 	margin-bottom: 10px;
 }
 
@@ -235,4 +235,19 @@ a {
 	background-color: black;
 	padding-top: 10px;
 	padding-bottom: 10px;
+}
+
+.fancy-button-bar {
+	display: flex;
+	justify-content: flex-end;
+	flex-direction: row;
+}
+
+.fancy-button-bar > * {
+	margin-right: 5px;
+}
+
+.my-fancy-table {
+	background-color: black;
+	color: white !important;
 }

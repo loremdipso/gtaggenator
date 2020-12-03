@@ -39,6 +39,7 @@
     - [ ] Make handle prettier
     - [ ] Add keymap, ideally an editable one
         - Save config to tsettings
+    - [ ] Make play into tabs (with configurable filters?
 
 3. Backburner
     - [ ] Figure out migrations
