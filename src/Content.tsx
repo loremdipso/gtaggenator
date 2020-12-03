@@ -78,8 +78,9 @@ interface IVideoContainer {
 function VideoContainer({ record }: IVideoContainer) {
 	const videoRef = useRef(null as HTMLVideoElement | null);
 	const containerRef = useRef(null as HTMLDivElement | null);
-	const [volumeHeight, setVolumeHeight] = useState(200);
-	const [durationWidth, setDurationWidth] = useState(200);
+	const [volumeHeight, setVolumeHeight] = useState(0);
+	const [durationWidth, setDurationWidth] = useState(0);
+	const [muted, setMuted] = useState(false);
 
 	useEffect(() => {
 		let currentVideo = videoRef?.current;
@@ -101,6 +102,7 @@ function VideoContainer({ record }: IVideoContainer) {
 						(currentVideo.volume / 1.0) *
 							currentContainer.clientHeight
 					);
+					setMuted(currentVideo.muted);
 				}
 			};
 			const updateBoth = () => {
@@ -174,6 +176,13 @@ function VideoContainer({ record }: IVideoContainer) {
 		volumeDown();
 	});
 
+	useHotkeysHelper("alt+m", () => {
+		if (videoRef?.current) {
+			let current = videoRef.current;
+			current.muted = !current.muted;
+		}
+	});
+
 	useHotkeysHelper("alt+space", () => {
 		if (videoRef?.current) {
 			let current = videoRef.current;
@@ -209,11 +218,11 @@ function VideoContainer({ record }: IVideoContainer) {
 
 	useHotkeysHelper("alt+shift+j", () => {
 		// toast("big back");
-		scrub(times.LARGE);
+		scrub(-times.LARGE);
 	});
 	useHotkeysHelper("alt+shift+k", () => {
 		// toast("big forward");
-		scrub(-times.LARGE);
+		scrub(times.LARGE);
 	});
 
 	useHotkeysHelper("alt+numpad0", () => {
@@ -229,7 +238,10 @@ function VideoContainer({ record }: IVideoContainer) {
 	return (
 		<div className="video-container" ref={containerRef}>
 			<div className="progress-bar" style={{ width: durationWidth }} />
-			<div className="volume-bar" style={{ height: volumeHeight }} />
+			<div
+				className={`volume-bar ${muted ? "muted" : ""}`}
+				style={{ height: volumeHeight }}
+			/>
 			<video controls autoPlay ref={videoRef} src={path} />
 		</div>
 	);

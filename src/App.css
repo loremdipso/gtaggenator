@@ -84,7 +84,7 @@ a {
 	width: 100%;
 }
 
-.progress-bar {
+.video-container .progress-bar {
 	background-color: red;
 	height: 10px;
 	position: absolute;
@@ -96,6 +96,10 @@ a {
 	position: absolute;
 	right: 0;
 	bottom: 0;
+}
+
+.volume-bar.muted {
+	background-color: red;
 }
 
 .content-container video {
