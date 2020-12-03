@@ -34,7 +34,7 @@ function GrabBag({ record }: IGrabBag) {
 	const getGrabBag = () => {
 		if (record) {
 			(async () => {
-				console.log("sup");
+				// TODO: make sure this doesn't freak out and loop forever
 				// TODO: show this somewhere
 				// also, should we actually load this all the time?
 				try {
@@ -77,6 +77,61 @@ interface IVideoContainer {
 }
 function VideoContainer({ record }: IVideoContainer) {
 	const videoRef = useRef(null as HTMLVideoElement | null);
+	const containerRef = useRef(null as HTMLDivElement | null);
+	const [volumeHeight, setVolumeHeight] = useState(200);
+	const [durationWidth, setDurationWidth] = useState(200);
+
+	useEffect(() => {
+		let currentVideo = videoRef?.current;
+		let currentContainer = containerRef?.current;
+		if (currentVideo && currentContainer) {
+			const updateTime = () => {
+				// console.log("updating time");
+				if (currentVideo && currentContainer) {
+					setDurationWidth(
+						(currentVideo.currentTime / currentVideo.duration) *
+							currentContainer.clientWidth
+					);
+				}
+			};
+			const updateVolume = () => {
+				// console.log("updating volume");
+				if (currentVideo && currentContainer) {
+					setVolumeHeight(
+						(currentVideo.volume / 1.0) *
+							currentContainer.clientHeight
+					);
+				}
+			};
+			const updateBoth = () => {
+				updateTime();
+				updateVolume();
+			};
+
+			currentVideo.addEventListener("timeupdate", updateTime);
+			currentVideo.addEventListener("volumechange", updateVolume);
+			currentContainer.addEventListener("resize", updateBoth);
+
+			return () => {
+				if (currentVideo) {
+					currentVideo.removeEventListener("timeupdate", updateTime);
+					currentVideo.removeEventListener(
+						"volumechange",
+						updateVolume
+					);
+				}
+				if (currentContainer) {
+					currentContainer.removeEventListener("resize", updateBoth);
+				}
+			};
+		}
+	}, [
+		record,
+		videoRef?.current,
+		containerRef?.current,
+		setVolumeHeight,
+		setDurationWidth,
+	]);
 
 	const volumeUp = () => {
 		if (videoRef?.current) {
@@ -172,10 +227,14 @@ function VideoContainer({ record }: IVideoContainer) {
 
 	let path = record ? getPath(record.Location) : "";
 	return (
-		<video controls autoPlay ref={videoRef}>
-			<source src={path} type="video/mp4" />
-			Your browser does not support the video tag.
-		</video>
+		<div className="video-container" ref={containerRef}>
+			<div className="progress-bar" style={{ width: durationWidth }} />
+			<div className="volume-bar" style={{ height: volumeHeight }} />
+			<video controls autoPlay ref={videoRef}>
+				<source src={path} type="video/mp4" />
+				Your browser does not support the video tag.
+			</video>
+		</div>
 	);
 }
 

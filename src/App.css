@@ -80,6 +80,24 @@ a {
 	display: flex;
 }
 
+.content-container .video-container {
+	width: 100%;
+}
+
+.progress-bar {
+	background-color: red;
+	height: 10px;
+	position: absolute;
+}
+
+.volume-bar {
+	background-color: blue;
+	width: 10px;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
+
 .content-container video {
 	width: 100%;
 	height: auto;
