@@ -11,14 +11,19 @@ export default function DisplayRecord({
 	recordIndex,
 	numRecords,
 }: IDisplayRecord) {
+	/* <div>
+			{recordIndex + 1} / {numRecords}
+		</div> */
 	return (
 		<div>
-			<div>
-				{recordIndex + 1} / {numRecords}
+			<div className="truncate">
+				lksdjfkldjfsdlkjf lkj slkfj lsjf lskfjsl ksjj
+				{record.Name}
 			</div>
-			<div>{record.Name}</div>
-			<div>Times opened: {record.TimesOpened}</div>
-			<div>Size: {printSize(record.Size)}</div>
+			<div className="side-by-side">
+				<div>{`Opened ${record.TimesOpened} times`}</div>
+				<div>{printSize(record.Size)}</div>
+			</div>
 		</div>
 	);
 }

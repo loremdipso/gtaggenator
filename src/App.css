@@ -154,7 +154,7 @@ a {
 	width: 100%;
 }
 
-button.truncate {
+.truncate {
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
@@ -176,11 +176,10 @@ button.truncate {
 
 .tag-container-container {
 	overflow-y: scroll;
-	min-height: 500px;
+	height: 500px;
 }
 
 .tag-input-container {
-	margin-top: 10px;
 	background-color: black;
 	margin-bottom: 10px;
 }
@@ -193,5 +192,47 @@ button.truncate {
 
 .filter-row {
 	display: flex;
-	margin-top: 2px;
+	padding-top: 10px;
+}
+
+.fancy-tabs {
+	background-color: white;
+}
+
+.fancy-tabs .nav-link {
+	padding: 0rem 1rem;
+}
+
+.flex-grid {
+	display: flex;
+	max-width: 100%;
+}
+.flex-grid .col {
+	flex: 1;
+}
+
+.flex-grid .flex-grid-col:first-child > * {
+	text-align: left;
+}
+
+.inflexible {
+	text-align: right;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.side-by-side {
+	display: flex;
+	justify-content: space-between;
+}
+
+.side-by-side > :last-child {
+	/* justify-self: end; */
+}
+
+.filter-tab-container {
+	background-color: black;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }

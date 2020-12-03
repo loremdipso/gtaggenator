@@ -15,7 +15,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Dropdown, Form } from "react-bootstrap";
+import { Dropdown, Form, Nav, Tab, Tabs } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DisplayRecord from "./DisplayRecord";
@@ -24,6 +24,8 @@ import { useHotkeys } from "react-hotkeys-hook";
 import ResizablePanel from "./ResizablePanel";
 import { useHotkeysHelper } from "./Utils";
 import { DisplayFilters, IFilter } from "./Filters";
+
+type ITabKey = "search" | "play";
 
 function App() {
 	const [search, setSearch] = useState("");
@@ -41,9 +43,25 @@ function App() {
 	const [recordIndex, setRecordIndex] = useState(0);
 	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
 
+	const [tabKey, setTabKey] = useState("search" as ITabKey);
+
 	const [lastOpenedRecordID, setLastOpenedRecordID] = useState(
 		null as number | null
 	);
+
+	const updateTabKey = (key: ITabKey | null) => {
+		if (!key || tabKey === key) {
+			return;
+		}
+
+		setTabKey(key);
+
+		// if (key === "search") {
+		// 	setSearchFocusEpoch((epoch) => epoch + 1);
+		// } else if (key === "play") {
+		// 	setPlay((epoch) => epoch + 1);
+		// }
+	};
 
 	const nextRecord = () => {
 		if (records.length) {
@@ -82,7 +100,7 @@ function App() {
 		() => {
 			nextRecord();
 		},
-		[nextRecord, previousRecord]
+		[nextRecord]
 	);
 
 	useHotkeysHelper(
@@ -90,15 +108,25 @@ function App() {
 		() => {
 			previousRecord();
 		},
-		[nextRecord, previousRecord]
+		[previousRecord]
 	);
 
 	useHotkeysHelper(
 		"alt+s",
 		() => {
+			setTabKey("search");
 			setSearchFocusEpoch((epoch) => epoch + 1);
 		},
-		[nextRecord, previousRecord]
+		[setTabKey, setSearchFocusEpoch]
+	);
+
+	useHotkeysHelper(
+		"alt+p",
+		() => {
+			setTabKey("play");
+			setTagFocusEpoch((epoch) => epoch + 1);
+		},
+		[setTabKey, setSearchFocusEpoch]
 	);
 
 	const updateRecord = useCallback(
@@ -149,6 +177,7 @@ function App() {
 
 	const doEnd = () => {
 		setRecords([]);
+		setTabKey("search");
 		setSearchFocusEpoch((oldEpoch) => oldEpoch + 1);
 	};
 
@@ -197,6 +226,7 @@ function App() {
 			} else {
 				toast("Loaded");
 			}
+			setTabKey("play");
 			setRecordIndex(newIndex);
 			setTagFocusEpoch(tagFocusEpoch + 1);
 			setLastExecutedSearch(tempSearch);
@@ -323,79 +353,106 @@ function App() {
 	return (
 		<div className="app">
 			<ResizablePanel startingValue={350} axis="x" className="sidebar">
-				<SpecialInput
-					onChange={updateSearch}
-					action={loadData}
-					actionName="Search"
-					value={search}
-					focusEpoch={searchFocusEpoch}
-				/>
-
-				<DisplayFilters filters={filters} setFilters={setFilters} />
-
-				{currentRecord ? (
-					<>
-						<div className="tag-input-container">
-							<DisplayRecord
-								record={currentRecord}
-								recordIndex={recordIndex}
-								numRecords={records.length}
-							/>
-
+				<Tabs
+					className="fancy-tabs"
+					defaultActiveKey="search"
+					activeKey={tabKey}
+					onSelect={(k) =>
+						updateTabKey((k || null) as ITabKey | null)
+					}
+				>
+					<Tab eventKey="search" title="search">
+						<div className="filter-tab-container">
 							<SpecialInput
-								onChange={updateTagLine}
-								action={handleTagLine}
-								value={tagLine}
-								actionName="Add"
-								focusEpoch={tagFocusEpoch}
-								extra={
-									<button onClick={() => clearTags()}>
-										Clear
-									</button>
-								}
+								onChange={updateSearch}
+								action={loadData}
+								actionName="Search"
+								value={search}
+								focusEpoch={searchFocusEpoch}
 							/>
 
-							<div className="tag-container-container">
-								<div className="tag-container">
-									{sortRecordTags(currentRecord).Tags.map(
-										(tag) => (
-											<DisplayTagLineGroup
-												tag={tag}
-												key={tag}
-												variant="success"
-												action={removeTagLine}
-												secondaryAction={(
-													tagName: string
-												) => {
-													toast(
-														`hooray for ${tagName}`
-													);
-													console.log(tagName);
-													setSearch(tagName);
-													loadData(tagName);
-												}}
-												secondaryTitle="?"
-											/>
-										)
-									)}
-								</div>
-							</div>
+							<DisplayFilters
+								filters={filters}
+								setFilters={setFilters}
+							/>
 						</div>
+					</Tab>
 
-						<DisplayDeltas
-							deltas={deltas}
-							setDeltas={setDeltas}
-							undoAdds={undoAdds}
-							undoRemoves={undoRemoves}
-							// redo={redo}
-							addTagLine={addTagLine}
-							removeTagLine={removeTagLine}
-						/>
+					<Tab
+						eventKey="play"
+						title={
+							records.length
+								? `play (${recordIndex + 1} / ${
+										records.length
+								  })`
+								: "play"
+						}
+					>
+						{currentRecord ? (
+							<>
+								<div className="tag-input-container">
+									<DisplayRecord
+										record={currentRecord}
+										recordIndex={recordIndex}
+										numRecords={records.length}
+									/>
 
-						{/* TODO: this */}
-						{/* <button>Open Natively</button> */}
-					</>
-				) : null}
+									<SpecialInput
+										onChange={updateTagLine}
+										action={handleTagLine}
+										value={tagLine}
+										actionName="Add"
+										focusEpoch={tagFocusEpoch}
+										extra={
+											<button onClick={() => clearTags()}>
+												Clear
+											</button>
+										}
+									/>
+
+									<div className="tag-container-container">
+										<div className="tag-container">
+											{sortRecordTags(
+												currentRecord
+											).Tags.map((tag) => (
+												<DisplayTagLineGroup
+													tag={tag}
+													key={tag}
+													variant="success"
+													action={removeTagLine}
+													secondaryAction={(
+														tagName: string
+													) => {
+														toast(
+															`hooray for ${tagName}`
+														);
+														console.log(tagName);
+														setSearch(tagName);
+														loadData(tagName);
+													}}
+													secondaryTitle="?"
+												/>
+											))}
+										</div>
+									</div>
+								</div>
+
+								<DisplayDeltas
+									deltas={deltas}
+									setDeltas={setDeltas}
+									undoAdds={undoAdds}
+									undoRemoves={undoRemoves}
+									// redo={redo}
+									addTagLine={addTagLine}
+									removeTagLine={removeTagLine}
+								/>
+
+								{/* TODO: this */}
+								{/* <button>Open Natively</button> */}
+							</>
+						) : null}
+					</Tab>
+				</Tabs>
 			</ResizablePanel>
 
 			<Content record={currentRecord} />
