@@ -193,4 +193,5 @@ button.truncate {
 
 .filter-row {
 	display: flex;
+	margin-top: 2px;
 }

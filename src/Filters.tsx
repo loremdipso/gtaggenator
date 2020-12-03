@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Button, Form } from "react-bootstrap";
+import { UpDown } from "./UpDown";
 
 interface ISearchOption {
 	display: string;
@@ -104,10 +105,43 @@ export function DisplayFilters({ filters, setFilters }: IShowFilters) {
 		);
 	};
 
+	const moveRecord = (
+		filterToMove: IFilter,
+		oldIndex: number,
+		newIndex: number
+	) => {
+		let newFilters = [...filters]; // clone, b/c we're functional
+		let temp = newFilters[oldIndex];
+		newFilters[oldIndex] = newFilters[newIndex];
+		newFilters[newIndex] = temp;
+		setFilters(newFilters);
+	};
+
+	const moveUp = (filterToMove: IFilter) => {
+		let oldIndex = getIndex(filters, filterToMove);
+		if (oldIndex >= 1) {
+			moveRecord(filterToMove, oldIndex, oldIndex - 1);
+		}
+	};
+
+	const moveDown = (filterToMove: IFilter) => {
+		let oldIndex = getIndex(filters, filterToMove);
+		if (oldIndex >= 0 && oldIndex < filters.length - 1) {
+			moveRecord(filterToMove, oldIndex, oldIndex + 1);
+		}
+	};
+
 	return (
 		<div>
 			{filters.map((filter) => (
 				<div className="filter-row" key={filter.id}>
+					{filters.length > 1 ? (
+						<UpDown
+							upEvent={() => moveUp(filter)}
+							downEvent={() => moveDown(filter)}
+						/>
+					) : null}
+
 					{filter.type !== "sorter" ? (
 						<DropdownHelper
 							modifyFilter={modifyFilter}
@@ -197,4 +231,8 @@ function getEmptyFilter(): IFilter {
 		type: "none",
 		id: getFilterID(),
 	};
+}
+
+function getIndex(filters: IFilter[], filterToMove: IFilter) {
+	return filters.findIndex((el) => el.id === filterToMove.id);
 }
