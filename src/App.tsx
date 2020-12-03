@@ -152,11 +152,11 @@ function App() {
 		setSearchFocusEpoch((oldEpoch) => oldEpoch + 1);
 	};
 
-	const getSearch = () => {
-		let tempSearch = search;
-		if (search.length > 0) {
-			if (!search.startsWith("search")) {
-				tempSearch = `search ${search}`;
+	const getSearch = (override?: string) => {
+		let tempSearch = override || search;
+		if (tempSearch.length > 0) {
+			if (!tempSearch.startsWith("search")) {
+				tempSearch = `search ${tempSearch}`;
 			}
 		}
 
@@ -175,10 +175,7 @@ function App() {
 	};
 
 	const loadData = async (override?: string) => {
-		let tempSearch = override;
-		if (!tempSearch) {
-			tempSearch = getSearch();
-		}
+		let tempSearch = getSearch(override);
 
 		try {
 			let records = await bridge.get_records({
@@ -373,6 +370,8 @@ function App() {
 													toast(
 														`hooray for ${tagName}`
 													);
+													console.log(tagName);
+													setSearch(tagName);
 													loadData(tagName);
 												}}
 												secondaryTitle="?"
