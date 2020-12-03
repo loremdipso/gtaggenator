@@ -13,7 +13,7 @@ pub struct Record {
 	// pub Tags: Vec<String>,
 	pub Tags: HashSet<String>,
 
-	pub Size: i32,
+	pub Size: i64,
 	pub Length: i32,
 	pub TimesOpened: i32,
 
@@ -37,7 +37,7 @@ pub const SQL: &str = "
 		Name VARCHAR(500),
 		Location VARCHAR(1000),
 
-		Size INTEGER DEFAULT -1,
+		Size BIGINT DEFAULT -1,
 		Length INTEGER DEFAULT -1,
 		TimesOpened INTEGER DEFAULT 0,
 

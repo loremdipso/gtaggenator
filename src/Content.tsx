@@ -148,7 +148,7 @@ function VideoContainer({ record }: IVideoContainer) {
 	};
 
 	const getNearEnd = (duration: number) => {
-		return duration - 30;
+		return Math.max(0, duration - 30);
 	};
 
 	const scrub = (delta: number) => {
@@ -230,10 +230,7 @@ function VideoContainer({ record }: IVideoContainer) {
 		<div className="video-container" ref={containerRef}>
 			<div className="progress-bar" style={{ width: durationWidth }} />
 			<div className="volume-bar" style={{ height: volumeHeight }} />
-			<video controls autoPlay ref={videoRef}>
-				<source src={path} type="video/mp4" />
-				Your browser does not support the video tag.
-			</video>
+			<video controls autoPlay ref={videoRef} src={path} />
 		</div>
 	);
 }

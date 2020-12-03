@@ -7,6 +7,7 @@ pub use self::taggenator::Taggenator;
 mod settings;
 
 mod utils;
+pub use utils::flags;
 
 pub mod errors;
 pub use errors::BError;
