@@ -14,10 +14,13 @@ export function Content({ record }: IContent) {
 				<>
 					<GrabBag record={record} />
 					{isImage(record.Name) ? (
-						<ImageContainer record={record} />
+						<ImageContainer path={getPath(record.Location)} />
 					) : null}
 					{isVideo(record.Name) ? (
 						<VideoContainer record={record} />
+					) : null}
+					{isComic(record.Name) ? (
+						<ComicContainer record={record} />
 					) : null}
 				</>
 			) : null}
@@ -255,9 +258,10 @@ function VideoContainer({ record }: IVideoContainer) {
 }
 
 interface IImageContainer {
-	record: IRecord;
+	path: string;
 }
-function ImageContainer({ record }: IImageContainer) {
+
+function ImageContainer({ path }: IImageContainer) {
 	const [fit, setFit] = useState("fit-best" as "fit-best" | "fit-width");
 	useHotkeysHelper("alt+f", () => {
 		setFit((fit) => {
@@ -269,7 +273,6 @@ function ImageContainer({ record }: IImageContainer) {
 		});
 	});
 
-	let path = record ? getPath(record.Location) : "";
 	return (
 		<div className={`image-container ${fit}`}>
 			<img src={path} />
@@ -277,9 +280,30 @@ function ImageContainer({ record }: IImageContainer) {
 	);
 }
 
+interface IComicContainer {
+	record: IRecord;
+}
+
+function ComicContainer({ record }: IComicContainer) {
+	let pageIndex = 0;
+	let path = record ? getComicPagePath(record.Location, pageIndex) : "";
+	return <ImageContainer path={path} />;
+}
+
+function getComicPagePath(path: string, pageIndex: number): string {
+	path = path.substring(2); // remove the leading './'
+	return `http://0.0.0.0:8000/comic/${path}/${pageIndex}`;
+}
+
 function getPath(path: string): string {
 	path = path.substring(2); // remove the leading './'
 	return `http://0.0.0.0:8000/static/${path}`;
+}
+
+function isComic(name: string): boolean {
+	let extensions = ["cbz", "cbr"];
+	let extension = getExtension(name);
+	return !!extensions.find((e) => e === extension);
 }
 
 function isImage(name: string): boolean {
