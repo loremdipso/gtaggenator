@@ -14,6 +14,11 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 		file_server::serve_fs();
 	});
 
+	// start comic server in separate thread
+	std::thread::spawn(move || {
+		file_server::comic_handler();
+	});
+
 	taggenator.update_files()?;
 	let taggenator = Arc::new(Mutex::new(taggenator));
 

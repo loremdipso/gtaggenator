@@ -15,7 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 serde_json = "1.0"
-warp = "0.2"
+warp = "*"
 
   [dependencies.serde]
   features = [ "derive" ]
@@ -29,7 +29,7 @@ warp = "0.2"
   version = "0.10"
 
   [dependencies.tokio]
-  version = "0.2"
+  version = "*"
   features = [ "full" ]
 
 [features]

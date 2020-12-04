@@ -292,7 +292,7 @@ function ComicContainer({ record }: IComicContainer) {
 
 function getComicPagePath(path: string, pageIndex: number): string {
 	path = path.substring(2); // remove the leading './'
-	return `http://0.0.0.0:8000/comic/${path}/${pageIndex}`;
+	return `http://0.0.0.0:8001/comic?path=${path}/${pageIndex}`;
 }
 
 function getPath(path: string): string {
