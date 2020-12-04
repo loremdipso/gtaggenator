@@ -33,6 +33,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import ResizablePanel from "./ResizablePanel";
 import { useHotkeysHelper } from "./Utils";
 import { DisplayFilters, IFilter } from "./Filters";
+import Drawer from "./Drawer";
 
 type ITabKey = "search" | "play";
 
@@ -373,7 +374,11 @@ function App() {
 
 	return (
 		<div className="app">
-			<ResizablePanel startingValue={350} axis="x" className="sidebar">
+			<ResizablePanel
+				startingValue={350}
+				position="left"
+				className="sidebar"
+			>
 				<Tabs
 					className="fancy-tabs"
 					defaultActiveKey="search"
@@ -519,14 +524,16 @@ function App() {
 									</div>
 								</div>
 
-								<DisplayDeltas
-									deltas={deltas}
-									setDeltas={setDeltas}
-									undoAdds={undoAdds}
-									undoRemoves={undoRemoves}
-									addTagLine={addTagLine}
-									removeTagLine={removeTagLine}
-								/>
+								<Drawer startingValue={350} position="bottom">
+									<DisplayDeltas
+										deltas={deltas}
+										setDeltas={setDeltas}
+										undoAdds={undoAdds}
+										undoRemoves={undoRemoves}
+										addTagLine={addTagLine}
+										removeTagLine={removeTagLine}
+									/>
+								</Drawer>
 							</div>
 						) : null}
 					</Tab>

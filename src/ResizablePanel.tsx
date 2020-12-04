@@ -5,13 +5,13 @@ import { transform } from "typescript";
 
 type IResizablePanel = React.PropsWithChildren<{
 	startingValue: number;
-	axis: "x" | "y";
+	position: "top" | "bottom" | "left" | "right";
 	className?: string;
 }>;
 
 export default function ResizablePanel({
 	startingValue,
-	axis,
+	position,
 	className,
 	children,
 }: IResizablePanel) {
@@ -23,8 +23,14 @@ export default function ResizablePanel({
 		y: 0,
 	});
 
+	className = className || "";
+
 	useEffect(() => {
-		setValue(startingValue + deltaPosition.x);
+		if (position === "left" || position === "right") {
+			setValue(startingValue + deltaPosition.x);
+		} else {
+			setValue(startingValue - deltaPosition.y);
+		}
 	}, [deltaPosition, startingValue]);
 
 	const onStart = () => {
@@ -52,47 +58,87 @@ export default function ResizablePanel({
 	if (isClosed) {
 		tempValue = 0;
 	}
-	let containerStyle =
-		axis === "x"
-			? { width: tempValue, minWidth: tempValue }
-			: { height: tempValue, minHeight: tempValue };
 
-	let primarySize = 10;
-	let secondarySize = 50;
+	let primarySize = 5;
+	let secondarySize = 100;
 	let handleMargin = startingValue - primarySize / 2;
 
-	let handleStyle: any = // react doesn't like position absolute for some reason
-		axis === "x"
-			? {
-					width: primarySize,
-					height: secondarySize,
-					marginLeft: handleMargin,
-					marginTop: "auto",
-					marginBottom: "auto",
-					top: 0,
-					bottom: 0,
-					position: "absolute",
-			  }
-			: {
-					width: secondarySize,
-					height: primarySize,
-					marginTop: handleMargin,
-					marginLeft: "auto",
-					marginRight: "auto",
-					left: 0,
-					right: 0,
-					position: "absolute",
-			  };
+	let containerStyle: any = {};
+	let handleStyle: any = {}; // react doesn't like position absolute for some reason
+	let axis = "x";
+	switch (position) {
+		case "left":
+			containerStyle = { width: tempValue, minWidth: tempValue };
+			handleStyle = {
+				width: primarySize,
+				// height: secondarySize,
+				height: "100%",
+				marginLeft: handleMargin,
+				marginTop: "auto",
+				marginBottom: "auto",
+				top: 0,
+				bottom: 0,
+				position: "absolute",
+			};
+			break;
+
+		case "top":
+			containerStyle = { height: tempValue, minHeight: tempValue };
+			handleStyle = {
+				width: secondarySize,
+				height: primarySize,
+				marginTop: handleMargin,
+				marginLeft: "auto",
+				marginRight: "auto",
+				left: 0,
+				right: 0,
+				position: "absolute",
+			};
+			axis = "y";
+			break;
+
+		case "bottom":
+			containerStyle = { height: tempValue, minHeight: tempValue };
+			handleStyle = {
+				// width: secondarySize,
+				height: primarySize,
+				// marginBottom: handleMargin,
+				// marginTop: -(handleMargin + deltaPosition.y),
+				marginLeft: "auto",
+				marginRight: "auto",
+				left: 0,
+				right: 0,
+				bottom: 0,
+				position: "absolute",
+			};
+			axis = "y";
+			break;
+	}
 
 	if (isClosed) {
 		handleStyle.left = 0;
 		handleStyle.transform = null;
-		if (axis === "x") {
-			let margin = -deltaPosition.x;
-			handleStyle.marginLeft = margin;
-		} else {
-			let margin = -deltaPosition.y;
-			handleStyle.marginTop = margin;
+		switch (position) {
+			case "left":
+				{
+					let margin = -deltaPosition.x;
+					handleStyle.marginLeft = margin;
+				}
+				break;
+
+			case "top":
+				{
+					let margin = -deltaPosition.y;
+					handleStyle.marginTop = margin;
+				}
+				break;
+
+			case "bottom":
+				{
+					let margin = -deltaPosition.y;
+					handleStyle.marginBottom = margin;
+				}
+				break;
 		}
 	}
 
@@ -104,7 +150,7 @@ export default function ResizablePanel({
 			{children}
 
 			<Draggable
-				axis={axis}
+				axis={axis as any}
 				onStart={onStart}
 				onDrag={handleDrag}
 				onStop={onStop}

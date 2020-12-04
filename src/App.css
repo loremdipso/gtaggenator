@@ -128,9 +128,10 @@ a {
 	/* max-height: 250px;
 	min-height: 250px; */
 	/* background-color: green; */
-	height: 250px;
-	border-top: 5px solid grey;
-	padding-top: 10px;
+	/* height: 250px; */
+	height: 100%;
+	/* border-top: 5px solid grey; */
+	/* padding-top: 10px; */
 }
 
 .delta-container > .accordion {
