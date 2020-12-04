@@ -3,6 +3,7 @@ import { bridge } from "./Commands";
 import { toast } from "react-toastify";
 import { IRecord } from "./interfaces";
 import { useHotkeysHelper } from "./Utils";
+import { setSourceMapRange, updatePropertyAssignment } from "typescript";
 
 interface IContent {
 	record: IRecord | null;
@@ -285,28 +286,98 @@ interface IComicContainer {
 }
 
 function ComicContainer({ record }: IComicContainer) {
+	const [pageIndex, setPageIndex] = useState(0);
+	const [comicInfo, setComicInfo] = useState(null as IComicInfo | null);
+
 	useEffect(() => {
 		(async () => {
-			await getComicInfo(record.Location);
+			let info = await getComicInfo(record.Location);
+			setComicInfo(info);
 		})();
-	}, []);
-	let pageIndex = 0;
+	}, [record, setComicInfo]);
+
+	const updatePage = (newIndex: number) => {
+		if (comicInfo) {
+			if (newIndex >= 0 && newIndex < comicInfo.num_pages) {
+				setPageIndex(newIndex);
+			}
+		}
+	};
+	const nextPage = () => {
+		updatePage(pageIndex + 1);
+	};
+	const previousPage = () => {
+		updatePage(pageIndex - 1);
+	};
+
+	useHotkeysHelper(
+		"alt+h",
+		() => {
+			updatePage(0);
+		},
+		[updatePage]
+	);
+	useHotkeysHelper(
+		"alt+i",
+		() => {
+			if (comicInfo) {
+				updatePage(Math.round(comicInfo.num_pages / 2));
+			}
+		},
+		[updatePage, comicInfo]
+	);
+	useHotkeysHelper(
+		"alt+j",
+		() => {
+			previousPage();
+		},
+		[previousPage]
+	);
+	useHotkeysHelper(
+		"alt+k",
+		() => {
+			nextPage();
+		},
+		[nextPage]
+	);
+	useHotkeysHelper(
+		"alt+l",
+		() => {
+			if (comicInfo) {
+				updatePage(comicInfo.num_pages - 1);
+			}
+		},
+		[updatePage, comicInfo]
+	);
+
 	let path = record ? getComicPagePath(record.Location, pageIndex) : "";
-	return <ImageContainer path={path} />;
+	return (
+		<div className="image-container">
+			{comicInfo ? (
+				<div
+					style={{
+						position: "absolute",
+						top: 0,
+						right: 0,
+						backgroundColor: "black",
+					}}
+				>
+					{pageIndex + 1}/{comicInfo?.num_pages}
+				</div>
+			) : null}
+			<ImageContainer path={path} />
+		</div>
+	);
 }
 
 interface IComicInfo {
 	num_pages: number;
 }
 async function getComicInfo(path: string): Promise<IComicInfo> {
-	console.log("A");
 	let response = await fetch(
 		`http://0.0.0.0:8000/get_comic_info?path=${path}`
 	);
-	console.log("B");
 	let info = await response.json();
-	console.log("C");
-	console.log(info);
 	return info;
 }
 
