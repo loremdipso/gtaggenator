@@ -1,9 +1,11 @@
 import { RefObject, useEffect, useRef, useState } from "react";
-import { bridge } from "./Commands";
+import { bridge } from "../Commands";
 import { toast } from "react-toastify";
-import { IRecord } from "./interfaces";
-import { useHotkeysHelper } from "./Utils";
+import { IRecord } from "../interfaces";
+import { useHotkeysHelper } from "../Utils";
 import { setSourceMapRange, updatePropertyAssignment } from "typescript";
+import { useRecoilState } from "recoil";
+import { currentRecordIndex } from "../Atoms";
 
 interface IContent {
 	record: IRecord | null;
@@ -287,6 +289,7 @@ interface IComicContainer {
 }
 
 function ComicContainer({ record }: IComicContainer) {
+	const [recordIndex, setRecordIndex] = useRecoilState(currentRecordIndex);
 	const [pageIndex, setPageIndex] = useState(0);
 	const [comicInfo, setComicInfo] = useState(null as IComicInfo | null);
 	const [images, setImages] = useState([] as number[]);
@@ -317,6 +320,14 @@ function ComicContainer({ record }: IComicContainer) {
 			if (newIndex >= 0 && newIndex < comicInfo.pages.length) {
 				setPageIndex(newIndex);
 				preload(newIndex);
+			}
+
+			if (newIndex >= comicInfo.pages.length) {
+				console.log("next comic");
+				setRecordIndex(recordIndex + 1);
+			} else if (newIndex < 0 && recordIndex > 0) {
+				console.log("previous comic");
+				setRecordIndex(recordIndex - 1);
 			}
 		}
 	};

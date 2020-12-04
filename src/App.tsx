@@ -4,14 +4,14 @@ import "./App.css";
 import { bridge } from "./Commands";
 import { IRecord } from "./interfaces";
 import { ChangeEvent } from "react";
-import { Content } from "./Content";
+import { Content } from "./Components/Content";
 import {
 	IDelta,
 	createDelta,
 	DisplayDeltas,
 	DisplayTagLineGroup,
 	appendDeltaImmutable,
-} from "./Deltas";
+} from "./Components/Deltas";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -27,17 +27,27 @@ import {
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import DisplayRecord from "./DisplayRecord";
+import DisplayRecord from "./Components/DisplayRecord";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import ResizablePanel from "./ResizablePanel";
 import { useHotkeysHelper } from "./Utils";
 import { DisplayFilters, IFilter } from "./Filters";
-import Drawer from "./Drawer";
+import Drawer from "./Components/Drawer";
+import { RecoilRoot, useRecoilState } from "recoil";
+import { currentRecordIndex } from "./Atoms";
 
 type ITabKey = "search" | "play";
 
 function App() {
+	return (
+		<RecoilRoot>
+			<AppContent />
+		</RecoilRoot>
+	);
+}
+
+function AppContent() {
 	const [search, setSearch] = useState("");
 	const [tagLine, setTagLine] = useState("");
 	const [records, setRecords] = useState([] as IRecord[]);
@@ -50,7 +60,7 @@ function App() {
 	const [tagFocusEpoch, setTagFocusEpoch] = useState(0);
 	const [searchFocusEpoch, setSearchFocusEpoch] = useState(0);
 
-	const [recordIndex, setRecordIndex] = useState(0);
+	const [recordIndex, setRecordIndex] = useRecoilState(currentRecordIndex);
 	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
 
 	const [tabKey, setTabKey] = useState("search" as ITabKey);
