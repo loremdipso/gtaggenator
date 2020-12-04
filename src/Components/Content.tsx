@@ -488,12 +488,23 @@ function FlashContainer({ path }: IFlashContainer) {
 			}
 
 			let ruffle = (window as any).RufflePlayer.newest();
-			let player = ruffle.createPlayer();
+			let player = ruffle.createPlayer({ autoplay: true });
+			// player.ensureFreshInstance({ autoplay: true });
 			(window as any).LastPlayer = player;
 			container.appendChild(player);
 
 			container.appendChild(player);
 			player.load(path);
+
+			// hacky, but w/e
+			let time = 1000;
+			let start = Date.now();
+			let interval = setInterval(() => {
+				if (Date.now() - start > time) {
+					clearInterval(interval);
+				}
+				player.play();
+			}, 20);
 
 			return () => {
 				// player.close();
