@@ -1,22 +1,26 @@
 use serde::Deserialize;
+use std::collections::HashMap;
+use std::io::prelude::*;
 use std::path::Path;
+use warp::cors;
 use warp::http::header::{HeaderMap, HeaderValue};
 use warp::Filter;
 
 #[tokio::main]
 pub async fn serve_fs() {
 	// NOTE: this seems to work fine, but should we use actix-web instead?
-	let route = warp::path("static").and(warp::fs::dir("."));
-	let route = route.with(warp::log("warp-server"));
+	let fs_route = warp::path("static")
+		.and(warp::fs::dir("."))
+		.with(warp::log("warp-server"));
 
-	// TODO: maybe we don't need separate threads
-	// let route = route.or(route);
+	let get_comic_info =
+		warp::path("get_comic_info").and(warp::query().map(|query: ComicQuery| {
+			let mut rv = HashMap::new();
+			rv.insert("A", "B");
+			let rv = serde_json::to_string(&rv).unwrap();
+			return rv;
+		}));
 
-	warp::serve(route).run(([0, 0, 0, 0], 8000)).await;
-}
-
-#[tokio::main]
-pub async fn comic_handler() {
 	let mut headers = HeaderMap::new();
 	headers.insert("Content-Type", HeaderValue::from_static("application/json"));
 	headers.insert(
@@ -24,31 +28,18 @@ pub async fn comic_handler() {
 		HeaderValue::from_static("attachement; filename = \"modified.json\""),
 	);
 
-	let route = warp::path("comic")
-		// .and(warp::body::concat())
-		// .map(move |body| export_json(body))
+	let get_comic_page = warp::path("get_comic_page")
 		.and(warp::query().map(|query: ComicQuery| {
 			let path = Path::new("/home/madams/Pictures/face_game.png");
 			let f = std::fs::read(path).unwrap();
 			return f;
-			// warp::fs::file(path_export_json)
-			// return warp::fs::file(Path::new("/home/madams/Pictures/face_game.png"));
-			// return format!("query = {:?}", query);
 		}))
 		.with(warp::reply::with::headers(headers));
 
-	// let route = warp::path("comic")
-	// 	.and(warp::path::end())
-	// 	.and(warp::query().map(|query: ComicQuery| {
-	// 		let path = Path::new("/home/madams/Pictures/face_game.png").unwrap();
-	// 		let f = std::fs::read_to_string(path).unwrap();
-	// 		headers.insert("Content-Disposition", HeaderValue::from_static("attachement; filename = \"modified.json\""));
-	// 		warp::fs::file(path_export_json)
-	// 		// return warp::fs::file(Path::new("/home/madams/Pictures/face_game.png"));
-	// 		// return format!("query = {:?}", query);
-	// 	}));
-
-	warp::serve(route).run(([0, 0, 0, 0], 8001)).await;
+	let cors = warp::cors().allow_any_origin();
+	warp::serve(get_comic_info.or(get_comic_page).or(fs_route).with(cors))
+		.run(([0, 0, 0, 0], 8000))
+		.await;
 }
 
 #[derive(Deserialize, Debug)]
@@ -56,41 +47,3 @@ struct ComicQuery {
 	path: Option<String>,
 	get_pages: Option<bool>,
 }
-
-// struct Png {
-//     inner: std::io::Result<File>,
-// }
-
-// impl Png {
-
-//     pub fn new(path: &Path) -> Self {
-//          Png {inner : File::open(path)}
-//     }
-// }
-
-// impl Reply for Png {
-//     #[inline]
-//     fn into_response(self) -> warp::reply::Response {
-//         match self.inner {
-//             Ok(mut file) => {
-//                 let mut data : Vec<u8> = Vec::new();
-//                     match file.read_to_end(&mut data) {
-//                         Err(why) => {
-//                             println!("Error: {:?}", why);
-//                             return Response::new(String::new().into());
-//                         }
-//                         Ok(_) => {
-//                             let mut res = Response::new(data.into());
-//                             res.headers_mut()
-//                                 .insert(CONTENT_TYPE, HeaderValue::from_static("image/png"));
-//                             return res;
-//                         },
-//                     }
-//             }
-//             Err(why) => {
-//                 println!("Error: {:?}", why);
-//                 return Response::new(String::new().into());
-//             }
-//         }
-//     }
-// }

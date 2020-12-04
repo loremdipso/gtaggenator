@@ -285,18 +285,37 @@ interface IComicContainer {
 }
 
 function ComicContainer({ record }: IComicContainer) {
+	useEffect(() => {
+		(async () => {
+			await getComicInfo(record.Location);
+		})();
+	}, []);
 	let pageIndex = 0;
 	let path = record ? getComicPagePath(record.Location, pageIndex) : "";
 	return <ImageContainer path={path} />;
 }
 
+interface IComicInfo {
+	num_pages: number;
+}
+async function getComicInfo(path: string): Promise<IComicInfo> {
+	console.log("A");
+	let response = await fetch(
+		`http://0.0.0.0:8000/get_comic_info?path=${path}`
+	);
+	console.log("B");
+	let info = await response.json();
+	console.log("C");
+	console.log(info);
+	return info;
+}
+
 function getComicPagePath(path: string, pageIndex: number): string {
-	path = path.substring(2); // remove the leading './'
-	return `http://0.0.0.0:8001/comic?path=${path}/${pageIndex}`;
+	return `http://0.0.0.0:8000/get_comic_page?path=${path}/${pageIndex}`;
 }
 
 function getPath(path: string): string {
-	path = path.substring(2); // remove the leading './'
+	path = path.substring(2); // remove the leading './' (specific to how our file server works)
 	return `http://0.0.0.0:8000/static/${path}`;
 }
 
