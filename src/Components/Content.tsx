@@ -25,6 +25,9 @@ export function Content({ record }: IContent) {
 					{isComic(record.Name) ? (
 						<ComicContainer record={record} />
 					) : null}
+					{isFlash(record.Name) ? (
+						<FlashContainer path={getPath(record.Location)} />
+					) : null}
 				</>
 			) : null}
 		</div>
@@ -471,6 +474,19 @@ async function getComicInfo(path: string): Promise<IComicInfo> {
 	return info;
 }
 
+interface IFlashContainer {
+	path: string;
+	hidden?: boolean;
+}
+
+function FlashContainer({ path }: IFlashContainer) {
+	return (
+		<div className={`image-container`}>
+			<embed src={path} type="application/x-shockwave-flash" />
+		</div>
+	);
+}
+
 function getComicPagePath(path: string, pageIndex: number): string {
 	return `http://0.0.0.0:8000/get_comic_page?path=${path}&page_number=${pageIndex}`;
 }
@@ -488,6 +504,12 @@ function isComic(name: string): boolean {
 
 function isImage(name: string): boolean {
 	let extensions = ["jpg", "png", "gif"];
+	let extension = getExtension(name);
+	return !!extensions.find((e) => e === extension);
+}
+
+function isFlash(name: string): boolean {
+	let extensions = ["swf"];
 	let extension = getExtension(name);
 	return !!extensions.find((e) => e === extension);
 }
