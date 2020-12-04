@@ -537,7 +537,9 @@ function App() {
 									/>
 								</Drawer>
 							</div>
-						) : null}
+						) : (
+							<div>No results: (</div>
+						)}
 					</Tab>
 				</Tabs>
 			</ResizablePanel>
