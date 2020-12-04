@@ -284,3 +284,19 @@ a {
 .panel-main-content > :first-child {
 	flex-grow: 1;
 }
+
+.image-container {
+	max-height: 100%;
+	max-width: 100%;
+	overflow-y: auto;
+	overflow-x: auto;
+}
+
+.image-container.fit-best {
+	display: flex;
+}
+
+.image-container.fit-width {
+	width: 100%;
+	height: auto;
+}

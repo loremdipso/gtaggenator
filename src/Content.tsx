@@ -258,8 +258,23 @@ interface IImageContainer {
 	record: IRecord;
 }
 function ImageContainer({ record }: IImageContainer) {
+	const [fit, setFit] = useState("fit-best" as "fit-best" | "fit-width");
+	useHotkeysHelper("alt+f", () => {
+		setFit((fit) => {
+			if (fit === "fit-best") {
+				return "fit-width";
+			} else {
+				return "fit-best";
+			}
+		});
+	});
+
 	let path = record ? getPath(record.Location) : "";
-	return <img alt="content" width={500} height={500} src={path} />;
+	return (
+		<div className={`image-container ${fit}`}>
+			<img src={path} />
+		</div>
+	);
 }
 
 function getPath(path: string): string {
