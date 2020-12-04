@@ -288,6 +288,8 @@ interface IComicContainer {
 	record: IRecord;
 }
 
+const NUM_TO_PRELOAD = 5;
+const NUM_MAX_IMAGES = 20;
 function ComicContainer({ record }: IComicContainer) {
 	const [recordIndex, setRecordIndex] = useRecoilState(currentRecordIndex);
 	const [pageIndex, setPageIndex] = useState(0);
@@ -297,8 +299,9 @@ function ComicContainer({ record }: IComicContainer) {
 	const preload = async (newIndex: number) => {
 		if (comicInfo) {
 			let newImages = [...images];
+			let thisBatch = [];
 			let didSet = false;
-			for (let i = newIndex - 1; i < newIndex + 5; i++) {
+			for (let i = newIndex - 1; i < newIndex + NUM_TO_PRELOAD; i++) {
 				if (
 					i >= 0 &&
 					i < comicInfo.pages.length &&
@@ -307,13 +310,20 @@ function ComicContainer({ record }: IComicContainer) {
 					newImages.push(i);
 					didSet = true;
 				}
+
+				thisBatch.push(i);
 			}
 
 			if (didSet) {
+				newImages = newImages.filter(
+					(value) => Math.abs(value - newIndex) < NUM_MAX_IMAGES / 2
+				);
 				setImages(newImages);
 			}
 		}
 	};
+
+	console.log(images.length);
 
 	const updatePage = (newIndex: number) => {
 		if (comicInfo) {
