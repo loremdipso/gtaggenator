@@ -202,11 +202,13 @@ function App() {
 		for (let filter of filters) {
 			// if we require a value make sure it exists
 			// need to !! to get to bools
-			if (!!filter.base.hasValue === !!filter.value) {
-				tempSearch += ` ${filter.base.command}`;
-				if (filter.base.hasValue) {
+			if (filter.base.valueType) {
+				if (filter.value !== null && filter.value !== undefined) {
+					tempSearch += ` ${filter.base.command}`;
 					tempSearch += ` ${filter.value}`;
 				}
+			} else {
+				tempSearch += ` ${filter.base.command}`;
 			}
 		}
 

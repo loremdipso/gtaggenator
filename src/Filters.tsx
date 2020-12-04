@@ -6,7 +6,7 @@ interface ISearchOption {
 	display: string;
 	command: string;
 	type: "filter" | "sorter" | "none";
-	hasValue?: boolean;
+	valueType?: "string" | "number";
 	id: number;
 }
 
@@ -20,6 +20,13 @@ let type: "filter" | "sorter" = "filter";
 const baseFilters: ISearchOption[] = [
 	{ display: "None", command: "", id: id++, type: "none" },
 	{
+		display: "Search",
+		command: "-sort search",
+		id: id++,
+		valueType: "string",
+		type,
+	},
+	{
 		display: "Untouched",
 		command: "-sort untouched",
 		id: id++,
@@ -31,7 +38,7 @@ const baseFilters: ISearchOption[] = [
 	{
 		display: "Limit",
 		command: "-sort limit",
-		hasValue: true,
+		valueType: "number",
 		id: id++,
 		type,
 	},
@@ -77,7 +84,7 @@ const baseSorters: ISearchOption[] = [
 export interface IFilter {
 	base: ISearchOption; // immutable core
 	type: "filter" | "sorter" | "none";
-	value?: number;
+	value?: number | string;
 	id: number;
 }
 
@@ -111,11 +118,7 @@ export function DisplayFilters({ filters, setFilters }: IShowFilters) {
 		);
 	};
 
-	const moveRecord = (
-		filterToMove: IFilter,
-		oldIndex: number,
-		newIndex: number
-	) => {
+	const moveRecord = (oldIndex: number, newIndex: number) => {
 		let newFilters = [...filters]; // clone, b/c we're functional
 		let temp = newFilters[oldIndex];
 		newFilters[oldIndex] = newFilters[newIndex];
@@ -126,14 +129,14 @@ export function DisplayFilters({ filters, setFilters }: IShowFilters) {
 	const moveUp = (filterToMove: IFilter) => {
 		let oldIndex = getIndex(filters, filterToMove);
 		if (oldIndex >= 1) {
-			moveRecord(filterToMove, oldIndex, oldIndex - 1);
+			moveRecord(oldIndex, oldIndex - 1);
 		}
 	};
 
 	const moveDown = (filterToMove: IFilter) => {
 		let oldIndex = getIndex(filters, filterToMove);
 		if (oldIndex >= 0 && oldIndex < filters.length - 1) {
-			moveRecord(filterToMove, oldIndex, oldIndex + 1);
+			moveRecord(oldIndex, oldIndex + 1);
 		}
 	};
 
@@ -164,17 +167,29 @@ export function DisplayFilters({ filters, setFilters }: IShowFilters) {
 						/>
 					) : null}
 
-					{filter.base.hasValue ? (
-						<input
-							value={filter.value || 0}
-							type="number"
-							onChange={(ev) =>
-								modifyFilter({
-									...filter,
-									value: parseInt(ev.target.value) || 0,
-								})
-							}
-						></input>
+					{filter.base.valueType ? (
+						filter.base.valueType === "number" ? (
+							<input
+								value={filter.value || 0}
+								type="number"
+								onChange={(ev) =>
+									modifyFilter({
+										...filter,
+										value: parseInt(ev.target.value) || 0,
+									})
+								}
+							/>
+						) : (
+							<input
+								value={filter.value}
+								onChange={(ev) =>
+									modifyFilter({
+										...filter,
+										value: ev.target.value,
+									})
+								}
+							/>
+						)
 					) : null}
 
 					<Button
@@ -229,6 +244,14 @@ function DropdownHelper({ modifyFilter, type, filter }: IDropdownHelper) {
 			))}
 		</Form.Control>
 	);
+}
+
+function getDefaultFilter(): IFilter {
+	return {
+		base: baseFilters[1], // TODO: make less hacky
+		type: "filter",
+		id: getFilterID(),
+	};
 }
 
 function getEmptyFilter(): IFilter {
