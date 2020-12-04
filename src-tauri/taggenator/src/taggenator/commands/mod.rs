@@ -3,10 +3,12 @@ use crate::taggenator::errors::BError;
 use crate::taggenator::errors::MyCustomError;
 use crate::Taggenator;
 
+mod delete;
 mod dump;
 mod dump_tags;
 mod grab_bag;
 mod import;
+mod move_record;
 mod open;
 
 pub fn RunCommand(
@@ -29,6 +31,12 @@ pub fn RunCommand(
 		}
 		"open" => {
 			return open::open(taggenator, args);
+		}
+		"delete" => {
+			return delete::delete(taggenator, args);
+		}
+		"move" => {
+			return move_record::move_record(taggenator, args);
 		}
 		_ => {
 			return Err(Box::new(MyCustomError::InvalidCommand {

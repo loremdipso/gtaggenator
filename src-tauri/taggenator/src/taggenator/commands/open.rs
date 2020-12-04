@@ -21,9 +21,7 @@ pub fn open(taggenator: &mut Taggenator, args: Vec<String>) -> Result<(), BError
 		taggenator.insert_tag_line(record, line);
 	}
 
-	// println!("Num records: {}", records.len());
 	for record in records {
-		// dbg!(record);
 		println!("{}", record.Location);
 	}
 

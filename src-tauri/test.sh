@@ -20,7 +20,12 @@ cargo build --release -q -p taggenator
 cd ../tests
 
 #cargo test --release -p taggenator
+#cargo test --release -p taggenator
 
+time ~/.cargo-target/release/taggenator move --destination ./tmp/destination search C.txt
+#time ~/.cargo-target/release/taggenator move --destination ./tmp/destination search C.txt
+#time ~/.cargo-target/release/taggenator delete search B.txt
+#time ~/.cargo-target/release/taggenator delete search B.txt
 #echo thing | ~/.cargo-target/release/taggenator open
 #~/.cargo-target/release/taggenator open
 #time ~/.cargo-target/release/taggenator grabbag add "./tmp/B.txt" huh welp2 --ignore-update
@@ -31,7 +36,7 @@ cd ../tests
 #time ~/.cargo-target/release/taggenator grabbag get_all "/home/madams/Projects/gtaggenator/src-tauri/tests/tmp/B.txt"
 #~/.cargo-target/release/taggenator dump -sort limit 20
 #~/.cargo-target/release/taggenator dump -sort limit -20
-echo add_record location 42 42 42 false "2020-11-11 11:18:18.123456 -0700 MST" DATE DATE | ~/.cargo-target/release/taggenator import
+#echo add_record location 42 42 42 false "2020-11-11 11:18:18.123456 -0700 MST" DATE DATE | ~/.cargo-target/release/taggenator import
 #echo add_record location 42 42 42 false "2020-11-11 11:18:18:18.470445054 -0700 MST" DATE DATE | ~/.cargo-target/release/taggenator import
 
 #echo a add_tag location tag add_tag location2 tag2 | ~/.cargo-target/release/taggenator import
