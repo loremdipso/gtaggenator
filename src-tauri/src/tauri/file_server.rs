@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use warp::cors;
@@ -16,7 +17,7 @@ pub async fn serve_fs() {
 	let get_comic_info =
 		warp::path("get_comic_info").and(warp::query().map(|query: ComicQuery| {
 			let mut rv = HashMap::new();
-			rv.insert("A", "B");
+			rv.insert("pages", 30); // TODO
 			let rv = serde_json::to_string(&rv).unwrap();
 			return rv;
 		}));
@@ -30,9 +31,24 @@ pub async fn serve_fs() {
 
 	let get_comic_page = warp::path("get_comic_page")
 		.and(warp::query().map(|query: ComicQuery| {
-			let path = Path::new("/home/madams/Pictures/face_game.png");
-			let f = std::fs::read(path).unwrap();
-			return f;
+			// let path = Path::new("/home/madams/Pictures/face_game.png");
+			// let f = std::fs::read(path).unwrap();
+			println!(
+				"Opening zip archive for: {:?}, {:?}",
+				query.path, query.page_number
+			);
+
+			let path = query.path.unwrap().to_string();
+			let path = Path::new(&path);
+			let file = File::open(path).unwrap();
+
+			let mut archive_contents: zip::read::ZipArchive<std::fs::File> =
+				zip::ZipArchive::new(file).unwrap();
+
+			let mut buffer = Vec::new();
+			let mut archive_file: zip::read::ZipFile = archive_contents.by_index(0).unwrap();
+			archive_file.read_to_end(&mut buffer);
+			return buffer;
 		}))
 		.with(warp::reply::with::headers(headers));
 
@@ -45,5 +61,5 @@ pub async fn serve_fs() {
 #[derive(Deserialize, Debug)]
 struct ComicQuery {
 	path: Option<String>,
-	get_pages: Option<bool>,
+	page_number: Option<i32>,
 }

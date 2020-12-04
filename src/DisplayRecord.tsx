@@ -31,6 +31,10 @@ export default function DisplayRecord({ record }: IDisplayRecord) {
 										<td>Last Seen</td>
 										<td>{record.DateLastAccessed}</td>
 									</tr>
+									<tr>
+										<td>Location</td>
+										<td>{record.Location}</td>
+									</tr>
 								</tbody>
 							</Table>
 						</div>

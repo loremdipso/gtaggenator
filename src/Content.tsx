@@ -311,7 +311,7 @@ async function getComicInfo(path: string): Promise<IComicInfo> {
 }
 
 function getComicPagePath(path: string, pageIndex: number): string {
-	return `http://0.0.0.0:8000/get_comic_page?path=${path}/${pageIndex}`;
+	return `http://0.0.0.0:8000/get_comic_page?path=${path}&page_number=${pageIndex}`;
 }
 
 function getPath(path: string): string {
