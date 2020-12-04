@@ -160,11 +160,20 @@ function App() {
 			) {
 				// we've got to keep track of this, otherwise we get an infinite loop, which is no bueno
 				setLastOpenedRecordID(currentRecord.RecordID);
-				updateRecord(
-					await bridge.open_record({
-						record: currentRecord,
-					})
-				);
+				// UI minor change: we'll update the record immediately, even before the request is finished
+				updateRecord({
+					...currentRecord,
+					TimesOpened: currentRecord.TimesOpened + 1,
+				});
+				await bridge.open_record({
+					record: currentRecord,
+				});
+
+				// updateRecord(
+				// 	await bridge.open_record({
+				// 		record: currentRecord,
+				// 	})
+				// );
 			}
 		})();
 	}, [currentRecord, lastOpenedRecordID, updateRecord]);

@@ -26,8 +26,16 @@ pub async fn serve_fs() {
 		warp::path("get_comic_info").and(warp::query().map(|query: ComicQuery| {
 			let mut archive_contents = get_archive(query.path.unwrap());
 
+			let mut pages: Vec<usize> = vec![];
+			for i in 0..archive_contents.len() {
+				let mut file = archive_contents.by_index(i).unwrap();
+				if file.is_file() && is_image(file.name()) {
+					pages.push(i);
+				}
+			}
+
 			let mut rv = HashMap::new();
-			rv.insert("num_pages", archive_contents.len());
+			rv.insert("pages", pages);
 			let rv = serde_json::to_string(&rv).unwrap();
 
 			return rv;
@@ -80,4 +88,14 @@ fn get_archive(path: String) -> ZipArchive<File> {
 struct ComicQuery {
 	path: Option<String>,
 	page_number: Option<usize>,
+}
+
+const IMAGE_EXTENSIONS: [&str; 5] = ["jpg", "png", "jpeg", "gif", "svg"];
+fn is_image(name: &str) -> bool {
+	for ext in IMAGE_EXTENSIONS.iter() {
+		if name.ends_with(ext) {
+			return true;
+		}
+	}
+	return false;
 }

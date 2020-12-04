@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { bridge } from "./Commands";
 import { toast } from "react-toastify";
 import { IRecord } from "./interfaces";
@@ -260,9 +260,10 @@ function VideoContainer({ record }: IVideoContainer) {
 
 interface IImageContainer {
 	path: string;
+	hidden?: boolean;
 }
 
-function ImageContainer({ path }: IImageContainer) {
+function ImageContainer({ path, hidden }: IImageContainer) {
 	const [fit, setFit] = useState("fit-best" as "fit-best" | "fit-width");
 	useHotkeysHelper("alt+f", () => {
 		setFit((fit) => {
@@ -275,8 +276,8 @@ function ImageContainer({ path }: IImageContainer) {
 	});
 
 	return (
-		<div className={`image-container ${fit}`}>
-			<img src={path} />
+		<div className={`image-container ${fit} ${hidden ? "hidden" : ""}`}>
+			<img src={path} alt="content" />
 		</div>
 	);
 }
@@ -288,18 +289,34 @@ interface IComicContainer {
 function ComicContainer({ record }: IComicContainer) {
 	const [pageIndex, setPageIndex] = useState(0);
 	const [comicInfo, setComicInfo] = useState(null as IComicInfo | null);
+	const [images, setImages] = useState([] as number[]);
 
-	useEffect(() => {
-		(async () => {
-			let info = await getComicInfo(record.Location);
-			setComicInfo(info);
-		})();
-	}, [record, setComicInfo]);
+	const preload = async (newIndex: number) => {
+		if (comicInfo) {
+			let newImages = [...images];
+			let didSet = false;
+			for (let i = newIndex - 1; i < newIndex + 5; i++) {
+				if (
+					i >= 0 &&
+					i < comicInfo.pages.length &&
+					images.indexOf(i) < 0
+				) {
+					newImages.push(i);
+					didSet = true;
+				}
+			}
+
+			if (didSet) {
+				setImages(newImages);
+			}
+		}
+	};
 
 	const updatePage = (newIndex: number) => {
 		if (comicInfo) {
-			if (newIndex >= 0 && newIndex < comicInfo.num_pages) {
+			if (newIndex >= 0 && newIndex < comicInfo.pages.length) {
 				setPageIndex(newIndex);
+				preload(newIndex);
 			}
 		}
 	};
@@ -310,8 +327,26 @@ function ComicContainer({ record }: IComicContainer) {
 		updatePage(pageIndex - 1);
 	};
 
+	useEffect(() => {
+		(async () => {
+			let info = await getComicInfo(record.Location);
+			setComicInfo(info);
+		})();
+	}, [record, setComicInfo]);
+
+	useEffect(() => {
+		updatePage(0);
+	}, [comicInfo]);
+
 	useHotkeysHelper(
 		"alt+h",
+		() => {
+			updatePage(0);
+		},
+		[updatePage]
+	);
+	useHotkeysHelper(
+		"home",
 		() => {
 			updatePage(0);
 		},
@@ -321,13 +356,20 @@ function ComicContainer({ record }: IComicContainer) {
 		"alt+i",
 		() => {
 			if (comicInfo) {
-				updatePage(Math.round(comicInfo.num_pages / 2));
+				updatePage(Math.round(comicInfo.pages.length / 2));
 			}
 		},
 		[updatePage, comicInfo]
 	);
 	useHotkeysHelper(
 		"alt+j",
+		() => {
+			previousPage();
+		},
+		[previousPage]
+	);
+	useHotkeysHelper(
+		"pageup",
 		() => {
 			previousPage();
 		},
@@ -341,37 +383,64 @@ function ComicContainer({ record }: IComicContainer) {
 		[nextPage]
 	);
 	useHotkeysHelper(
+		"pagedown",
+		() => {
+			nextPage();
+		},
+		[nextPage]
+	);
+	useHotkeysHelper(
 		"alt+l",
 		() => {
 			if (comicInfo) {
-				updatePage(comicInfo.num_pages - 1);
+				updatePage(comicInfo.pages.length - 1);
+			}
+		},
+		[updatePage, comicInfo]
+	);
+	useHotkeysHelper(
+		"end",
+		() => {
+			if (comicInfo) {
+				updatePage(comicInfo.pages.length - 1);
 			}
 		},
 		[updatePage, comicInfo]
 	);
 
-	let path = record ? getComicPagePath(record.Location, pageIndex) : "";
 	return (
 		<div className="image-container">
-			{comicInfo ? (
-				<div
-					style={{
-						position: "absolute",
-						top: 0,
-						right: 0,
-						backgroundColor: "black",
-					}}
-				>
-					{pageIndex + 1}/{comicInfo?.num_pages}
-				</div>
+			{record && comicInfo ? (
+				<>
+					<div
+						style={{
+							position: "absolute",
+							top: 0,
+							right: 0,
+							backgroundColor: "black",
+						}}
+					>
+						{pageIndex + 1}/{comicInfo.pages.length}
+					</div>
+
+					{images.map((imageIndex) => (
+						<ImageContainer
+							key={imageIndex}
+							path={getComicPagePath(
+								record.Location,
+								comicInfo.pages[imageIndex]
+							)}
+							hidden={imageIndex !== pageIndex}
+						/>
+					))}
+				</>
 			) : null}
-			<ImageContainer path={path} />
 		</div>
 	);
 }
 
 interface IComicInfo {
-	num_pages: number;
+	pages: number[];
 }
 async function getComicInfo(path: string): Promise<IComicInfo> {
 	let response = await fetch(

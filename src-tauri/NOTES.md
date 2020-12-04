@@ -22,7 +22,7 @@
     - [ ] Test renaming code/deduplication work
     - [x] Implement batching in Async SQL queries
     - [ ] Add dates
-    - [ ] Flush before reads? Yay or nay?
+    - [ ] Flush before reads? Yay or nay? Maybe with reload?
 
 2. GUI
 
@@ -36,10 +36,12 @@
     - [ ] Am I re-requesting an image anytime I change anything?
     - [x] Add toasts
     - [ ] Add scss
-    - [ ] Make handle prettier
+    - [x] Make handle prettier
     - [ ] Add keymap, ideally an editable one
         - Save config to tsettings
     - [ ] Make play into tabs (with configurable filters?
+    - [ ] Preload images in browser
+    - [ ] Cache Zip/pages on server
 
 3. Backburner
     - [ ] Figure out migrations
