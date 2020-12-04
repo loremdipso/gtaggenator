@@ -488,8 +488,7 @@ function FlashContainer({ path }: IFlashContainer) {
 			}
 
 			let ruffle = (window as any).RufflePlayer.newest();
-			let player = ruffle.createPlayer({ autoplay: true });
-			// player.ensureFreshInstance({ autoplay: true });
+			let player = ruffle.createPlayer();
 			(window as any).LastPlayer = player;
 			container.appendChild(player);
 
@@ -505,10 +504,6 @@ function FlashContainer({ path }: IFlashContainer) {
 				}
 				player.play();
 			}, 20);
-
-			return () => {
-				// player.close();
-			};
 		}
 	}, [path, ref]);
 
