@@ -1,9 +1,7 @@
-import { RefObject, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { bridge } from "../Commands";
-import { toast } from "react-toastify";
 import { IRecord } from "../interfaces";
 import { useHotkeysHelper } from "../Utils";
-import { setSourceMapRange, updatePropertyAssignment } from "typescript";
 import { useRecoilState } from "recoil";
 import { currentRecordIndex } from "../Atoms";
 
@@ -480,11 +478,30 @@ interface IFlashContainer {
 }
 
 function FlashContainer({ path }: IFlashContainer) {
-	return (
-		<div className={`image-container`}>
-			<embed src={path} type="application/x-shockwave-flash" />
-		</div>
-	);
+	const ref = useRef(null as HTMLDivElement | null);
+
+	useEffect(() => {
+		let container = ref.current;
+		if (container) {
+			while (container.firstChild) {
+				container.removeChild(container.firstChild);
+			}
+
+			let ruffle = (window as any).RufflePlayer.newest();
+			let player = ruffle.createPlayer();
+			(window as any).LastPlayer = player;
+			container.appendChild(player);
+
+			container.appendChild(player);
+			player.load(path);
+
+			return () => {
+				// player.close();
+			};
+		}
+	}, [path, ref]);
+
+	return <div className="flash-container" ref={ref} />;
 }
 
 function getComicPagePath(path: string, pageIndex: number): string {
