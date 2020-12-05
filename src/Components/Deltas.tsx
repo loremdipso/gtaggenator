@@ -228,14 +228,16 @@ interface IDisplayTagLineGroup {
 	tag: string;
 	variant: "success" | "danger";
 	action: (tag: string) => any;
-	secondaryAction: (tag: string) => any;
-	secondaryTitle: string;
+	rightClickAction?: (tag: string) => any;
+	secondaryAction?: (tag: string) => any;
+	secondaryTitle?: string;
 }
 
 export function DisplayTagLineGroup({
 	tag,
 	variant,
 	action,
+	rightClickAction,
 	secondaryAction,
 	secondaryTitle,
 }: IDisplayTagLineGroup) {
@@ -246,15 +248,18 @@ export function DisplayTagLineGroup({
 				key={tag}
 				variant={variant}
 				action={action}
+				rightClickAction={rightClickAction}
 			/>
 
-			<Button
-				size="sm"
-				variant="dark"
-				onClick={() => secondaryAction(tag)}
-			>
-				{secondaryTitle}
-			</Button>
+			{secondaryAction ? (
+				<Button
+					size="sm"
+					variant="dark"
+					onClick={() => secondaryAction(tag)}
+				>
+					{secondaryTitle}
+				</Button>
+			) : null}
 		</div>
 	);
 }
@@ -263,14 +268,25 @@ interface IDisplayTagLine {
 	tag: string;
 	variant: "success" | "danger";
 	action: (tag: string) => any;
+	rightClickAction?: (tag: string) => any;
 }
-function DisplayTagLine({ tag, variant, action }: IDisplayTagLine) {
+function DisplayTagLine({
+	tag,
+	variant,
+	action,
+	rightClickAction,
+}: IDisplayTagLine) {
 	return (
 		<Button
 			className="tag truncate"
 			size="sm"
 			variant={variant}
 			onClick={() => action(tag)}
+			onContextMenu={(event) => {
+				event.preventDefault();
+				rightClickAction && rightClickAction(tag);
+				return false;
+			}}
 		>
 			{tag}
 		</Button>

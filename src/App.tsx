@@ -492,13 +492,13 @@ function AppContent() {
 										Delete
 									</Button>
 
-									<Button
+									{/* <Button
 										onClick={() => editSelf()}
 										size="sm"
 										variant="secondary"
 									>
 										Edit
-									</Button>
+									</Button> */}
 
 									<Button
 										onClick={() => hardReload()}
@@ -540,18 +540,19 @@ function AppContent() {
 													tag={tag}
 													key={tag}
 													variant="success"
-													action={removeTagLine}
-													secondaryAction={(
+													action={(
 														tagName: string
 													) => {
 														toast(
 															`hooray for ${tagName}`
 														);
-														console.log(tagName);
 														setSearch(tagName);
 														loadData(tagName);
 													}}
-													secondaryTitle="?"
+													rightClickAction={
+														removeTagLine
+													}
+													// secondaryTitle="?"
 												/>
 											)
 										)}
