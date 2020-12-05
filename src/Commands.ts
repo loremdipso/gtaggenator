@@ -28,6 +28,10 @@ class Bridge {
 	async get_grab_bag(args: { record: IRecord }): Promise<{ [key: string]: string }> {
 		return helper("GetGrabBag", args);
 	}
+
+	async hardReload(): Promise<unknown> {
+		return helper("HardReload", {});
+	}
 }
 
 function helper<T>(tagname: string, args: any): Promise<T> {

@@ -192,6 +192,13 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 								error,
 							);
 						}
+
+						HardReload { callback, error } => {
+							// TODO: save state, then recreate UI?
+							println!("Reloading...");
+							// _webview.eval("document.location = \"about:blank\";");
+							_webview.terminate();
+						}
 					}
 					Ok(())
 				}

@@ -63,6 +63,11 @@ pub enum Cmd {
 		key: String,
 		value: String,
 	},
+
+	HardReload {
+		callback: String,
+		error: String,
+	},
 }
 
 #[derive(Serialize)]
