@@ -318,8 +318,7 @@ function AppContent() {
 
 	const hardReload = () => {
 		// TODO: this, maybe? Our memory usage is off the walls
-		bridge.hardReload();
-		// (document as any).location = "about:blank";
+		bridge.hardReload({ records, recordIndex });
 	};
 
 	const editSelf = () => {
@@ -499,6 +498,14 @@ function AppContent() {
 										variant="secondary"
 									>
 										Edit
+									</Button>
+
+									<Button
+										onClick={() => hardReload()}
+										size="sm"
+										variant="dark"
+									>
+										Hard Reload
 									</Button>
 
 									<Button

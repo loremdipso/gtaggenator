@@ -29,8 +29,8 @@ class Bridge {
 		return helper("GetGrabBag", args);
 	}
 
-	async hardReload(): Promise<unknown> {
-		return helper("HardReload", {});
+	async hardReload(args: { records: IRecord[], recordIndex: number }): Promise<unknown> {
+		return helper("HardReload", args);
 	}
 }
 

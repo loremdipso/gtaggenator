@@ -16,7 +16,23 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 
 	taggenator.update_files()?;
 	let taggenator = Arc::new(Mutex::new(taggenator));
+	let stored_data = Arc::new(Mutex::new(StoredData::new()));
+	loop {
+		stored_data.clone().lock().unwrap().should_reload = false;
+		start_tauri_core(taggenator.clone(), stored_data.clone())?;
+		let data = stored_data.clone();
+		let data = data.lock().unwrap();
+		if !data.should_reload {
+			break;
+		}
+	}
+	return Ok(());
+}
 
+pub fn start_tauri_core(
+	taggenator: Arc<Mutex<Taggenator>>,
+	stored_data: Arc<Mutex<StoredData>>,
+) -> Result<(), BError> {
 	tauri::AppBuilder::new()
 		.invoke_handler(move |_webview, arg| {
 			use super::cmd::Cmd::*;
@@ -197,6 +213,7 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 							// TODO: save state, then recreate UI?
 							println!("Reloading...");
 							// _webview.eval("document.location = \"about:blank\";");
+							stored_data.clone().lock().unwrap().should_reload = true;
 							_webview.terminate();
 						}
 					}
@@ -208,4 +225,16 @@ pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
 		.run();
 
 	Ok(())
+}
+
+pub struct StoredData {
+	should_reload: bool,
+}
+
+impl StoredData {
+	fn new() -> StoredData {
+		StoredData {
+			should_reload: false,
+		}
+	}
 }
