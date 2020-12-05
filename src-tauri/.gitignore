@@ -10,6 +10,7 @@ config.json
 bundle.json
 tests/tmp
 tests/*.db
+tests/massif*
 
 tagg.db
 tsettings.yaml
