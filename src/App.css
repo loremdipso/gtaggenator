@@ -316,3 +316,18 @@ ruffle-player {
 	width: 100%;
 	height: 100%;
 }
+
+.grabbag-row > * {
+	padding: 10px;
+	word-break: break-word;
+}
+
+.grabbag-row .grabbag-key {
+	background-color: black;
+	color: white;
+}
+
+.grabbag-row .grabbag-value {
+	background-color: rgb(37, 37, 37);
+	color: white;
+}

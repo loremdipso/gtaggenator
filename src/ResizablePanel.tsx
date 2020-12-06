@@ -26,8 +26,10 @@ export default function ResizablePanel({
 	className = className || "";
 
 	useEffect(() => {
-		if (position === "left" || position === "right") {
+		if (position === "left") {
 			setValue(startingValue + deltaPosition.x);
+		} else if (position === "right") {
+			setValue(startingValue - deltaPosition.x);
 		} else {
 			setValue(startingValue - deltaPosition.y);
 		}
@@ -71,9 +73,22 @@ export default function ResizablePanel({
 			containerStyle = { width: tempValue, minWidth: tempValue };
 			handleStyle = {
 				width: primarySize,
-				// height: secondarySize,
 				height: "100%",
 				marginLeft: handleMargin,
+				marginTop: "auto",
+				marginBottom: "auto",
+				top: 0,
+				bottom: 0,
+				position: "absolute",
+			};
+			break;
+
+		case "right":
+			containerStyle = { width: tempValue, minWidth: tempValue };
+			handleStyle = {
+				width: primarySize,
+				height: "100%",
+				marginRight: handleMargin,
 				marginTop: "auto",
 				marginBottom: "auto",
 				top: 0,
@@ -100,10 +115,7 @@ export default function ResizablePanel({
 		case "bottom":
 			containerStyle = { height: tempValue, minHeight: tempValue };
 			handleStyle = {
-				// width: secondarySize,
 				height: primarySize,
-				// marginBottom: handleMargin,
-				// marginTop: -(handleMargin + deltaPosition.y),
 				marginLeft: "auto",
 				marginRight: "auto",
 				left: 0,
@@ -116,19 +128,29 @@ export default function ResizablePanel({
 	}
 
 	if (isClosed) {
-		handleStyle.left = 0;
 		handleStyle.transform = null;
 		switch (position) {
 			case "left":
 				{
 					let margin = -deltaPosition.x;
+					handleStyle.left = 0;
 					handleStyle.marginLeft = margin;
+				}
+				break;
+
+			case "right":
+				{
+					let margin = deltaPosition.x;
+					handleStyle.marginRight = margin;
+					handleStyle.right = 0;
 				}
 				break;
 
 			case "top":
 				{
+					// TODO: test
 					let margin = -deltaPosition.y;
+					handleStyle.left = 0;
 					handleStyle.marginTop = margin;
 				}
 				break;
@@ -136,6 +158,7 @@ export default function ResizablePanel({
 			case "bottom":
 				{
 					let margin = -deltaPosition.y;
+					handleStyle.left = 0;
 					handleStyle.marginBottom = margin;
 				}
 				break;

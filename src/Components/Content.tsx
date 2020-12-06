@@ -4,6 +4,8 @@ import { IRecord } from "../interfaces";
 import { useHotkeysHelper } from "../Utils";
 import { useRecoilState } from "recoil";
 import { currentRecordIndex } from "../Atoms";
+import ResizablePanel from "../ResizablePanel";
+import { Card } from "react-bootstrap";
 
 interface IContent {
 	record: IRecord | null;
@@ -13,7 +15,6 @@ export function Content({ record }: IContent) {
 		<div className="content-container">
 			{record ? (
 				<>
-					<GrabBag record={record} />
 					{isImage(record.Name) ? (
 						<ImageContainer path={getPath(record.Location)} />
 					) : null}
@@ -26,6 +27,7 @@ export function Content({ record }: IContent) {
 					{isFlash(record.Name) ? (
 						<FlashContainer path={getPath(record.Location)} />
 					) : null}
+					<GrabBag record={record} />
 				</>
 			) : null}
 		</div>
@@ -47,7 +49,6 @@ function GrabBag({ record }: IGrabBag) {
 				try {
 					let grabBag = await bridge.get_grab_bag({ record: record });
 					setGrabBag(grabBag);
-					console.log(grabBag);
 				} catch (e) {
 					console.log(e);
 				}
@@ -59,16 +60,21 @@ function GrabBag({ record }: IGrabBag) {
 		getGrabBag();
 	}, [record]);
 
+	if (!Object.keys(grabBag).length) {
+		return null;
+	}
+
 	return (
-		<>
-			{/* <button onClick={() => getGrabBag()}>DOIT</button> */}
-			{Object.keys(grabBag).map((key) => (
-				<div key={key}>
-					<div>Key = {key}</div>
-					<div>Value = {grabBag[key]}</div>
-				</div>
-			))}
-		</>
+		<ResizablePanel startingValue={250} position="right">
+			<div className="grabbag-container">
+				{Object.keys(grabBag).map((key) => (
+					<div key={key} className="grabbag-row">
+						<div className="grabbag-key">{key}</div>
+						<div className="grabbag-value">{grabBag[key]}</div>
+					</div>
+				))}
+			</div>
+		</ResizablePanel>
 	);
 }
 
