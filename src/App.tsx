@@ -484,13 +484,13 @@ function AppContent() {
 										</Button>
 									</OverlayTrigger>
 
-									<Button
+									{/* <Button
 										onClick={() => removeSelf()}
 										size="sm"
 										variant="danger"
 									>
 										Delete
-									</Button>
+									</Button> */}
 
 									{/* <Button
 										onClick={() => editSelf()}
@@ -500,13 +500,13 @@ function AppContent() {
 										Edit
 									</Button> */}
 
-									<Button
+									{/* <Button
 										onClick={() => hardReload()}
 										size="sm"
 										variant="dark"
 									>
 										Hard Reload
-									</Button>
+									</Button> */}
 
 									<Button
 										onClick={() => reload()}

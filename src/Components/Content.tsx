@@ -65,7 +65,7 @@ function GrabBag({ record }: IGrabBag) {
 	}
 
 	return (
-		<ResizablePanel startingValue={250} position="right">
+		<ResizablePanel startingValue={350} position="right">
 			<div className="grabbag-container">
 				{Object.keys(grabBag).map((key) => (
 					<div key={key} className="grabbag-row">
