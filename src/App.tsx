@@ -15,16 +15,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import {
-	Button,
-	Dropdown,
-	Form,
-	Nav,
-	OverlayTrigger,
-	Tab,
-	Tabs,
-	Tooltip,
-} from "react-bootstrap";
+import { Button, OverlayTrigger, Tab, Tabs, Tooltip } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DisplayRecord from "./Components/DisplayRecord";
@@ -48,6 +39,8 @@ function App() {
 }
 
 function AppContent() {
+	const [args, setArgs] = useState([] as string[]);
+
 	const [search, setSearch] = useState("");
 	const [tagLine, setTagLine] = useState("");
 	const [records, setRecords] = useState([] as IRecord[]);
@@ -144,13 +137,22 @@ function AppContent() {
 	);
 
 	// load initial arguments, once
-	// useEffect(() => {
-	// 	(async () => {
-	// 		let args = await bridge.getInitialArguments();
-	// 		console.log(`initial args: ${args}`);
-	// 		// TODO: populate filters from this
-	// 	})();
-	// }, []);
+	useEffect(() => {
+		(async () => {
+			let initialArgs = await bridge.getInitialArguments();
+			setArgs(initialArgs);
+		})();
+	}, []);
+
+	useEffect(() => {
+		if (args.length) {
+			console.log(`initial args: ${args}`);
+			let argsString = args.join(" ");
+			setSearch(argsString);
+			loadData(argsString);
+			// TODO: populate filters from this
+		}
+	}, [args]);
 
 	const updateRecord = useCallback(
 		(updatedRecord: IRecord) => {
