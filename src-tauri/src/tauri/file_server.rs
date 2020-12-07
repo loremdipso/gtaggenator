@@ -1,10 +1,10 @@
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::{cmp::Ordering, collections::HashMap};
 use warp::cors;
 use warp::http::header::{HeaderMap, HeaderValue};
 use warp::Filter;
@@ -26,13 +26,29 @@ pub async fn serve_fs() {
 		warp::path("get_comic_info").and(warp::query().map(|query: ComicQuery| {
 			let mut archive_contents = get_archive(query.path.unwrap());
 
-			let mut pages: Vec<usize> = vec![];
+			let mut pages_map: HashMap<usize, String> = HashMap::new();
+			// let mut pages: Vec<usize> = vec![];
 			for i in 0..archive_contents.len() {
 				let mut file = archive_contents.by_index(i).unwrap();
 				if file.is_file() && is_image(file.name()) {
-					pages.push(i);
+					pages_map.insert(i, file.name().to_string());
 				}
 			}
+
+			// Make sure to sort by:
+			// 	- numerical rep of name
+			//  - name
+			//  - then the index in the zip
+			let mut pages: Vec<usize> = pages_map.keys().cloned().collect();
+			let cmp = |l: &usize, r: &usize| {
+				let l_name = &pages_map[l];
+				let r_name = &pages_map[r];
+				return chain_ordering(
+					get_leading_number(&l_name).cmp(&get_leading_number(&r_name)),
+					chain_ordering(l_name.cmp(r_name), l.cmp(r)),
+				);
+			};
+			pages.sort_by(cmp);
 
 			let mut rv = HashMap::new();
 			rv.insert("pages", pages);
@@ -98,4 +114,28 @@ fn is_image(name: &str) -> bool {
 		}
 	}
 	return false;
+}
+
+fn get_leading_number(string: &str) -> usize {
+	let res = string
+		.chars()
+		.take_while(|c| c.is_digit(10))
+		.collect::<String>();
+	dbg!(&res);
+	return usize::from_str_radix(&res, 10).unwrap_or_default();
+}
+
+#[test]
+fn test_get_leading_number() {
+	assert_eq!(4, get_leading_number("4and then something else"));
+	assert_eq!(42, get_leading_number("42and then something else"));
+	assert_eq!(0, get_leading_number("something else then 4"));
+	assert_eq!(0, get_leading_number("something else 4 then more"));
+}
+
+fn chain_ordering(o1: Ordering, o2: Ordering) -> Ordering {
+	match o1 {
+		Ordering::Equal => o2,
+		_ => o1,
+	}
 }

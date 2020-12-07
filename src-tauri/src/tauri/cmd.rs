@@ -64,7 +64,7 @@ pub enum Cmd {
 		value: String,
 	},
 
-	HardReload {
+	GetInitialArguments {
 		callback: String,
 		error: String,
 	},

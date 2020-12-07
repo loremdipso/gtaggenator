@@ -27,7 +27,6 @@ use walkdir;
 pub struct Taggenator {
 	pub settings: Settings,
 	pub database: Database,
-	pub headless: bool,
 }
 
 impl Taggenator {
@@ -37,17 +36,6 @@ impl Taggenator {
 		return Ok(Taggenator {
 			settings: settings,
 			database: database,
-			headless: false,
-		});
-	}
-
-	pub fn new_headless() -> Result<Taggenator, BError> {
-		let settings = Settings::new()?;
-		let database = Database::new()?;
-		return Ok(Taggenator {
-			settings: settings,
-			database: database,
-			headless: true,
 		});
 	}
 

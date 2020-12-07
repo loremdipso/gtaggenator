@@ -1,5 +1,4 @@
 import { promisified } from "tauri/api/tauri";
-import { addEmitHelper } from "typescript";
 import { IRecord } from "./interfaces";
 
 class Bridge {
@@ -29,8 +28,8 @@ class Bridge {
 		return helper("GetGrabBag", args);
 	}
 
-	async hardReload(args: { records: IRecord[], recordIndex: number }): Promise<unknown> {
-		return helper("HardReload", args);
+	async getInitialArguments(): Promise<string[]> {
+		return helper("GetInitialArguments", {});
 	}
 }
 

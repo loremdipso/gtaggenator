@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import "./App.css";
-import { bridge } from "./Commands";
-import { IRecord } from "./interfaces";
+import { bridge } from "./Utils/Commands";
+import { IRecord } from "./Utils/interfaces";
 import { ChangeEvent } from "react";
 import { Content } from "./Components/Content";
 import {
@@ -30,12 +30,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import DisplayRecord from "./Components/DisplayRecord";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import ResizablePanel from "./ResizablePanel";
-import { useHotkeysHelper } from "./Utils";
-import { DisplayFilters, IFilter } from "./Filters";
+import ResizablePanel from "./Components/ResizablePanel";
+import { useHotkeysHelper } from "./Utils/Hotkeys";
+import { DisplayFilters, IFilter } from "./Components/Filters";
 import Drawer from "./Components/Drawer";
 import { RecoilRoot, useRecoilState } from "recoil";
-import { currentRecordIndex } from "./Atoms";
+import { currentRecordIndex } from "./Utils/Atoms";
 
 type ITabKey = "search" | "play";
 
@@ -75,12 +75,6 @@ function AppContent() {
 		}
 
 		setTabKey(key);
-
-		// if (key === "search") {
-		// 	setSearchFocusEpoch((epoch) => epoch + 1);
-		// } else if (key === "play") {
-		// 	setPlay((epoch) => epoch + 1);
-		// }
 	};
 
 	const nextRecord = () => {
@@ -148,6 +142,15 @@ function AppContent() {
 		},
 		[setTabKey, setSearchFocusEpoch]
 	);
+
+	// load initial arguments, once
+	// useEffect(() => {
+	// 	(async () => {
+	// 		let args = await bridge.getInitialArguments();
+	// 		console.log(`initial args: ${args}`);
+	// 		// TODO: populate filters from this
+	// 	})();
+	// }, []);
 
 	const updateRecord = useCallback(
 		(updatedRecord: IRecord) => {
@@ -316,18 +319,13 @@ function AppContent() {
 		loadData();
 	};
 
-	const hardReload = () => {
-		// TODO: this, maybe? Our memory usage is off the walls
-		bridge.hardReload({ records, recordIndex });
-	};
+	// const editSelf = () => {
+	// 	// TODO: this
+	// };
 
-	const editSelf = () => {
-		// TODO: this
-	};
-
-	const removeSelf = () => {
-		// TODO: this
-	};
+	// const removeSelf = () => {
+	// 	// TODO: this
+	// };
 
 	const clearTags = () => {
 		if (currentRecord) {
@@ -498,14 +496,6 @@ function AppContent() {
 										variant="secondary"
 									>
 										Edit
-									</Button> */}
-
-									{/* <Button
-										onClick={() => hardReload()}
-										size="sm"
-										variant="dark"
-									>
-										Hard Reload
 									</Button> */}
 
 									<Button

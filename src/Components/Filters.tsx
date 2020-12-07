@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Button, Form } from "react-bootstrap";
-import { UpDown } from "./Components/UpDown";
+import { UpDown } from "./UpDown";
 
 interface ISearchOption {
 	display: string;

@@ -5,6 +5,7 @@ export function useHotkeysHelper(shortcut: string, callback: Function, deps?: an
 	if (shortcut.indexOf("numpad") >= 0) {
 		shortcut = "*";
 	}
+
 	useHotkeys(shortcut, (event: KeyboardEvent) => {
 		if (shortcut !== oldShortcut) {
 			if (contains(oldShortcut, "alt") !== event.altKey) {
@@ -35,7 +36,7 @@ export function useHotkeysHelper(shortcut: string, callback: Function, deps?: an
 		callback();
 	},
 		{
-			enableOnTags: ["INPUT", "VIDEO"] as any,
+			enableOnTags: ["INPUT", "VIDEO", "IMG", "BODY"] as any,
 		},
 		deps
 	);

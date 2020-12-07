@@ -1,4 +1,5 @@
 use super::file_server;
+use crate::take_flag;
 use crate::tauri::cmd::CommandError;
 use crate::tauri::cmd::Response;
 use std::sync::Arc;
@@ -8,30 +9,27 @@ use taggenator::taggenator::database::searcher::Searcher;
 use taggenator::BError;
 use taggenator::Taggenator;
 
-pub fn start_tauri(mut taggenator: Taggenator) -> Result<(), BError> {
+pub fn start_tauri(mut taggenator: Taggenator, mut args: Vec<String>) -> Result<(), BError> {
 	// start file server in separate thread
 	std::thread::spawn(move || {
 		file_server::serve_fs();
 	});
 
-	taggenator.update_files()?;
-	let taggenator = Arc::new(Mutex::new(taggenator));
-	let stored_data = Arc::new(Mutex::new(StoredData::new()));
-	loop {
-		stored_data.clone().lock().unwrap().should_reload = false;
-		start_tauri_core(taggenator.clone(), stored_data.clone())?;
-		let data = stored_data.clone();
-		let data = data.lock().unwrap();
-		if !data.should_reload {
-			break;
-		}
+	if take_flag(&mut args, "--ignore-update") || take_flag(&mut args, "--stale") {
+		println!("Ignore file system changes...");
+	} else {
+		taggenator.update_files()?;
 	}
+
+	let taggenator = Arc::new(Mutex::new(taggenator));
+	start_tauri_core(taggenator.clone(), args)?;
+
 	return Ok(());
 }
 
 pub fn start_tauri_core(
 	taggenator: Arc<Mutex<Taggenator>>,
-	stored_data: Arc<Mutex<StoredData>>,
+	initial_arguments: Vec<String>,
 ) -> Result<(), BError> {
 	tauri::AppBuilder::new()
 		.invoke_handler(move |_webview, arg| {
@@ -209,12 +207,16 @@ pub fn start_tauri_core(
 							);
 						}
 
-						HardReload { callback, error } => {
-							// TODO: save state, then recreate UI?
-							println!("Reloading...");
-							// _webview.eval("document.location = \"about:blank\";");
-							stored_data.clone().lock().unwrap().should_reload = true;
-							_webview.terminate();
+						GetInitialArguments { callback, error } => {
+							let args = initial_arguments.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									return Ok(args);
+								},
+								callback,
+								error,
+							);
 						}
 					}
 					Ok(())
@@ -225,16 +227,4 @@ pub fn start_tauri_core(
 		.run();
 
 	Ok(())
-}
-
-pub struct StoredData {
-	should_reload: bool,
-}
-
-impl StoredData {
-	fn new() -> StoredData {
-		StoredData {
-			should_reload: false,
-		}
-	}
 }

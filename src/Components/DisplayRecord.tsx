@@ -1,4 +1,4 @@
-import { IRecord } from "../interfaces";
+import { IRecord } from "../Utils/interfaces";
 import { InfoCircleFill } from "react-bootstrap-icons";
 import React from "react";
 import { OverlayTrigger, Table, Tooltip } from "react-bootstrap";

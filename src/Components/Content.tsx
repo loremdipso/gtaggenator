@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { bridge } from "../Commands";
-import { IRecord } from "../interfaces";
-import { useHotkeysHelper } from "../Utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { bridge } from "../Utils/Commands";
+import { IRecord } from "../Utils/interfaces";
+import { useHotkeysHelper } from "../Utils/Hotkeys";
 import { useRecoilState } from "recoil";
-import { currentRecordIndex } from "../Atoms";
-import ResizablePanel from "../ResizablePanel";
-import { Card } from "react-bootstrap";
+import { currentRecordIndex } from "../Utils/Atoms";
+import ResizablePanel from "./ResizablePanel";
 
 interface IContent {
 	record: IRecord | null;
@@ -40,7 +39,7 @@ interface IGrabBag {
 function GrabBag({ record }: IGrabBag) {
 	let [grabBag, setGrabBag] = useState({} as { [key: string]: string });
 
-	const getGrabBag = () => {
+	useEffect(() => {
 		if (record) {
 			(async () => {
 				// TODO: make sure this doesn't freak out and loop forever
@@ -54,11 +53,7 @@ function GrabBag({ record }: IGrabBag) {
 				}
 			})();
 		}
-	};
-
-	useEffect(() => {
-		getGrabBag();
-	}, [record]);
+	}, [record, setGrabBag]);
 
 	if (!Object.keys(grabBag).length) {
 		return null;
@@ -140,13 +135,7 @@ function VideoContainer({ record }: IVideoContainer) {
 				}
 			};
 		}
-	}, [
-		record,
-		videoRef?.current,
-		containerRef?.current,
-		setVolumeHeight,
-		setDurationWidth,
-	]);
+	}, [record, videoRef, containerRef, setVolumeHeight, setDurationWidth]);
 
 	const volumeUp = () => {
 		if (videoRef?.current) {
@@ -303,51 +292,55 @@ function ComicContainer({ record }: IComicContainer) {
 	const [comicInfo, setComicInfo] = useState(null as IComicInfo | null);
 	const [images, setImages] = useState([] as number[]);
 
-	const preload = async (newIndex: number) => {
-		if (comicInfo) {
-			let newImages = [...images];
-			let thisBatch = [];
-			let didSet = false;
-			for (let i = newIndex - 1; i < newIndex + NUM_TO_PRELOAD; i++) {
-				if (
-					i >= 0 &&
-					i < comicInfo.pages.length &&
-					images.indexOf(i) < 0
-				) {
-					newImages.push(i);
-					didSet = true;
+	const preload = useCallback(
+		async (newIndex: number) => {
+			if (comicInfo) {
+				let newImages = [...images];
+				let thisBatch = [];
+				let didSet = false;
+				for (let i = newIndex - 1; i < newIndex + NUM_TO_PRELOAD; i++) {
+					if (
+						i >= 0 &&
+						i < comicInfo.pages.length &&
+						images.indexOf(i) < 0
+					) {
+						newImages.push(i);
+						didSet = true;
+					}
+
+					thisBatch.push(i);
 				}
 
-				thisBatch.push(i);
+				if (didSet) {
+					newImages = newImages.filter(
+						(value) =>
+							Math.abs(value - newIndex) < NUM_MAX_IMAGES / 2
+					);
+					setImages(newImages);
+				}
 			}
+		},
+		[comicInfo, images]
+	);
 
-			if (didSet) {
-				newImages = newImages.filter(
-					(value) => Math.abs(value - newIndex) < NUM_MAX_IMAGES / 2
-				);
-				setImages(newImages);
+	const updatePage = useCallback(
+		(newIndex: number) => {
+			if (comicInfo) {
+				if (newIndex >= 0 && newIndex < comicInfo.pages.length) {
+					setPageIndex(newIndex);
+					preload(newIndex);
+				}
+
+				if (newIndex >= comicInfo.pages.length) {
+					setRecordIndex(recordIndex + 1);
+				} else if (newIndex < 0 && recordIndex > 0) {
+					setRecordIndex(recordIndex - 1);
+				}
 			}
-		}
-	};
+		},
+		[setRecordIndex, setPageIndex, comicInfo, preload, recordIndex]
+	);
 
-	console.log(images.length);
-
-	const updatePage = (newIndex: number) => {
-		if (comicInfo) {
-			if (newIndex >= 0 && newIndex < comicInfo.pages.length) {
-				setPageIndex(newIndex);
-				preload(newIndex);
-			}
-
-			if (newIndex >= comicInfo.pages.length) {
-				console.log("next comic");
-				setRecordIndex(recordIndex + 1);
-			} else if (newIndex < 0 && recordIndex > 0) {
-				console.log("previous comic");
-				setRecordIndex(recordIndex - 1);
-			}
-		}
-	};
 	const nextPage = () => {
 		updatePage(pageIndex + 1);
 	};
@@ -437,7 +430,24 @@ function ComicContainer({ record }: IComicContainer) {
 	);
 
 	return (
-		<div className="image-container">
+		<div
+			className="image-container"
+			onClick={(event: React.MouseEvent) => {
+				let target = event.target as HTMLDivElement;
+				if (event.pageX > target.clientWidth / 2 + target.offsetLeft) {
+					nextPage();
+				} else {
+					previousPage();
+				}
+			}}
+			onWheel={(event: React.WheelEvent) => {
+				if ((event as any).deltaY > 0) {
+					nextPage();
+				} else {
+					previousPage();
+				}
+			}}
+		>
 			{record && comicInfo ? (
 				<>
 					<div
