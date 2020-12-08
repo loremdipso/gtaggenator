@@ -68,6 +68,11 @@ pub enum Cmd {
 		callback: String,
 		error: String,
 	},
+
+	GetPort {
+		callback: String,
+		error: String,
+	},
 }
 
 #[derive(Serialize)]

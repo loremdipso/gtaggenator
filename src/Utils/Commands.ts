@@ -31,6 +31,10 @@ class Bridge {
 	async getInitialArguments(): Promise<string[]> {
 		return helper("GetInitialArguments", {});
 	}
+
+	async getPort(): Promise<number> {
+		return helper("GetPort", {});
+	}
 }
 
 function helper<T>(tagname: string, args: any): Promise<T> {

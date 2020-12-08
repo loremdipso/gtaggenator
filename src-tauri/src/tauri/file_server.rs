@@ -11,7 +11,7 @@ use warp::Filter;
 use zip::ZipArchive;
 
 #[tokio::main]
-pub async fn serve_fs() {
+pub async fn serve_fs(port: u16) {
 	// NOTE: this seems to work fine, but should we use actix-web instead?
 	let fs_route = warp::path("static")
 		.and(warp::fs::dir("."))
@@ -66,18 +66,14 @@ pub async fn serve_fs() {
 
 	let get_comic_page = warp::path("get_comic_page")
 		.and(warp::query().map(|query: ComicQuery| {
-			// let path = Path::new("/home/madams/Pictures/face_game.png");
-			// let f = std::fs::read(path).unwrap();
-			println!(
-				"Opening zip archive for: {:?}, {:?}",
-				query.path, query.page_number
-			);
+			let path = query.path.unwrap();
+			let page_number = query.page_number.unwrap();
+			println!("Opening zip archive: {}, page: {}", path, page_number);
 
-			let mut archive_contents = get_archive(query.path.unwrap());
+			let mut archive_contents = get_archive(path);
 			let mut buffer = Vec::new();
-			let mut archive_file: zip::read::ZipFile = archive_contents
-				.by_index(query.page_number.unwrap())
-				.unwrap();
+			let mut archive_file: zip::read::ZipFile =
+				archive_contents.by_index(page_number).unwrap();
 			archive_file.read_to_end(&mut buffer);
 
 			return buffer;
@@ -86,7 +82,7 @@ pub async fn serve_fs() {
 
 	let cors = warp::cors().allow_any_origin();
 	warp::serve(get_comic_info.or(get_comic_page).or(fs_route).with(cors))
-		.run(([0, 0, 0, 0], 8000))
+		.run(([0, 0, 0, 0], port))
 		.await;
 }
 
@@ -121,7 +117,6 @@ fn get_leading_number(string: &str) -> usize {
 		.chars()
 		.take_while(|c| c.is_digit(10))
 		.collect::<String>();
-	dbg!(&res);
 	return usize::from_str_radix(&res, 10).unwrap_or_default();
 }
 

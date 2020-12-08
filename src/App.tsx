@@ -26,7 +26,7 @@ import { useHotkeysHelper } from "./Utils/Hotkeys";
 import { DisplayFilters, IFilter } from "./Components/Filters";
 import Drawer from "./Components/Drawer";
 import { RecoilRoot, useRecoilState } from "recoil";
-import { currentRecordIndex } from "./Utils/Atoms";
+import { currentRecordIndex, fileServerPort } from "./Utils/Atoms";
 
 type ITabKey = "search" | "play";
 
@@ -61,6 +61,15 @@ function AppContent() {
 	const [lastOpenedRecordID, setLastOpenedRecordID] = useState(
 		null as number | null
 	);
+
+	const [_, setPort] = useRecoilState(fileServerPort);
+	useEffect(() => {
+		(async () => {
+			let port = await bridge.getPort();
+			console.log(`Using port ${port}`);
+			setPort(port);
+		})();
+	}, []);
 
 	const updateTabKey = (key: ITabKey | null) => {
 		if (!key || tabKey === key) {

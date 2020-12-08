@@ -3,19 +3,24 @@ import { bridge } from "../Utils/Commands";
 import { IRecord } from "../Utils/interfaces";
 import { useHotkeysHelper } from "../Utils/Hotkeys";
 import { useRecoilState } from "recoil";
-import { currentRecordIndex } from "../Utils/Atoms";
+import { currentRecordIndex, fileServerPort } from "../Utils/Atoms";
 import ResizablePanel from "./ResizablePanel";
 
 interface IContent {
 	record: IRecord | null;
 }
 export function Content({ record }: IContent) {
+	const [port, _] = useRecoilState(fileServerPort);
+	if (!port) {
+		return null;
+	}
+
 	return (
 		<div className="content-container">
 			{record ? (
 				<>
 					{isImage(record.Name) ? (
-						<ImageContainer path={getPath(record.Location)} />
+						<ImageContainer path={getPath(port, record.Location)} />
 					) : null}
 					{isVideo(record.Name) ? (
 						<VideoContainer record={record} />
@@ -24,7 +29,7 @@ export function Content({ record }: IContent) {
 						<ComicContainer record={record} />
 					) : null}
 					{isFlash(record.Name) ? (
-						<FlashContainer path={getPath(record.Location)} />
+						<FlashContainer path={getPath(port, record.Location)} />
 					) : null}
 					<GrabBag record={record} />
 				</>
@@ -89,6 +94,8 @@ function VideoContainer({ record }: IVideoContainer) {
 	const [volumeHeight, setVolumeHeight] = useState(0);
 	const [durationWidth, setDurationWidth] = useState(0);
 	const [muted, setMuted] = useState(false);
+
+	const [port, _] = useRecoilState(fileServerPort);
 
 	useEffect(() => {
 		let currentVideo = videoRef?.current;
@@ -243,7 +250,7 @@ function VideoContainer({ record }: IVideoContainer) {
 		scrub(times.TINY);
 	});
 
-	let path = record ? getPath(record.Location) : "";
+	let path = record ? getPath(port, record.Location) : "";
 	return (
 		<div className="video-container" ref={containerRef}>
 			<video controls autoPlay ref={videoRef} src={path} />
@@ -341,6 +348,8 @@ function ComicContainer({ record }: IComicContainer) {
 		[setRecordIndex, setPageIndex, comicInfo, preload, recordIndex]
 	);
 
+	const [port, _] = useRecoilState(fileServerPort);
+
 	const nextPage = () => {
 		updatePage(pageIndex + 1);
 	};
@@ -350,7 +359,7 @@ function ComicContainer({ record }: IComicContainer) {
 
 	useEffect(() => {
 		(async () => {
-			let info = await getComicInfo(record.Location);
+			let info = await getComicInfo(port, record.Location);
 			setComicInfo(info);
 		})();
 	}, [record, setComicInfo]);
@@ -465,6 +474,7 @@ function ComicContainer({ record }: IComicContainer) {
 						<ImageContainer
 							key={imageIndex}
 							path={getComicPagePath(
+								port,
 								record.Location,
 								comicInfo.pages[imageIndex]
 							)}
@@ -480,9 +490,9 @@ function ComicContainer({ record }: IComicContainer) {
 interface IComicInfo {
 	pages: number[];
 }
-async function getComicInfo(path: string): Promise<IComicInfo> {
+async function getComicInfo(port: number, path: string): Promise<IComicInfo> {
 	let response = await fetch(
-		`http://0.0.0.0:8000/get_comic_info?path=${path}`
+		`http://0.0.0.0:${port}/get_comic_info?path=${path}`
 	);
 	let info = await response.json();
 	return info;
@@ -526,13 +536,17 @@ function FlashContainer({ path }: IFlashContainer) {
 	return <div className="flash-container" ref={ref} />;
 }
 
-function getComicPagePath(path: string, pageIndex: number): string {
-	return `http://0.0.0.0:8000/get_comic_page?path=${path}&page_number=${pageIndex}`;
+function getComicPagePath(
+	port: number,
+	path: string,
+	pageIndex: number
+): string {
+	return `http://0.0.0.0:${port}/get_comic_page?path=${path}&page_number=${pageIndex}`;
 }
 
-function getPath(path: string): string {
+function getPath(port: number, path: string): string {
 	path = path.substring(2); // remove the leading './' (specific to how our file server works)
-	return `http://0.0.0.0:8000/static/${path}`;
+	return `http://0.0.0.0:${port}/static/${path}`;
 }
 
 function isComic(name: string): boolean {

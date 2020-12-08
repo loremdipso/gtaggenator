@@ -2,6 +2,7 @@ use super::file_server;
 use crate::take_flag;
 use crate::tauri::cmd::CommandError;
 use crate::tauri::cmd::Response;
+use portpicker::pick_unused_port;
 use std::sync::Arc;
 use std::sync::Mutex;
 use taggenator::errors::MyCustomError::UnknownError;
@@ -11,9 +12,12 @@ use taggenator::Taggenator;
 
 pub fn start_tauri(mut taggenator: Taggenator, mut args: Vec<String>) -> Result<(), BError> {
 	// start file server in separate thread
+	let file_server_port: u16 = pick_unused_port().expect("No ports free");
 	std::thread::spawn(move || {
-		file_server::serve_fs();
+		file_server::serve_fs(file_server_port);
 	});
+
+	println!("Using port {}", file_server_port);
 
 	if take_flag(&mut args, "--ignore-update") || take_flag(&mut args, "--stale") {
 		println!("Ignore file system changes...");
@@ -22,13 +26,14 @@ pub fn start_tauri(mut taggenator: Taggenator, mut args: Vec<String>) -> Result<
 	}
 
 	let taggenator = Arc::new(Mutex::new(taggenator));
-	start_tauri_core(taggenator.clone(), args)?;
+	start_tauri_core(taggenator.clone(), file_server_port, args)?;
 
 	return Ok(());
 }
 
 pub fn start_tauri_core(
 	taggenator: Arc<Mutex<Taggenator>>,
+	port: u16,
 	initial_arguments: Vec<String>,
 ) -> Result<(), BError> {
 	tauri::AppBuilder::new()
@@ -201,6 +206,17 @@ pub fn start_tauri_core(
 										.grabbag_upsert(record.RecordID, key, value)
 										.map_err(|_| UnknownError)?;
 									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
+
+						GetPort { callback, error } => {
+							tauri::execute_promise(
+								_webview,
+								move || {
+									return Ok(port);
 								},
 								callback,
 								error,

@@ -40,8 +40,9 @@
     - [ ] Add keymap, ideally an editable one
         - Save config to tsettings
     - [ ] Make play into tabs (with configurable filters?
-    - [ ] Preload images in browser
+    - [x] Preload images in browser
     - [ ] Cache Zip/pages on server
+    - [x] Dynamically bind filesystem to port
 
 3. Backburner
     - [ ] Figure out migrations

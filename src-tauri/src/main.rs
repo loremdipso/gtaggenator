@@ -9,6 +9,9 @@ use taggenator::flags::take_flag;
 use taggenator::Taggenator;
 mod tauri;
 
+#[macro_use]
+extern crate lazy_static;
+
 fn main() {
 	let mut args: Vec<String> = env::args().skip(1).collect();
 	let do_gopen = take_flag(&mut args, "gopen");
