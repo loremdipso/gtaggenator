@@ -7,6 +7,7 @@ export function useHotkeysHelper(shortcut: string, callback: Function, deps?: an
 	}
 
 	useHotkeys(shortcut, (event: KeyboardEvent) => {
+		console.log(event);
 		if (shortcut !== oldShortcut) {
 			if (contains(oldShortcut, "alt") !== event.altKey) {
 				return;

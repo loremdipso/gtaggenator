@@ -355,7 +355,7 @@ impl Taggenator {
 					None => break,
 					Some(row) => {
 						let tagName: String = row.get(0)?;
-						tagName.strip_prefix("temp");
+						let tagName = tagName.strip_prefix("temp").unwrap().to_string();
 						let number = tagName.parse::<i32>();
 						if let Ok(number) = number {
 							if number > self.newest_temp {

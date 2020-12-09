@@ -178,13 +178,6 @@ function VideoContainer({ record }: IVideoContainer) {
 		}
 	};
 
-	useHotkeysHelper("alt+numpad8", () => {
-		volumeUp();
-	});
-	useHotkeysHelper("alt+numpad2", () => {
-		volumeDown();
-	});
-
 	useHotkeysHelper("alt+m", () => {
 		if (videoRef?.current) {
 			let current = videoRef.current;
@@ -216,6 +209,7 @@ function VideoContainer({ record }: IVideoContainer) {
 			videoRef.current.currentTime = 0;
 		}
 	});
+
 	useHotkeysHelper("alt+j", () => {
 		// back
 		scrub(-times.MEDIUM);
@@ -224,6 +218,7 @@ function VideoContainer({ record }: IVideoContainer) {
 		// forward
 		scrub(times.MEDIUM);
 	});
+
 	useHotkeysHelper("alt+l", () => {
 		// toast("near end");
 		if (videoRef?.current) {
@@ -240,6 +235,36 @@ function VideoContainer({ record }: IVideoContainer) {
 		// toast("big forward");
 		scrub(times.LARGE);
 	});
+	useHotkeysHelper("alt+numpad1", () => {
+		// small back
+		scrub(-times.SMALL);
+	});
+	useHotkeysHelper("alt+numpad2", () => {
+		volumeDown();
+	});
+	useHotkeysHelper("alt+numpad3", () => {
+		// small forward
+		scrub(times.SMALL);
+	});
+	useHotkeysHelper("alt+numpad4", () => {
+		// back
+		scrub(-times.MEDIUM);
+	});
+	useHotkeysHelper("alt+numpad6", () => {
+		// forward
+		scrub(times.MEDIUM);
+	});
+	useHotkeysHelper("alt+numpad7", () => {
+		// toast("big back");
+		scrub(-times.LARGE);
+	});
+	useHotkeysHelper("alt+numpad8", () => {
+		volumeUp();
+	});
+	useHotkeysHelper("alt+numpad9", () => {
+		// toast("big forward");
+		scrub(times.LARGE);
+	});
 
 	useHotkeysHelper("alt+numpad0", () => {
 		// toast("tiny back");
@@ -253,7 +278,7 @@ function VideoContainer({ record }: IVideoContainer) {
 	let path = record ? getPath(port, record.Location) : "";
 	return (
 		<div className="video-container" ref={containerRef}>
-			<video controls autoPlay ref={videoRef} src={path} />
+			<video controls loop autoPlay ref={videoRef} src={path} />
 			<div className="progress-bar" style={{ width: durationWidth }} />
 			<div
 				className={`volume-bar ${muted ? "muted" : ""}`}
