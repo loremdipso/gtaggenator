@@ -27,6 +27,7 @@ use walkdir;
 pub struct Taggenator {
 	pub settings: Settings,
 	pub database: Database,
+	newest_temp: i32,
 }
 
 impl Taggenator {
@@ -36,6 +37,7 @@ impl Taggenator {
 		return Ok(Taggenator {
 			settings: settings,
 			database: database,
+			newest_temp: 0,
 		});
 	}
 
@@ -237,17 +239,19 @@ impl Taggenator {
 			}
 		}
 
+		self.replace_synonyms(&mut to_remove)?;
+		self.replace_synonyms(&mut to_add)?;
+		self.handle_temp(&mut to_add)?;
 		self.add_derived(record, &mut to_add)?;
-		self.handle_synonyms(record, &mut to_add)?;
 
 		dedup(&mut to_add);
 
-		for tag in &to_remove {
-			record.Tags.remove(&tag.to_string());
-		}
-
 		for tag in &to_add {
 			record.Tags.insert(tag.clone());
+		}
+
+		for tag in &to_remove {
+			record.Tags.remove(&tag.to_string());
 		}
 
 		// only add the tags that weren't there already
@@ -305,21 +309,58 @@ impl Taggenator {
 		return Ok(());
 	}
 
-	fn handle_synonyms(
-		&mut self,
-		record: &mut Record,
-		tags: &mut Vec<String>,
-	) -> Result<(), BError> {
+	fn replace_synonyms(&mut self, tags: &mut Vec<String>) -> Result<(), BError> {
 		for tag in tags {
 			if let Some(synonym) = self.settings.synonyms.get(tag) {
-				// NOTE: since we aren't checking if the synonym exists in the tags vec
-				// we need to de-dup outselves
-				if !record.Tags.contains(synonym) {
-					*tag = synonym.clone();
-				}
+				*tag = synonym.clone();
 			}
 		}
 
 		return Ok(());
+	}
+
+	// tempnew & temp
+	fn handle_temp(&mut self, tags_to_add: &mut Vec<String>) -> Result<(), BError> {
+		for tag in tags_to_add {
+			if tag == "temp" {
+				self.update_temp_tags()?;
+				*tag = format!("temp{}", self.newest_temp);
+			} else if tag == "tempnew" {
+				self.update_temp_tags()?;
+				self.newest_temp += 1;
+				*tag = format!("temp{}", self.newest_temp);
+			}
+		}
+
+		return Ok(());
+	}
+
+	fn update_temp_tags(&mut self) -> Result<(), BError> {
+		if self.newest_temp == 0 {
+			let query = &"Select TagName From Tags Where TagName Like ?";
+			let mut stmt = self.database.conn.prepare(&query)?;
+
+			// We're handling query args ourselves
+			let mut rows = stmt.query(&["temp%"])?;
+
+			loop {
+				let row = rows.next()?;
+				match row {
+					None => break,
+					Some(row) => {
+						let tagName: String = row.get(0)?;
+						tagName.strip_prefix("temp");
+						let number = tagName.parse::<i32>();
+						if let Ok(number) = number {
+							if number > self.newest_temp {
+								self.newest_temp = number;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		Ok(())
 	}
 }
