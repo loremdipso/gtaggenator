@@ -42,7 +42,6 @@ body {
 .sidebar.closed > :not(.react-draggable) {
 	display: none;
 }
-
 .special-input {
 	display: flex;
 	width: 100%;
@@ -56,10 +55,22 @@ body {
 	border-radius: 0;
 }
 
-.special-input input {
+.special-input input,
+.special-input > .rbt {
 	flex-grow: 1;
 	margin-right: 0px;
 	vertical-align: center;
+}
+
+.special-input .rbt > :first-child {
+	height: initial !important;
+}
+
+.special-input .rbt-menu {
+	max-height: 150px !important;
+	min-height: 150px !important;
+	position: initial !important;
+	transform: none !important;
 }
 
 .special-input a {

@@ -119,21 +119,14 @@ pub fn start_tauri_core(
 							);
 						}
 
-						GetTags {
-							callback,
-							error,
-							args,
-						} => {
+						GetTags { callback, error } => {
 							let mut taggenator = taggenator.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
 									let taggenator = taggenator.lock().unwrap();
-									println!("{:?}", &args);
-									let mut searcher = Searcher::new(args).unwrap(); // TODO: how do we bubble errors up?
-
+									let mut searcher = Searcher::new(vec![]).unwrap();
 									let tags = searcher.get_tags(&taggenator.database).unwrap();
-									// println!("tags: {:?}", tags);
 									return Ok(tags);
 								},
 								callback,

@@ -187,7 +187,7 @@ impl Database {
 		)
 	}
 
-	pub fn add_record_by_location_core(
+	pub fn add_record_by_location(
 		&mut self,
 		filename: String,
 		location: String,
@@ -201,7 +201,14 @@ impl Database {
 		was_imported: bool,
 	) -> Result<(), BError> {
 		let location = self.get_location_relative_to_base(&location)?;
-		println!("{}", &location);
+
+		// set to now if we don't have this
+		let date_added = if date_added.is_none() {
+			Some(Utc::now())
+		} else {
+			date_added
+		};
+
 		self.async_write(
 			"UPDATE records
 			SET

@@ -8,6 +8,7 @@ type IResizablePanel = React.PropsWithChildren<{
 	startingValue: number;
 	position: "top" | "bottom" | "left" | "right";
 	className?: string;
+	closed?: boolean;
 }>;
 
 export default function Drawer({
@@ -15,8 +16,9 @@ export default function Drawer({
 	position,
 	className,
 	children,
+	closed,
 }: IResizablePanel) {
-	const [isClosed, setIsClosed] = useState(false);
+	const [isClosed, setIsClosed] = useState(!!closed);
 	className = className || "";
 
 	let primarySize = 5;

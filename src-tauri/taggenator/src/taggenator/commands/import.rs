@@ -72,7 +72,7 @@ pub fn run_import(taggenator: &mut Taggenator, args: Vec<String>) -> Result<(), 
 					let date_last_touched = get_date(&it.next().unwrap().to_string())?;
 					let imported = true;
 
-					taggenator.database.add_record_by_location_core(
+					taggenator.database.add_record_by_location(
 						filename,
 						location,
 						size,

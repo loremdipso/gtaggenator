@@ -1,7 +1,7 @@
 import { IRecord } from "../Utils/interfaces";
 import { InfoCircleFill } from "react-bootstrap-icons";
 import React from "react";
-import { OverlayTrigger, Table, Tooltip } from "react-bootstrap";
+import { OverlayTrigger, Table } from "react-bootstrap";
 
 interface IDisplayRecord {
 	record: IRecord;
@@ -15,7 +15,13 @@ export default function DisplayRecord({ record }: IDisplayRecord) {
 
 				<OverlayTrigger
 					placement="right"
-					overlay={(props: any) => (
+					overlay={({
+						placement,
+						arrowProps,
+						show: _show,
+						popper,
+						...props
+					}) => (
 						<div {...props}>
 							<Table className="my-fancy-table">
 								<tbody>

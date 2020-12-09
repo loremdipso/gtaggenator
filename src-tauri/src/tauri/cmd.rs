@@ -35,7 +35,6 @@ pub enum Cmd {
 	GetTags {
 		callback: String,
 		error: String,
-		args: Vec<String>,
 	},
 
 	GetRecords {

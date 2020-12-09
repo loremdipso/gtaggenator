@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import "./App.css";
 import { bridge } from "./Utils/Commands";
@@ -15,7 +15,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Button, OverlayTrigger, Tab, Tabs, Tooltip } from "react-bootstrap";
+import { Button, OverlayTrigger, Tab, Tabs } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DisplayRecord from "./Components/DisplayRecord";
@@ -26,7 +26,9 @@ import { useHotkeysHelper } from "./Utils/Hotkeys";
 import { DisplayFilters, IFilter } from "./Components/Filters";
 import Drawer from "./Components/Drawer";
 import { RecoilRoot, useRecoilState } from "recoil";
-import { currentRecordIndex, fileServerPort } from "./Utils/Atoms";
+import { allTagsAtom, currentRecordIndex, fileServerPort } from "./Utils/Atoms";
+import { SpecialInput } from "./Components/SpecialInput";
+import { SimpleTooltip } from "./Components/SimpleTooltip";
 
 type ITabKey = "search" | "play";
 
@@ -41,8 +43,9 @@ function App() {
 function AppContent() {
 	const [args, setArgs] = useState([] as string[]);
 
-	const [search, setSearch] = useState("");
 	const [tagLine, setTagLine] = useState("");
+	const [search, setSearch] = useState("");
+
 	const [records, setRecords] = useState([] as IRecord[]);
 
 	const [filters, setFilters] = useState([] as IFilter[]);
@@ -50,11 +53,12 @@ function AppContent() {
 
 	const [lastExecutedSearch, setLastExecutedSearch] = useState("");
 
-	const [tagFocusEpoch, setTagFocusEpoch] = useState(0);
 	const [searchFocusEpoch, setSearchFocusEpoch] = useState(0);
+	const [tagFocusEpoch, setTagFocusEpoch] = useState(0);
 
 	const [recordIndex, setRecordIndex] = useRecoilState(currentRecordIndex);
 	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
+	const [allTags, setAllTags] = useRecoilState(allTagsAtom);
 
 	const [tabKey, setTabKey] = useState("search" as ITabKey);
 
@@ -62,14 +66,14 @@ function AppContent() {
 		null as number | null
 	);
 
-	const [_, setPort] = useRecoilState(fileServerPort);
+	const [, setPort] = useRecoilState(fileServerPort);
 	useEffect(() => {
 		(async () => {
 			let port = await bridge.getPort();
 			console.log(`Using port ${port}`);
 			setPort(port);
 		})();
-	}, []);
+	}, [setPort]);
 
 	const updateTabKey = (key: ITabKey | null) => {
 		if (!key || tabKey === key) {
@@ -158,23 +162,10 @@ function AppContent() {
 			console.log(`initial args: ${args}`);
 			let argsString = args.join(" ");
 			setSearch(argsString);
-			loadData(argsString);
 			// TODO: populate filters from this
+			// loadData(argsString);
 		}
 	}, [args]);
-
-	const updateRecord = useCallback(
-		(updatedRecord: IRecord) => {
-			setRecords(
-				records.map((record) =>
-					record.RecordID === updatedRecord.RecordID
-						? updatedRecord
-						: record
-				)
-			);
-		},
-		[records, setRecords]
-	);
 
 	useEffect(() => {
 		(async () => {
@@ -185,22 +176,16 @@ function AppContent() {
 				// we've got to keep track of this, otherwise we get an infinite loop, which is no bueno
 				setLastOpenedRecordID(currentRecord.RecordID);
 				// UI minor change: we'll update the record immediately, even before the request is finished
-				updateRecord({
+				updateRecord(setRecords, {
 					...currentRecord,
 					TimesOpened: currentRecord.TimesOpened + 1,
 				});
 				await bridge.openRecord({
 					record: currentRecord,
 				});
-
-				// updateRecord(
-				// 	await bridge.open_record({
-				// 		record: currentRecord,
-				// 	})
-				// );
 			}
 		})();
-	}, [currentRecord, lastOpenedRecordID, updateRecord]);
+	}, [currentRecord, lastOpenedRecordID, setRecords]);
 
 	useEffect(() => {
 		if (records.length === 0) {
@@ -216,7 +201,14 @@ function AppContent() {
 		} else if (records.length > recordIndex) {
 			setCurrentRecord(records[recordIndex]);
 		}
-	}, [recordIndex, records, currentRecord]);
+	}, [recordIndex, records, currentRecord, setRecordIndex]);
+
+	useEffect(() => {
+		(async () => {
+			let tags = await bridge.getTags();
+			setAllTags(tags);
+		})();
+	}, [setAllTags]);
 
 	const doEnd = () => {
 		setRecords([]);
@@ -309,7 +301,7 @@ function AppContent() {
 		}
 
 		newRecord.Tags = sortTags(newRecord.Tags, oldRecord.Tags);
-		updateRecord(newRecord);
+		updateRecord(setRecords, newRecord);
 	};
 
 	const undoAdds = (delta: IDelta) => {
@@ -370,12 +362,12 @@ function AppContent() {
 		}
 	};
 
-	const updateTagLine = (event: ChangeEvent<HTMLInputElement>) => {
-		setTagLine(event.target.value);
+	const updateTagLine = (newValue: string) => {
+		setTagLine(newValue);
 	};
 
-	const updateSearch = (event: ChangeEvent<HTMLInputElement>) => {
-		setSearch(event.target.value);
+	const updateSearch = (newValue: string) => {
+		setSearch(newValue);
 	};
 
 	const handleTagLine = () => {
@@ -456,6 +448,7 @@ function AppContent() {
 								<SpecialInput
 									onChange={updateTagLine}
 									action={handleTagLine}
+									options={allTags}
 									value={tagLine}
 									actionName="Add"
 									focusEpoch={tagFocusEpoch}
@@ -464,7 +457,7 @@ function AppContent() {
 								<div className="fancy-button-bar">
 									{/* <OverlayTrigger
 											placement="top"
-											overlay={myTooltip(
+											overlay={SimpleTooltip(
 												"Try to launch on local machine"
 											)}
 										>
@@ -479,7 +472,9 @@ function AppContent() {
 
 									<OverlayTrigger
 										placement="top"
-										overlay={myTooltip("Remove all tags")}
+										overlay={SimpleTooltip(
+											"Remove all tags"
+										)}
 									>
 										<Button
 											onClick={() => clearTags()}
@@ -535,32 +530,30 @@ function AppContent() {
 
 								<div className="growable">
 									<div className="tag-container">
-										{sortRecordTags(currentRecord).Tags.map(
-											(tag) => (
-												<DisplayTagLineGroup
-													tag={tag}
-													key={tag}
-													variant="success"
-													action={(
-														tagName: string
-													) => {
-														toast(
-															`hooray for ${tagName}`
-														);
-														setSearch(tagName);
-														loadData(tagName);
-													}}
-													rightClickAction={
-														removeTagLine
-													}
-													// secondaryTitle="?"
-												/>
-											)
-										)}
+										{currentRecord.Tags.map((tag) => (
+											<DisplayTagLineGroup
+												tag={tag}
+												key={tag}
+												variant="success"
+												action={(tagName: string) => {
+													toast(
+														`hooray for ${tagName}`
+													);
+													setSearch(tagName);
+													loadData(tagName);
+												}}
+												rightClickAction={removeTagLine}
+												// secondaryTitle="?"
+											/>
+										))}
 									</div>
 								</div>
 
-								<Drawer startingValue={350} position="bottom">
+								<Drawer
+									startingValue={350}
+									position="bottom"
+									closed
+								>
 									<DisplayDeltas
 										deltas={deltas}
 										setDeltas={setDeltas}
@@ -590,61 +583,6 @@ function AppContent() {
 	);
 }
 
-interface ISpecialInput {
-	className?: string;
-	key?: string;
-	action: Function;
-	onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-	value: string;
-	actionName?: string;
-	prefix?: string;
-	extra?: React.ReactElement;
-
-	focusEpoch?: number;
-}
-function SpecialInput({
-	className,
-	action,
-	onChange,
-	value,
-	actionName,
-	prefix,
-	extra,
-	focusEpoch, // used to force focus
-}: ISpecialInput) {
-	const thisInput = useRef<HTMLInputElement>(null);
-	useEffect(() => {
-		if (focusEpoch && thisInput.current) {
-			thisInput.current.focus();
-			thisInput.current.select();
-		}
-	}, [thisInput, focusEpoch]);
-
-	return (
-		<div className="special-input">
-			{prefix ? <button onClick={() => action()}>{prefix}</button> : null}
-
-			<input
-				ref={thisInput}
-				value={value}
-				className={className}
-				onChange={onChange}
-				onKeyPress={(event) => {
-					if ((event.keyCode || event.which) === 13) {
-						action();
-					}
-				}}
-			/>
-
-			{actionName ? (
-				<button onClick={() => action()}>{actionName}</button>
-			) : null}
-
-			{extra}
-		</div>
-	);
-}
-
 function sortTags(newTags: string[], oldTags: string[]): string[] {
 	// Keeps the order of tags that are in both oldTags and newTags,
 	// but keep the tags that are just in newTags at the top
@@ -665,16 +603,15 @@ function sortTags(newTags: string[], oldTags: string[]): string[] {
 	return netNew.concat(existing);
 }
 
-function sortRecordTags(record: IRecord): IRecord {
-	if (!record.OpenedInGUI) {
-		record.Tags.sort();
-		record.OpenedInGUI = true;
-	}
-	return record;
+function updateRecord(
+	setRecords: (fn: (records: IRecord[]) => IRecord[]) => any,
+	updatedRecord: IRecord
+) {
+	setRecords((records) =>
+		records.map((record) =>
+			record.RecordID === updatedRecord.RecordID ? updatedRecord : record
+		)
+	);
 }
 
 export default App;
-
-function myTooltip(text: string) {
-	return (props: any) => <Tooltip {...props}>{text}</Tooltip>;
-}

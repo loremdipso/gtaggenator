@@ -11,8 +11,8 @@ class Bridge {
 		return helper("GetRecords", args);
 	}
 
-	async getTags(args: { args: string[] }): Promise<String[]> {
-		return helper("GetTags", args);
+	async getTags(): Promise<string[]> {
+		return helper("GetTags", {});
 	}
 
 	// returns the tags we just added

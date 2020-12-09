@@ -10,7 +10,7 @@ export const currentRecordIndex = atom({
 	default: 0,
 });
 
-export const allTags = atom({
+export const allTagsAtom = atom({
 	key: 'allTags',
 	default: [] as string[],
 });
