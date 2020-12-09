@@ -10,7 +10,7 @@ interface IContent {
 	record: IRecord | null;
 }
 export function Content({ record }: IContent) {
-	const [port, _] = useRecoilState(fileServerPort);
+	const [port] = useRecoilState(fileServerPort);
 	if (!port) {
 		return null;
 	}
@@ -51,7 +51,7 @@ function GrabBag({ record }: IGrabBag) {
 				// TODO: show this somewhere
 				// also, should we actually load this all the time?
 				try {
-					let grabBag = await bridge.get_grab_bag({ record: record });
+					let grabBag = await bridge.getGrabBag({ record: record });
 					setGrabBag(grabBag);
 				} catch (e) {
 					console.log(e);
@@ -95,7 +95,7 @@ function VideoContainer({ record }: IVideoContainer) {
 	const [durationWidth, setDurationWidth] = useState(0);
 	const [muted, setMuted] = useState(false);
 
-	const [port, _] = useRecoilState(fileServerPort);
+	const [port] = useRecoilState(fileServerPort);
 
 	useEffect(() => {
 		let currentVideo = videoRef?.current;
@@ -348,7 +348,7 @@ function ComicContainer({ record }: IComicContainer) {
 		[setRecordIndex, setPageIndex, comicInfo, preload, recordIndex]
 	);
 
-	const [port, _] = useRecoilState(fileServerPort);
+	const [port] = useRecoilState(fileServerPort);
 
 	const nextPage = () => {
 		updatePage(pageIndex + 1);

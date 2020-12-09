@@ -189,7 +189,7 @@ function AppContent() {
 					...currentRecord,
 					TimesOpened: currentRecord.TimesOpened + 1,
 				});
-				await bridge.open_record({
+				await bridge.openRecord({
 					record: currentRecord,
 				});
 
@@ -252,7 +252,7 @@ function AppContent() {
 		let tempSearch = getSearch(override);
 
 		try {
-			let records = await bridge.get_records({
+			let records = await bridge.getRecords({
 				args: tempSearch.split(" "),
 			});
 			setRecords(records);
@@ -295,7 +295,7 @@ function AppContent() {
 		}
 
 		let oldRecord = currentRecord;
-		let newRecord = await bridge.add_tags({
+		let newRecord = await bridge.addTags({
 			record: currentRecord,
 			tag_line: line,
 		});

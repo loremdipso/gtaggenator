@@ -27,14 +27,39 @@ const baseFilters: ISearchOption[] = [
 		type,
 	},
 	{
+		display: "Search Inclusive",
+		command: "-sort search_inclusive",
+		id: id++,
+		valueType: "string",
+		type,
+	},
+
+	{
+		display: "Tags",
+		command: "-sort tags",
+		valueType: "string",
+		id: id++,
+		type,
+	},
+	{
+		display: "Tags Inclusive",
+		command: "-sort tags_inclusive",
+		valueType: "string",
+		id: id++,
+		type,
+	},
+
+	{ display: "Touched", command: "-sort touched", id: id++, type },
+	{
 		display: "Untouched",
 		command: "-sort untouched",
 		id: id++,
 		type,
 	},
-	{ display: "Touched", command: "-sort touched", id: id++, type },
+
 	{ display: "Seen", command: "-sort seen", id: id++, type },
 	{ display: "Unseen", command: "-sort unseen", id: id++, type },
+
 	{
 		display: "Limit",
 		command: "-sort limit",
@@ -60,6 +85,7 @@ const baseSorters: ISearchOption[] = [
 		id: id++,
 		type,
 	},
+
 	{ display: "Largest", command: "-sort largest", id: id++, type },
 	{
 		display: "Smallest",
@@ -67,15 +93,76 @@ const baseSorters: ISearchOption[] = [
 		id: id++,
 		type,
 	},
+
 	{
 		display: "Alphabetial",
 		command: "-sort alpha",
 		id: id++,
 		type,
 	},
+
 	{
 		display: "Random",
 		command: "-sort random",
+		id: id++,
+		type,
+	},
+
+	{
+		display: "Reverse",
+		command: "-sort reverse",
+		id: id++,
+		type,
+	},
+
+	{
+		display: "Most Tags",
+		command: "-sort most_tags",
+		id: id++,
+		type,
+	},
+	{
+		display: "Fewest Tags",
+		command: "-sort fewest_tags",
+		id: id++,
+		type,
+	},
+
+	{
+		display: "Most Recently Opened",
+		command: "-sort most_recently_opened",
+		id: id++,
+		type,
+	},
+	{
+		display: "Least Recently Opened",
+		command: "-sort least_recently_opened",
+		id: id++,
+		type,
+	},
+
+	{
+		display: "Most Frequently Opened",
+		command: "-sort most_frequently_opened",
+		id: id++,
+		type,
+	},
+	{
+		display: "Least Frequently Opened",
+		command: "-sort least_frequently_opened",
+		id: id++,
+		type,
+	},
+
+	{
+		display: "Newest",
+		command: "-sort newest",
+		id: id++,
+		type,
+	},
+	{
+		display: "Least Oldest",
+		command: "-sort oldest",
 		id: id++,
 		type,
 	},

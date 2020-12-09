@@ -393,7 +393,6 @@ impl Filter {
 								.cmp(&(a.DateLastAccessed, a.DateAdded))
 						});
 					}
-
 					"least_recently_opened" => {
 						records.sort_by(|a, b| {
 							(a.DateLastAccessed, a.DateAdded)
