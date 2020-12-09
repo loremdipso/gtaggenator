@@ -226,14 +226,10 @@ impl Taggenator {
 
 			if tag.chars().nth(0).unwrap_or_default() == '-' {
 				let tag = &tag[1..];
-				if record.Tags.contains(tag) {
-					to_remove.push(tag.to_string());
-				}
+				to_remove.push(tag.to_string());
 			} else if tag.chars().last().unwrap_or_default() == '-' {
 				let tag = &tag[..tag.chars().count() - 1];
-				if record.Tags.contains(tag) {
-					to_remove.push(tag.to_string());
-				}
+				to_remove.push(tag.to_string());
 			} else if !record.Tags.contains(tag) {
 				to_add.push(tag.to_string());
 			}
@@ -247,16 +243,26 @@ impl Taggenator {
 		dedup(&mut to_add);
 
 		for tag in &to_add {
-			record.Tags.insert(tag.clone());
+			if !record.Tags.contains(tag) {
+				record.Tags.insert(tag.clone());
+			}
 		}
 
 		for tag in &to_remove {
-			record.Tags.remove(&tag.to_string());
+			if record.Tags.contains(tag) {
+				record.Tags.remove(&tag.to_string());
+			}
 		}
 
-		// only add the tags that weren't there already
-		self.database.add_tags(record.RecordID, to_add)?;
-		self.database.remove_tags(record.RecordID, to_remove)?;
+		if to_add.len() > 0 {
+			// only add the tags that weren't there already
+			self.database.add_tags(record.RecordID, to_add)?;
+		}
+
+		if to_remove.len() > 0 {
+			self.database.remove_tags(record.RecordID, to_remove)?;
+		}
+
 		Ok(())
 	}
 

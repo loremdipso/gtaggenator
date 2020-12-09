@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "./App.css";
 import { bridge } from "./Utils/Commands";
 import { IRecord } from "./Utils/interfaces";
-import { ChangeEvent } from "react";
 import { Content } from "./Components/Content";
 import {
 	IDelta,
@@ -300,7 +299,19 @@ function AppContent() {
 			}
 		}
 
+		// add net-new tags to our global tags
+		let tagsToAdd: string[] = [];
+		for (let tag of newRecord.Tags) {
+			if (allTags.indexOf(tag) === -1) {
+				tagsToAdd.push(tag);
+			}
+		}
+		if (tagsToAdd.length) {
+			setAllTags((allTags) => [...allTags, ...tagsToAdd]);
+		}
+
 		newRecord.Tags = sortTags(newRecord.Tags, oldRecord.Tags);
+
 		updateRecord(setRecords, newRecord);
 	};
 
@@ -370,29 +381,32 @@ function AppContent() {
 		setSearch(newValue);
 	};
 
-	const handleTagLine = () => {
+	const handleTagLine = (override?: string) => {
 		setTagLine("");
-		if (tagLine.length > 0) {
-			if (tagLine[0] === "<" || tagLine[0] === ">") {
-				let direction = tagLine[0] === "<" ? -1 : 1;
-				let amount = parseInt(tagLine.substring(1));
+		let tempTagLine = override || tagLine;
+		if (tempTagLine.length > 0) {
+			if (tempTagLine[0] === "<" || tempTagLine[0] === ">") {
+				let direction = tempTagLine[0] === "<" ? -1 : 1;
+				let amount = parseInt(tempTagLine.substring(1));
 				if (isNaN(amount)) {
 					amount = 1;
 				}
 				setRecordIndex(recordIndex + direction * amount);
 			} else if (
-				tagLine[tagLine.length - 1] === "<" ||
-				tagLine[tagLine.length - 1] === ">"
+				tempTagLine[tempTagLine.length - 1] === "<" ||
+				tempTagLine[tempTagLine.length - 1] === ">"
 			) {
-				let direction = tagLine[0] === "<" ? -1 : 1;
-				let amount = parseInt(tagLine.substring(0, tagLine.length - 1));
+				let direction = tempTagLine[0] === "<" ? -1 : 1;
+				let amount = parseInt(
+					tempTagLine.substring(0, tempTagLine.length - 1)
+				);
 				if (isNaN(amount)) {
 					amount = 1;
 				}
 				setRecordIndex(recordIndex + direction * amount);
 			} else {
 				// TODO: is this safe?
-				addTags(tagLine);
+				addTags(tempTagLine);
 			}
 		} else {
 			setRecordIndex(recordIndex + 1);

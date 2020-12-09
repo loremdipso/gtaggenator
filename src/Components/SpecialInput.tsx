@@ -54,13 +54,14 @@ export function SpecialInput({
 					}}
 					onChange={(selection) => {
 						if (selection[0]) {
-							onChange(selection[0] || "");
+							action(selection[0]);
 							typeAheadRef.current.clear();
 						}
 					}}
 					onKeyDown={(event: any) => {
 						if ((event.keyCode || event.which) === 13) {
-							action();
+							let value = typeAheadRef.current.getInput().value;
+							action(value);
 							typeAheadRef.current.clear();
 						}
 					}}
