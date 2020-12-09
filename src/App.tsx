@@ -300,14 +300,22 @@ function AppContent() {
 		}
 
 		// add net-new tags to our global tags
-		let tagsToAdd: string[] = [];
-		for (let tag of newRecord.Tags) {
-			if (allTags.indexOf(tag) === -1) {
-				tagsToAdd.push(tag);
-			}
-		}
+		let tagsToAdd = difference(allTags, newRecord.Tags);
 		if (tagsToAdd.length) {
 			setAllTags((allTags) => [...allTags, ...tagsToAdd]);
+		}
+
+		let addedTags = difference(newRecord.Tags, oldRecord.Tags);
+		for (let tag of addedTags) {
+			toast(tag, {
+				position: "bottom-left",
+				className: "green-toast",
+			});
+		}
+
+		let removedTags = difference(oldRecord.Tags, newRecord.Tags);
+		for (let tag of removedTags) {
+			toast(tag, { position: "bottom-left", className: "red-toast" });
 		}
 
 		newRecord.Tags = sortTags(newRecord.Tags, oldRecord.Tags);
@@ -519,6 +527,14 @@ function AppContent() {
 									</Button> */}
 
 									<Button
+										onClick={() => handleTagLine("reset")}
+										size="sm"
+										variant="dark"
+									>
+										Reset
+									</Button>
+
+									<Button
 										onClick={() => reload()}
 										size="sm"
 										variant="dark"
@@ -591,6 +607,7 @@ function AppContent() {
 				draggable={false}
 				autoClose={2000}
 				hideProgressBar
+				limit={5}
 				position="bottom-right"
 			/>
 		</div>
@@ -626,6 +643,16 @@ function updateRecord(
 			record.RecordID === updatedRecord.RecordID ? updatedRecord : record
 		)
 	);
+}
+
+function difference<T>(a: T[], b: T[]) {
+	let rv = [];
+	for (let x of a) {
+		if (b.indexOf(x) === -1) {
+			rv.push(x);
+		}
+	}
+	return rv;
 }
 
 export default App;

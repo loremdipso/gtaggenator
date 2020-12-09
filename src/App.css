@@ -163,7 +163,7 @@ a {
 }
 
 .added-tag {
-	background-color: green;
+	background-color: #218838;
 }
 
 .removed-tag {
@@ -341,4 +341,13 @@ ruffle-player {
 .grabbag-row .grabbag-value {
 	background-color: rgb(37, 37, 37);
 	color: white;
+}
+
+.green-toast {
+	background: #218838 !important;
+	color: white !important;
+}
+.red-toast {
+	background: #ff6565 !important;
+	color: white !important;
 }
