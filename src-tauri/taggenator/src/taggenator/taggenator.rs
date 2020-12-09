@@ -216,8 +216,8 @@ impl Taggenator {
 
 		self.handle_tagger(record, &mut tags)?;
 
-		let mut to_add = vec![];
-		let mut to_remove = vec![];
+		let mut to_add: Vec<String> = vec![];
+		let mut to_remove: Vec<String> = vec![];
 		for tag in tags.iter() {
 			// don't add empty tags
 			if tag.len() == 0 {
@@ -238,6 +238,7 @@ impl Taggenator {
 		self.replace_synonyms(&mut to_remove)?;
 		self.replace_synonyms(&mut to_add)?;
 		self.handle_temp(&mut to_add)?;
+		let do_reset = self.handle_reset(&mut to_add);
 		self.add_derived(record, &mut to_add)?;
 
 		dedup(&mut to_add);
@@ -252,15 +253,30 @@ impl Taggenator {
 			if record.Tags.contains(tag) {
 				record.Tags.remove(&tag.to_string());
 			}
+
+			if let Some(index) = to_add.iter().position(|x| tag == x) {
+				to_add.remove(index);
+			}
 		}
 
 		if to_add.len() > 0 {
 			// only add the tags that weren't there already
-			self.database.add_tags(record.RecordID, to_add)?;
+			self.database.add_tags(record.RecordID, &to_add)?;
 		}
 
 		if to_remove.len() > 0 {
-			self.database.remove_tags(record.RecordID, to_remove)?;
+			self.database.remove_tags(record.RecordID, &to_remove)?;
+		}
+
+		if do_reset {
+			record.HaveManuallyTouched = false;
+			record.TimesOpened = 0;
+			self.database.set_times_opened(record.RecordID, 0)?;
+			self.database.set_touched(record.RecordID, false)?;
+		} else if !record.HaveManuallyTouched && to_add.len() > 0 {
+			// touched
+			record.HaveManuallyTouched = true;
+			self.database.set_touched(record.RecordID, true)?;
 		}
 
 		Ok(())
@@ -339,6 +355,24 @@ impl Taggenator {
 		}
 
 		return Ok(());
+	}
+
+	fn handle_reset(&mut self, tags_to_add: &mut Vec<String>) -> bool {
+		let mut to_remove = vec![];
+		let mut rv = false;
+		for (i, tag) in tags_to_add.iter().enumerate() {
+			if tag == "reset" || tag == "unsorted" {
+				to_remove.push(i);
+				rv = true;
+			}
+		}
+
+		// TODO: clean up, filter or drain or something
+		for i in to_remove.iter().rev() {
+			tags_to_add.remove(*i);
+		}
+
+		return rv;
 	}
 
 	fn update_temp_tags(&mut self) -> Result<(), BError> {

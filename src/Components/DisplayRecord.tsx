@@ -41,6 +41,18 @@ export default function DisplayRecord({ record }: IDisplayRecord) {
 										<td>Location</td>
 										<td>{record.Location}</td>
 									</tr>
+									<tr>
+										<td>Times Opened</td>
+										<td>{record.TimesOpened}</td>
+									</tr>
+									<tr>
+										<td>Have Manually Touched</td>
+										<td>
+											{record.HaveManuallyTouched
+												? "yes"
+												: "no"}
+										</td>
+									</tr>
 								</tbody>
 							</Table>
 						</div>

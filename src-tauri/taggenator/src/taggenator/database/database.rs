@@ -285,7 +285,7 @@ impl Database {
 		)
 	}
 
-	pub fn add_tags(&mut self, recordId: i64, tags: Vec<String>) -> Result<(), BError> {
+	pub fn add_tags(&mut self, recordId: i64, tags: &Vec<String>) -> Result<(), BError> {
 		self.start_batch();
 		for tag in tags {
 			self.add_tag(recordId, tag)?;
@@ -294,7 +294,7 @@ impl Database {
 		Ok(())
 	}
 
-	pub fn add_tag(&mut self, recordId: i64, tag: String) -> Result<(), BError> {
+	pub fn add_tag(&mut self, recordId: i64, tag: &String) -> Result<(), BError> {
 		self.async_write(
 			"INSERT INTO Tags (RecordID, TagName, DateAdded) VALUES (?1, ?2, ?3)",
 			vec![
@@ -440,19 +440,27 @@ impl Database {
 		)
 	}
 
-	pub fn remove_tags(&mut self, recordId: i64, tags: Vec<String>) -> Result<(), BError> {
+	pub fn set_touched(&mut self, recordId: i64, touched: bool) -> Result<(), BError> {
+		self.async_write(
+			"UPDATE Records SET HaveManuallyTouched = ?
+			WHERE Records.RecordID = ?",
+			vec![Boolean(touched), Number(recordId)],
+		)
+	}
+
+	pub fn remove_tags(&mut self, recordId: i64, tags: &Vec<String>) -> Result<(), BError> {
 		self.start_batch();
 		for tag in tags {
-			self.remove_tag(recordId, tag)?;
+			self.remove_tag(recordId, &tag)?;
 		}
 		self.end_batch();
 		Ok(())
 	}
 
-	pub fn remove_tag(&mut self, recordId: i64, tag: String) -> Result<(), BError> {
+	pub fn remove_tag(&mut self, recordId: i64, tag: &String) -> Result<(), BError> {
 		self.async_write(
 			"DELETE FROM Tags WHERE RecordID = ?1 AND TagName = ?2",
-			vec![Number(recordId), Text(tag)],
+			vec![Number(recordId), Text(tag.to_string())],
 		)
 	}
 
