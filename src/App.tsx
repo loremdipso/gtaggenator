@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import "./App.css";
+import "./App.scss";
 import { bridge } from "./Utils/Commands";
 import { IRecord } from "./Utils/interfaces";
 import { Content } from "./Components/Content";
@@ -26,7 +26,7 @@ import { DisplayFilters, IFilter } from "./Components/Filters";
 import Drawer from "./Components/Drawer";
 import { RecoilRoot, useRecoilState } from "recoil";
 import { allTagsAtom, currentRecordIndex, fileServerPort } from "./Utils/Atoms";
-import { SpecialInput } from "./Components/SpecialInput";
+import { SpecialInput, SpecialInputSimple } from "./Components/SpecialInput";
 import { SimpleTooltip } from "./Components/SimpleTooltip";
 
 type ITabKey = "search" | "play";
@@ -42,6 +42,9 @@ function App() {
 function AppContent() {
 	const [args, setArgs] = useState([] as string[]);
 
+	const [searchFocusEpoch, setSearchFocusEpoch] = useState(0);
+	const [tagFocusEpoch, setTagFocusEpoch] = useState(0);
+
 	const [tagLine, setTagLine] = useState("");
 	const [search, setSearch] = useState("");
 
@@ -51,9 +54,6 @@ function AppContent() {
 	const [deltas, setDeltas] = useState([] as IDelta[]);
 
 	const [lastExecutedSearch, setLastExecutedSearch] = useState("");
-
-	const [searchFocusEpoch, setSearchFocusEpoch] = useState(0);
-	const [tagFocusEpoch, setTagFocusEpoch] = useState(0);
 
 	const [recordIndex, setRecordIndex] = useRecoilState(currentRecordIndex);
 	const [currentRecord, setCurrentRecord] = useState(null as IRecord | null);
@@ -212,7 +212,7 @@ function AppContent() {
 	const doEnd = () => {
 		setRecords([]);
 		setTabKey("search");
-		setSearchFocusEpoch((oldEpoch) => oldEpoch + 1);
+		// setSearchFocusEpoch((oldEpoch) => oldEpoch + 1);
 	};
 
 	const getSearch = (override?: string) => {
@@ -264,7 +264,7 @@ function AppContent() {
 			}
 			setTabKey("play");
 			setRecordIndex(newIndex);
-			setTagFocusEpoch(tagFocusEpoch + 1);
+			setTagFocusEpoch((epoch) => epoch + 1);
 			setLastExecutedSearch(tempSearch);
 		} catch (e) {
 			console.log(e);
@@ -381,14 +381,6 @@ function AppContent() {
 		}
 	};
 
-	const updateTagLine = (newValue: string) => {
-		setTagLine(newValue);
-	};
-
-	const updateSearch = (newValue: string) => {
-		setSearch(newValue);
-	};
-
 	const handleTagLine = (override?: string) => {
 		setTagLine("");
 		let tempTagLine = override || tagLine;
@@ -438,12 +430,12 @@ function AppContent() {
 				>
 					<Tab eventKey="search" title="search">
 						<div className="filter-tab-container">
-							<SpecialInput
-								onChange={updateSearch}
+							<SpecialInputSimple
+								onChange={setSearch}
 								action={loadData}
 								actionName="Search"
-								value={search}
 								focusEpoch={searchFocusEpoch}
+								value={search}
 							/>
 
 							<DisplayFilters
@@ -468,12 +460,12 @@ function AppContent() {
 								<DisplayRecord record={currentRecord} />
 
 								<SpecialInput
-									onChange={updateTagLine}
+									focusEpoch={tagFocusEpoch}
 									action={handleTagLine}
 									options={allTags}
-									value={tagLine}
+									// onChange={updateTagLine}
+									// value={tagLine}
 									actionName="Add"
-									focusEpoch={tagFocusEpoch}
 								/>
 
 								<div className="fancy-button-bar">

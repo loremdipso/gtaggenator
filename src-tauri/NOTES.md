@@ -27,9 +27,6 @@
 2. GUI
 
     - [x] POC
-    - [ ] Figure out plugin architecture
-        - Load how?
-        - Can they be dynamic?
     - [x] How do we load files?
     - [x] How do we load files?
         - [x] Make sure we aren't leaking memory/crashing
@@ -41,13 +38,18 @@
         - Save config to tsettings
     - [ ] Make play into tabs (with configurable filters?
     - [x] Preload images in browser
-    - [ ] Cache Zip/pages on server
     - [x] Dynamically bind filesystem to port
+    - [ ] Add settings edit screen
 
 3. Backburner
+    - [ ] Figure out plugin architecture
+        - Load how?
+        - Can they be dynamic?
+        - Do we even want to go to the trouble?
+    - [ ] Cache Zip/pages on server
     - [ ] Figure out migrations
         - [ ] Maybe query schema, figure out if anything's missing?
     - [ ] How do we ensure we don't leave the DB in a funky state?
     - [ ] Package thread-safe SQLite with the project instead of using whatever's installed
     - [ ] Swap font to roboto-mono, maybe
-	- [ ] If no tagg.db, open launch screen with a list of existing directories. For use when launching not from CLI
+    - [ ] If no tagg.db, open launch screen with a list of existing directories. For use when launching not from CLI
