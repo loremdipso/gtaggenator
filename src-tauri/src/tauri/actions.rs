@@ -10,6 +10,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use taggenator::errors::MyCustomError::UnknownError;
 use taggenator::taggenator::database::searcher::Searcher;
+use taggenator::taggenator::SETTINGS_FILENAME;
 use taggenator::BError;
 use taggenator::Taggenator;
 use tauri_api::dialog::Response::Okay;
@@ -73,6 +74,27 @@ pub fn start_tauri_core(
 									let mut taggenator_option =
 										taggenator_box.lock().map_err(|_| UnknownError)?;
 									let taggenator = initialize(ignore_updates, location).unwrap();
+									*taggenator_option = Some(taggenator);
+									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
+
+						Reload { callback, error } => {
+							let mut taggenator_box = taggenator_box.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let location = std::env::current_dir().unwrap();
+									let mut taggenator_option =
+										taggenator_box.lock().map_err(|_| UnknownError)?;
+
+									// this time we definitely want to query for updates
+									let taggenator =
+										initialize(false, location.to_string_lossy().to_string())
+											.unwrap();
 									*taggenator_option = Some(taggenator);
 									return Ok(());
 								},
@@ -323,6 +345,23 @@ pub fn start_tauri_core(
 									// TODO: make path absolute
 									// TODO: disown
 									Command::new("xdg-open").arg(location).spawn();
+									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
+
+						EditSettings { callback, error } => {
+							tauri::execute_promise(
+								_webview,
+								move || {
+									// TODO: make generic
+									// TODO: make path absolute
+									// TODO: disown
+									let path = std::env::current_dir().unwrap();
+									let location = path.join(SETTINGS_FILENAME);
+									Command::new("code").arg(location).spawn();
 									return Ok(());
 								},
 								callback,

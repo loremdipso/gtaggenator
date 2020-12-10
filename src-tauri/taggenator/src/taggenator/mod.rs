@@ -19,3 +19,5 @@ pub mod query_processor;
 mod commands;
 
 pub mod models;
+
+pub static SETTINGS_FILENAME: &str = "tsettings.yaml";

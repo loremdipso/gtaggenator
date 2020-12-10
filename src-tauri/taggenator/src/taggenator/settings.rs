@@ -1,5 +1,6 @@
 use crate::taggenator::errors::BError;
 use crate::taggenator::utils::input::readline;
+use crate::taggenator::SETTINGS_FILENAME;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
@@ -7,8 +8,6 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::{error::Error, include_str};
-
-static SETTINGS_FILENAME: &str = "tsettings.yaml";
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Settings {

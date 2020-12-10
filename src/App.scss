@@ -339,3 +339,24 @@ body {
 .clickable {
 	cursor: pointer;
 }
+
+.initializer {
+	background-color: black;
+	color: white;
+	height: 100vh;
+	width: 100vw;
+
+	h1 {
+		text-align: center;
+	}
+
+	button {
+		text-align: right;
+	}
+}
+
+.fancy-jumbotron {
+	background-color: black !important;
+	color: white;
+	text-align: center;
+}

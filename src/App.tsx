@@ -14,7 +14,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Button, OverlayTrigger, Tab, Tabs } from "react-bootstrap";
+import { Button, Jumbotron, OverlayTrigger, Tab, Tabs } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DisplayRecord from "./Components/DisplayRecord";
@@ -30,7 +30,7 @@ import { SpecialInput, SpecialInputSimple } from "./Components/SpecialInput";
 import { SimpleTooltip } from "./Components/SimpleTooltip";
 import { Initializer } from "./Components/Initializer";
 
-type ITabKey = "search" | "play";
+type ITabKey = "search" | "play" | "edit_settings";
 
 function App() {
 	const [initialized, setInitialized] = useState(false);
@@ -41,12 +41,16 @@ function App() {
 
 	return (
 		<RecoilRoot>
-			<AppContent />
+			<AppContent setInitialized={setInitialized} />
 		</RecoilRoot>
 	);
 }
 
-function AppContent() {
+interface IAppContent {
+	setInitialized: (initialized: boolean) => any;
+}
+
+function AppContent({ setInitialized }: IAppContent) {
 	const [args, setArgs] = useState([] as string[]);
 
 	const [searchFocusEpoch, setSearchFocusEpoch] = useState(0);
@@ -614,8 +618,31 @@ function AppContent() {
 								</Drawer>
 							</div>
 						) : (
-							<div>No results: (</div>
+							<Jumbotron fluid className="fancy-jumbotron">
+								<h1>No results: (</h1>
+							</Jumbotron>
 						)}
+					</Tab>
+
+					<Tab eventKey="edit_settings" title="Settings">
+						<Jumbotron fluid className="fancy-jumbotron">
+							<Button onClick={() => bridge.editSettings()}>
+								Edit In VSCode
+							</Button>
+
+							<Button
+								onClick={async () => {
+									await bridge.reload();
+									loadData();
+								}}
+							>
+								Reload
+							</Button>
+
+							<Button onClick={() => setInitialized(false)}>
+								Folder Select
+							</Button>
+						</Jumbotron>
 					</Tab>
 				</Tabs>
 			</ResizablePanel>

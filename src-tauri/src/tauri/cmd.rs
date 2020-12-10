@@ -100,6 +100,16 @@ pub enum Cmd {
 		error: String,
 		location: String,
 	},
+
+	EditSettings {
+		callback: String,
+		error: String,
+	},
+
+	Reload {
+		callback: String,
+		error: String,
+	},
 }
 
 #[derive(Serialize)]

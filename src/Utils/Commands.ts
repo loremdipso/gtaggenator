@@ -20,6 +20,14 @@ class Bridge {
 		return helper("OpenNewFolder", {});
 	}
 
+	async reload(): Promise<IStartupOptions> {
+		return helper("Reload", {});
+	}
+
+	async editSettings(): Promise<IStartupOptions> {
+		return helper("EditSettings", {});
+	}
+
 	async getRecords(args: { args: string[] }): Promise<IRecord[]> {
 		return helper("GetRecords", args);
 	}

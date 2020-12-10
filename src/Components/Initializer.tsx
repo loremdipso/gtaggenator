@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Button, ListGroup, Table } from "react-bootstrap";
+import { Button, Table } from "react-bootstrap";
 import { bridge } from "../Utils/Commands";
-import { IStartupFolder, IStartupOptions } from "../Utils/interfaces";
+import { IStartupOptions } from "../Utils/interfaces";
 
 interface IInitializer {
 	onInitialize: (initialized: boolean) => any;
@@ -37,11 +37,11 @@ export function Initializer({ onInitialize }: IInitializer) {
 	}
 
 	return (
-		<>
+		<div className="initializer">
 			<h1>Select Folder</h1>
 			<Table striped bordered hover variant="dark">
 				<tbody>
-					{options.folders.map((folder, i) => (
+					{options.folders.map((folder) => (
 						<tr
 							className="clickable"
 							onClick={() => selectLocation(folder.location)}
@@ -54,8 +54,10 @@ export function Initializer({ onInitialize }: IInitializer) {
 				</tbody>
 			</Table>
 
-			<Button onClick={() => addNew()}>Add New</Button>
-		</>
+			<Button style={{ marginLeft: "auto" }} onClick={() => addNew()}>
+				Add New
+			</Button>
+		</div>
 	);
 }
 
