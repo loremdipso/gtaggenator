@@ -300,7 +300,7 @@ function AppContent() {
 		}
 
 		// add net-new tags to our global tags
-		let tagsToAdd = difference(allTags, newRecord.Tags);
+		let tagsToAdd = difference(newRecord.Tags, allTags);
 		if (tagsToAdd.length) {
 			setAllTags((allTags) => [...allTags, ...tagsToAdd]);
 		}
