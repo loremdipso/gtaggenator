@@ -1,5 +1,4 @@
-use crate::taggenator::database::END_OF_WRITES;
-use crate::taggenator::database::SETTINGS_FILENAME;
+use crate::taggenator::database::DATABASE_FILENAME;
 use crate::taggenator::errors::BError;
 use chrono::DateTime;
 use chrono::Utc;
@@ -63,7 +62,7 @@ impl Writer {
 		todo_sender: Sender<usize>,
 	) -> Result<Writer, BError> {
 		let mut conn = Connection::open_with_flags(
-			SETTINGS_FILENAME,
+			DATABASE_FILENAME,
 			OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_CREATE,
 		)?;
 

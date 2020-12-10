@@ -1,9 +1,9 @@
 use super::file_server;
 use crate::take_flag;
-use crate::tauri::cmd::get_locations;
 use crate::tauri::cmd::CommandError;
 use crate::tauri::cmd::Response;
 use crate::tauri::cmd::StartupOptions;
+use crate::tauri::cmd::{add_to_cache, get_locations};
 use portpicker::pick_unused_port;
 use std::process::Command;
 use std::sync::Arc;
@@ -12,6 +12,7 @@ use taggenator::errors::MyCustomError::UnknownError;
 use taggenator::taggenator::database::searcher::Searcher;
 use taggenator::BError;
 use taggenator::Taggenator;
+use tauri_api::dialog::Response::Okay;
 
 pub fn start_tauri(mut args: Vec<String>) -> Result<(), BError> {
 	// start file server in separate thread
@@ -52,7 +53,7 @@ pub fn start_tauri_core(
 								_webview,
 								move || {
 									return Ok(StartupOptions {
-										folders: get_locations()?,
+										folders: get_locations().unwrap(),
 									});
 								},
 								callback,
@@ -71,15 +72,35 @@ pub fn start_tauri_core(
 								move || {
 									let mut taggenator_option =
 										taggenator_box.lock().map_err(|_| UnknownError)?;
-									std::env::set_current_dir(&location)?;
-
-									let mut taggenator = Taggenator::new().unwrap();
-									if !ignore_updates {
-										taggenator.update_files().map_err(|_| UnknownError)?;
-									}
+									let taggenator = initialize(ignore_updates, location).unwrap();
 									*taggenator_option = Some(taggenator);
-
 									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
+
+						OpenNewFolder { callback, error } => {
+							let mut taggenator_box = taggenator_box.clone();
+							let response = tauri_api::dialog::pick_folder(Some(
+								std::env::current_dir().unwrap(),
+							))
+							.unwrap();
+
+							tauri::execute_promise(
+								_webview,
+								move || {
+									if let Okay(location) = response {
+										let mut taggenator_option =
+											taggenator_box.lock().map_err(|_| UnknownError)?;
+										let taggenator =
+											initialize(ignore_updates, location).unwrap();
+										*taggenator_option = Some(taggenator);
+										return Ok(());
+									} else {
+										panic!();
+									}
 								},
 								callback,
 								error,
@@ -317,4 +338,16 @@ pub fn start_tauri_core(
 		.run();
 
 	Ok(())
+}
+
+fn initialize(ignore_updates: bool, location: String) -> Result<Taggenator, BError> {
+	std::env::set_current_dir(&location)?;
+
+	let mut taggenator = Taggenator::new_headless().unwrap();
+	if !ignore_updates {
+		taggenator.update_files().map_err(|_| UnknownError)?;
+	}
+
+	add_to_cache(location);
+	return Ok(taggenator);
 }

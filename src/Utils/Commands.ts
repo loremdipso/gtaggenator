@@ -16,6 +16,10 @@ class Bridge {
 		return helper("Initialize", args);
 	}
 
+	async openNewFolder(): Promise<IStartupOptions> {
+		return helper("OpenNewFolder", {});
+	}
+
 	async getRecords(args: { args: string[] }): Promise<IRecord[]> {
 		return helper("GetRecords", args);
 	}

@@ -6,6 +6,7 @@ use crate::taggenator::database::writer::Sqlizable::Number;
 use crate::taggenator::database::writer::Sqlizable::Text;
 use crate::taggenator::database::writer::Writer;
 use crate::taggenator::database::writer::MAX_BATCH_SIZE;
+use crate::taggenator::database::DATABASE_FILENAME;
 use crate::taggenator::errors::BError;
 use crate::taggenator::errors::MyCustomError;
 use crate::taggenator::errors::MyCustomError::UnknownError;
@@ -28,8 +29,6 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::thread;
 use std::thread::JoinHandle;
-
-static DATABASE_FILENAME: &str = "tagg.db";
 
 pub struct Database {
 	pub conn: Connection,

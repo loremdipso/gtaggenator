@@ -4,8 +4,8 @@ mod database;
 pub mod searcher;
 mod writer;
 
-static SETTINGS_FILENAME: &str = "tagg.db";
-static END_OF_WRITES: &str = "end";
+pub static CACHE_FILENAME: &str = ".gtaggenator_cache.yaml";
+pub static DATABASE_FILENAME: &str = "tagg.db";
 
 use crate::taggenator::errors::BError;
 pub use database::Database;

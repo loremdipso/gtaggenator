@@ -41,6 +41,16 @@ impl Taggenator {
 		});
 	}
 
+	pub fn new_headless() -> Result<Taggenator, BError> {
+		let settings = Settings::new_headless()?;
+		let database = Database::new()?;
+		return Ok(Taggenator {
+			settings: settings,
+			database: database,
+			newest_temp: 0,
+		});
+	}
+
 	pub fn parse_args(&mut self, mut args: Vec<String>) -> Result<(), BError> {
 		if !take_flag(&mut args, "--ignore-update") {
 			let (num_added, num_deleted) = self.update_files()?;

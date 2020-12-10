@@ -1,5 +1,11 @@
 use serde::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
+use taggenator::taggenator::database::CACHE_FILENAME;
+use taggenator::taggenator::database::DATABASE_FILENAME;
 use taggenator::taggenator::models::record::Record;
+use taggenator::BError;
 
 #[derive(Deserialize, Debug)]
 pub struct DoSomethingPayload {
@@ -20,6 +26,11 @@ pub enum Cmd {
 	},
 
 	GetStartupOptions {
+		callback: String,
+		error: String,
+	},
+
+	OpenNewFolder {
 		callback: String,
 		error: String,
 	},
@@ -130,13 +141,67 @@ pub struct StartupFolder {
 	pub location: String,
 }
 
-pub fn get_locations() -> std::io::Result<Vec<StartupFolder>> {
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct Cache {
+	pub opened: Vec<String>,
+}
+
+// TODO: refactor
+pub fn get_locations() -> Result<Vec<StartupFolder>, BError> {
 	let mut folders = vec![];
 
 	let base = std::env::current_dir()?;
-	folders.push(StartupFolder {
-		location: base.to_string_lossy().to_string(),
-	});
+	if Path::join(&base, DATABASE_FILENAME).exists() {
+		folders.push(StartupFolder {
+			location: base.to_string_lossy().to_string(),
+		});
+	}
+
+	let home_dir = std::env::home_dir().unwrap();
+	let config_path = Path::new(&home_dir).join(CACHE_FILENAME);
+	if config_path.exists() {
+		let mut file = File::open(config_path)?;
+		let mut contents = String::new();
+		file.read_to_string(&mut contents)
+			.unwrap_or_else(|err| panic!("Error while reading cache: [{}]", err));
+
+		let mut cache: Cache = serde_yaml::from_str(&contents)?;
+		for path in &mut cache.opened {
+			if !folders.iter().any(|el| el.location.eq(path)) {
+				folders.push(StartupFolder {
+					location: path.to_string(),
+				});
+			}
+		}
+	}
 
 	return Ok(folders);
+}
+
+pub fn add_to_cache(location: String) -> Result<(), BError> {
+	let home_dir = std::env::home_dir().unwrap();
+	let config_path = Path::new(&home_dir).join(CACHE_FILENAME);
+	if !config_path.exists() {}
+
+	let cache = if config_path.exists() {
+		let mut file = File::open(&config_path)?;
+		let mut contents = String::new();
+		file.read_to_string(&mut contents)
+			.unwrap_or_else(|err| panic!("Error while reading cache: [{}]", err));
+
+		let mut cache: Cache = serde_yaml::from_str(&contents)?;
+		if !cache.opened.iter().any(|el| el == &location) {
+			cache.opened.push(location.to_string());
+		}
+		cache
+	} else {
+		Cache {
+			opened: vec![location],
+		}
+	};
+
+	let s = serde_yaml::to_string(&cache)?;
+	std::fs::write(config_path, s)?;
+
+	return Ok(());
 }
