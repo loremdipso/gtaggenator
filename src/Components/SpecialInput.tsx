@@ -37,9 +37,10 @@ export function SpecialInput({
 	let [, setActionDebouncer] = useState("");
 	const doAction = (value: string) => {
 		setActionDebouncer((oldValue) => {
-			if (value !== oldValue) {
-				action(value);
-			}
+			// TODO: figure this out
+			// if (value === "" || value !== oldValue) {
+			action(value);
+			// }
 			return value;
 		});
 	};
@@ -54,6 +55,7 @@ export function SpecialInput({
 				minLength={2}
 				id="TODO: make unique id"
 				options={options}
+				maxResults={20}
 				// onInputChange={(newValue) => {
 				// 	onChange(newValue);
 				// }}
@@ -70,7 +72,6 @@ export function SpecialInput({
 						typeAheadRef.current.clear();
 					}
 				}}
-				// dropup
 				open
 			/>
 

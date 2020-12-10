@@ -19,10 +19,11 @@
     - [x] Implement Duplicate checking
     - [x] Implement renaming
     - [x] Get rid of unique name requirement?
-    - [ ] Test renaming code/deduplication work
     - [x] Implement batching in Async SQL queries
-    - [ ] Add dates
-    - [ ] Flush before reads? Yay or nay? Maybe with reload?
+    - [x] Add dates
+    - [x] Flush before reads? Yay or nay? Maybe with reload?
+    - [ ] Test renaming code/deduplication work
+    - [ ] Support rename
 
 2. GUI
 

@@ -1,7 +1,6 @@
 import React from "react";
-import { ReactChildren, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Draggable from "react-draggable";
-import { transform } from "typescript";
 
 type IResizablePanel = React.PropsWithChildren<{
 	startingValue: number;

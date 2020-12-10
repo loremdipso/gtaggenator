@@ -459,15 +459,6 @@ function AppContent() {
 							<div className="tag-input-container">
 								<DisplayRecord record={currentRecord} />
 
-								<SpecialInput
-									focusEpoch={tagFocusEpoch}
-									action={handleTagLine}
-									options={allTags}
-									// onChange={updateTagLine}
-									// value={tagLine}
-									actionName="Add"
-								/>
-
 								<div className="fancy-button-bar">
 									{/* <OverlayTrigger
 											placement="top"
@@ -549,6 +540,15 @@ function AppContent() {
 										{">"}
 									</Button>
 								</div>
+
+								<SpecialInput
+									focusEpoch={tagFocusEpoch}
+									action={handleTagLine}
+									options={allTags}
+									// onChange={updateTagLine}
+									// value={tagLine}
+									actionName="Add"
+								/>
 
 								<div className="growable">
 									<div className="tag-container">

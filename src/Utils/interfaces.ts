@@ -15,7 +15,4 @@ export interface IRecord {
 	DateLastAccessed: string,
 
 	HaveManuallyTouched: boolean,
-
-	// GUI-only
-	OpenedInGUI: boolean,
 }

@@ -12,7 +12,6 @@ export default function DisplayRecord({ record }: IDisplayRecord) {
 		<div>
 			<div className="side-by-side">
 				<div className="truncate">{record.Name}</div>
-
 				<OverlayTrigger
 					placement="right"
 					overlay={({
