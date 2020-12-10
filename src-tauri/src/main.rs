@@ -16,9 +16,8 @@ fn main() {
 	let mut args: Vec<String> = env::args().skip(1).collect();
 	let do_gopen = take_flag(&mut args, "gopen");
 
-	let mut taggenator = Taggenator::new().unwrap();
 	if do_gopen || args.len() == 0 {
-		tauri::start_tauri(taggenator, args);
+		tauri::start_tauri(args);
 	} else {
 		let mut taggenator = Taggenator::new().unwrap();
 		if let Err(error) = taggenator.parse_args(args) {

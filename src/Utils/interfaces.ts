@@ -16,3 +16,11 @@ export interface IRecord {
 
 	HaveManuallyTouched: boolean,
 }
+
+export interface IStartupOptions {
+	folders: IStartupFolder[]
+}
+
+export interface IStartupFolder {
+	location: string
+}

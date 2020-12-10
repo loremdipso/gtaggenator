@@ -14,15 +14,20 @@ pub struct DoSomethingPayload {
 #[derive(Deserialize)]
 #[serde(tag = "cmd")]
 pub enum Cmd {
+	// as an example
 	DoSomethingSync {
 		argument: String,
 	},
 
-	DoSomethingAsync {
-		count: u64,
-		payload: DoSomethingPayload,
+	GetStartupOptions {
 		callback: String,
 		error: String,
+	},
+
+	Initialize {
+		callback: String,
+		error: String,
+		location: String,
 	},
 
 	AddTags {
@@ -114,3 +119,24 @@ impl<'a> std::fmt::Display for CommandError<'a> {
 // Tauri uses the `anyhow` lib so custom error types must implement std::error::Error
 // and the function call should call `.into()` on it
 impl<'a> std::error::Error for CommandError<'a> {}
+
+#[derive(Serialize)]
+pub struct StartupOptions {
+	pub folders: Vec<StartupFolder>,
+}
+
+#[derive(Serialize)]
+pub struct StartupFolder {
+	pub location: String,
+}
+
+pub fn get_locations() -> std::io::Result<Vec<StartupFolder>> {
+	let mut folders = vec![];
+
+	let base = std::env::current_dir()?;
+	folders.push(StartupFolder {
+		location: base.to_string_lossy().to_string(),
+	});
+
+	return Ok(folders);
+}

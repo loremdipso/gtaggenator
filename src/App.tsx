@@ -28,10 +28,17 @@ import { RecoilRoot, useRecoilState } from "recoil";
 import { allTagsAtom, currentRecordIndex, fileServerPort } from "./Utils/Atoms";
 import { SpecialInput, SpecialInputSimple } from "./Components/SpecialInput";
 import { SimpleTooltip } from "./Components/SimpleTooltip";
+import { Initializer } from "./Components/Initializer";
 
 type ITabKey = "search" | "play";
 
 function App() {
+	const [initialized, setInitialized] = useState(false);
+
+	if (!initialized) {
+		return <Initializer onInitialize={setInitialized} />;
+	}
+
 	return (
 		<RecoilRoot>
 			<AppContent />
@@ -191,7 +198,6 @@ function AppContent() {
 	useEffect(() => {
 		(async () => {
 			let initialArgs = await bridge.getInitialArguments();
-			initialArgs = ["jpg"];
 			setArgs(initialArgs);
 		})();
 	}, []);
@@ -322,9 +328,9 @@ function AppContent() {
 		}
 	};
 
-	const reload = () => {
-		loadData();
-	};
+	// const reload = () => {
+	// 	loadData();
+	// };
 
 	// const editSelf = () => {
 	// 	// TODO: this

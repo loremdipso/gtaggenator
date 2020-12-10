@@ -1,7 +1,9 @@
 use super::file_server;
 use crate::take_flag;
+use crate::tauri::cmd::get_locations;
 use crate::tauri::cmd::CommandError;
 use crate::tauri::cmd::Response;
+use crate::tauri::cmd::StartupOptions;
 use portpicker::pick_unused_port;
 use std::process::Command;
 use std::sync::Arc;
@@ -11,7 +13,7 @@ use taggenator::taggenator::database::searcher::Searcher;
 use taggenator::BError;
 use taggenator::Taggenator;
 
-pub fn start_tauri(mut taggenator: Taggenator, mut args: Vec<String>) -> Result<(), BError> {
+pub fn start_tauri(mut args: Vec<String>) -> Result<(), BError> {
 	// start file server in separate thread
 	let file_server_port: u16 = pick_unused_port().expect("No ports free");
 	std::thread::spawn(move || {
@@ -20,23 +22,24 @@ pub fn start_tauri(mut taggenator: Taggenator, mut args: Vec<String>) -> Result<
 
 	println!("Using port {}", file_server_port);
 
+	let mut ignore_updates = false;
 	if take_flag(&mut args, "--ignore-update") || take_flag(&mut args, "--stale") {
 		println!("Ignore file system changes...");
-	} else {
-		taggenator.update_files()?;
+		ignore_updates = true;
 	}
 
-	let taggenator = Arc::new(Mutex::new(taggenator));
-	start_tauri_core(taggenator.clone(), file_server_port, args)?;
+	start_tauri_core(file_server_port, args, ignore_updates)?;
 
 	return Ok(());
 }
 
 pub fn start_tauri_core(
-	taggenator: Arc<Mutex<Taggenator>>,
 	port: u16,
 	initial_arguments: Vec<String>,
+	ignore_updates: bool,
 ) -> Result<(), BError> {
+	let taggenator_box: Arc<Mutex<Option<Taggenator>>> = Arc::new(Mutex::new(None));
+
 	tauri::AppBuilder::new()
 		.invoke_handler(move |_webview, arg| {
 			use super::cmd::Cmd::*;
@@ -44,34 +47,50 @@ pub fn start_tauri_core(
 				Err(e) => Err(e.to_string()),
 				Ok(command) => {
 					match command {
+						GetStartupOptions { callback, error } => {
+							tauri::execute_promise(
+								_webview,
+								move || {
+									return Ok(StartupOptions {
+										folders: get_locations()?,
+									});
+								},
+								callback,
+								error,
+							);
+						}
+
+						Initialize {
+							callback,
+							error,
+							location,
+						} => {
+							let mut taggenator_box = taggenator_box.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let mut taggenator_option =
+										taggenator_box.lock().map_err(|_| UnknownError)?;
+									std::env::set_current_dir(&location)?;
+
+									let mut taggenator = Taggenator::new().unwrap();
+									if !ignore_updates {
+										taggenator.update_files().map_err(|_| UnknownError)?;
+									}
+									*taggenator_option = Some(taggenator);
+
+									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
+
 						// sync
 						DoSomethingSync { argument } => {
 							//  your command code
 							println!("{}", argument);
 						}
-
-						DoSomethingAsync {
-							count,
-							payload,
-							callback,
-							error,
-						} => tauri::execute_promise(
-							_webview,
-							move || {
-								dbg!(payload);
-								if count > 5 {
-									let response = Response {
-										value: 5,
-										message: "async response!",
-									};
-									Ok(response)
-								} else {
-									Err(CommandError::new("count should be > 5").into())
-								}
-							},
-							callback,
-							error,
-						),
 
 						AddTags {
 							callback,
@@ -79,16 +98,20 @@ pub fn start_tauri_core(
 							mut record,
 							tag_line,
 						} => {
-							let mut taggenator = taggenator.clone();
+							let mut taggenator_box = taggenator_box.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
-									let mut taggenator =
-										taggenator.lock().map_err(|_| UnknownError)?;
-									taggenator
-										.insert_tag_line(&mut record, tag_line)
-										.map_err(|_| UnknownError)?;
-									return Ok(record);
+									let mut taggenator = taggenator_box.lock().unwrap();
+									if let Some(ref mut taggenator) = *taggenator {
+										taggenator
+											.insert_tag_line(&mut record, tag_line)
+											.map_err(|_| UnknownError)?;
+										return Ok(record);
+									} else {
+										// TODO: remove, throw error
+										panic!();
+									}
 								},
 								callback,
 								error,
@@ -100,20 +123,24 @@ pub fn start_tauri_core(
 							error,
 							args,
 						} => {
-							let mut taggenator = taggenator.clone();
+							let mut taggenator_box = taggenator_box.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
-									let taggenator = taggenator.lock().map_err(|_| UnknownError)?;
 									println!("{:?}", &args);
-									let mut searcher =
-										Searcher::new(args).map_err(|_| UnknownError)?;
+									let mut taggenator = taggenator_box.lock().unwrap();
+									if let Some(ref mut taggenator) = *taggenator {
+										let mut searcher =
+											Searcher::new(args).map_err(|_| UnknownError)?;
 
-									let records = searcher
-										.get_records(&taggenator.database)
-										.map_err(|_| UnknownError)?;
-									// println!("records: {:?}", records);
-									return Ok(records);
+										let records = searcher
+											.get_records(&taggenator.database)
+											.map_err(|_| UnknownError)?;
+										return Ok(records);
+									} else {
+										// TODO: remove, throw error
+										panic!();
+									}
 								},
 								callback,
 								error,
@@ -121,14 +148,19 @@ pub fn start_tauri_core(
 						}
 
 						GetTags { callback, error } => {
-							let mut taggenator = taggenator.clone();
+							let mut taggenator_box = taggenator_box.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
-									let taggenator = taggenator.lock().unwrap();
-									let mut searcher = Searcher::new(vec![]).unwrap();
-									let tags = searcher.get_tags(&taggenator.database).unwrap();
-									return Ok(tags);
+									let mut taggenator = taggenator_box.lock().unwrap();
+									if let Some(ref mut taggenator) = *taggenator {
+										let mut searcher = Searcher::new(vec![]).unwrap();
+										let tags = searcher.get_tags(&taggenator.database).unwrap();
+										return Ok(tags);
+									} else {
+										// TODO: remove, throw error
+										panic!();
+									}
 								},
 								callback,
 								error,
@@ -140,18 +172,22 @@ pub fn start_tauri_core(
 							error,
 							mut record,
 						} => {
-							let mut taggenator = taggenator.clone();
+							let mut taggenator_box = taggenator_box.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
-									let mut taggenator =
-										taggenator.lock().map_err(|_| UnknownError)?;
-									record.TimesOpened += 1;
-									taggenator
-										.database
-										.set_times_opened(record.RecordID, record.TimesOpened)
-										.map_err(|_| UnknownError)?;
-									return Ok(record);
+									let mut taggenator = taggenator_box.lock().unwrap();
+									if let Some(ref mut taggenator) = *taggenator {
+										record.TimesOpened += 1;
+										taggenator
+											.database
+											.set_times_opened(record.RecordID, record.TimesOpened)
+											.map_err(|_| UnknownError)?;
+										return Ok(record);
+									} else {
+										// TODO: remove, throw error
+										panic!();
+									}
 								},
 								callback,
 								error,
@@ -163,18 +199,21 @@ pub fn start_tauri_core(
 							error,
 							mut record,
 						} => {
-							let mut taggenator = taggenator.clone();
+							let mut taggenator_box = taggenator_box.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
-									let mut taggenator =
-										taggenator.lock().map_err(|_| UnknownError)?;
-
-									let grab_bag = taggenator
-										.database
-										.grabbag_get_all(record.RecordID)
-										.map_err(|_| UnknownError)?;
-									return Ok(grab_bag);
+									let mut taggenator = taggenator_box.lock().unwrap();
+									if let Some(ref mut taggenator) = *taggenator {
+										let grab_bag = taggenator
+											.database
+											.grabbag_get_all(record.RecordID)
+											.map_err(|_| UnknownError)?;
+										return Ok(grab_bag);
+									} else {
+										// TODO: remove, throw error
+										panic!();
+									}
 								},
 								callback,
 								error,
@@ -188,18 +227,21 @@ pub fn start_tauri_core(
 							key,
 							value,
 						} => {
-							let mut taggenator = taggenator.clone();
+							let mut taggenator_box = taggenator_box.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
-									let mut taggenator =
-										taggenator.lock().map_err(|_| UnknownError)?;
-
-									let grab_bag = taggenator
-										.database
-										.grabbag_upsert(record.RecordID, key, value)
-										.map_err(|_| UnknownError)?;
-									return Ok(());
+									let mut taggenator = taggenator_box.lock().unwrap();
+									if let Some(ref mut taggenator) = *taggenator {
+										let grab_bag = taggenator
+											.database
+											.grabbag_upsert(record.RecordID, key, value)
+											.map_err(|_| UnknownError)?;
+										return Ok(());
+									} else {
+										// TODO: remove, throw error
+										panic!();
+									}
 								},
 								callback,
 								error,
@@ -234,7 +276,6 @@ pub fn start_tauri_core(
 							error,
 							location,
 						} => {
-							let args = initial_arguments.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
@@ -254,7 +295,6 @@ pub fn start_tauri_core(
 							error,
 							location,
 						} => {
-							let args = initial_arguments.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {

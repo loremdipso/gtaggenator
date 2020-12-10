@@ -1,11 +1,19 @@
 import { FileEarmarkEasel } from "react-bootstrap-icons";
 import { promisified } from "tauri/api/tauri";
-import { IRecord } from "./interfaces";
+import { IRecord, IStartupOptions } from "./interfaces";
 
 class Bridge {
 	constructor() {
 		// await promisified({
 		// });
+	}
+
+	async getStartupOptions(): Promise<IStartupOptions> {
+		return helper("GetStartupOptions", {});
+	}
+
+	async initialize(args: { location: string }): Promise<IStartupOptions> {
+		return helper("Initialize", args);
 	}
 
 	async getRecords(args: { args: string[] }): Promise<IRecord[]> {
