@@ -15,11 +15,13 @@ use std::thread::JoinHandle;
 
 pub const MAX_BATCH_SIZE: usize = 1000; // TODO: what should this number be?
 
+#[derive(Debug)]
 pub struct Query {
 	pub sql: String,
 	pub params: Vec<Sqlizable>,
 }
 
+#[derive(Debug)]
 pub enum Sqlizable {
 	Text(String),
 	Number(i64),

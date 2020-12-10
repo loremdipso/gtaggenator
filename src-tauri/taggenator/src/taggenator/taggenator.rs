@@ -101,7 +101,7 @@ impl Taggenator {
 						let mut did_create = false;
 						if !file_map.contains_key(*name) {
 							num_added += 1;
-							self.database.add_record(name, location);
+							self.database.add_record(name, location)?;
 							did_create = true;
 						} else {
 							// if we've seen a file like this, but never at this location,
@@ -149,7 +149,7 @@ impl Taggenator {
 			match do_update.len() {
 				0 => {
 					// println!("Adding {} at {}", name, location);
-					self.database.add_record(name, location);
+					self.database.add_record(name, location)?;
 					seen.insert(name.to_string(), location.to_string());
 					num_added += 1;
 				}

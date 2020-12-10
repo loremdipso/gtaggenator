@@ -123,7 +123,12 @@ impl Database {
 		let length = -1; // TODO: fetch the length of video files
 		let times_opened = 0;
 		let date_added = Some(Utc::now());
-		let date_created = Some(DateTime::<Utc>::from(metadata.created()?));
+
+		let mut date_created = None;
+		if let Ok(created) = metadata.created() {
+			date_created = Some(DateTime::<Utc>::from(created));
+		}
+
 		let date_last_touched = None;
 		let have_manually_touched = false;
 		let was_imported = false;

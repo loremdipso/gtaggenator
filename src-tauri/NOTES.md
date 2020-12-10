@@ -50,3 +50,4 @@
     - [ ] How do we ensure we don't leave the DB in a funky state?
     - [ ] Package thread-safe SQLite with the project instead of using whatever's installed
     - [ ] Swap font to roboto-mono, maybe
+	- [ ] If no tagg.db, open launch screen with a list of existing directories. For use when launching not from CLI
