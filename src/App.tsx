@@ -79,6 +79,12 @@ function AppContent() {
 			return;
 		}
 
+		if (key === "search") {
+			setSearchFocusEpoch((epoch) => epoch + 1);
+		} else if (key === "play") {
+			setTagFocusEpoch((epoch) => epoch + 1);
+		}
+
 		setTabKey(key);
 	};
 
@@ -148,23 +154,58 @@ function AppContent() {
 		[setTabKey, setSearchFocusEpoch]
 	);
 
+	// TODO: is this the most react-y thing we can do?
+	const loadData = async (override?: string) => {
+		let tempSearch = getSearch(search, filters, override);
+
+		try {
+			let records = await bridge.getRecords({
+				args: tempSearch.split(" "),
+			});
+			setRecords(records);
+
+			let newIndex = 0;
+			if (lastExecutedSearch === tempSearch && currentRecord) {
+				// special case: if we're refreshing, try to find the record we were just on
+				newIndex = records.findIndex(
+					(record) => record.RecordID === currentRecord.RecordID
+				);
+				if (newIndex < 0) {
+					newIndex = 0;
+				}
+
+				toast("Reloaded");
+			} else {
+				toast("Loaded");
+			}
+			setTabKey("play");
+			setRecordIndex(newIndex);
+			setTagFocusEpoch((epoch) => epoch + 1);
+			setLastExecutedSearch(tempSearch);
+		} catch (e) {
+			console.log(e);
+		}
+	};
+
 	// load initial arguments, once
 	useEffect(() => {
 		(async () => {
 			let initialArgs = await bridge.getInitialArguments();
+			initialArgs = ["jpg"];
 			setArgs(initialArgs);
 		})();
 	}, []);
 
 	useEffect(() => {
 		if (args.length) {
+			setArgs([]);
 			console.log(`initial args: ${args}`);
 			let argsString = args.join(" ");
 			setSearch(argsString);
 			// TODO: populate filters from this
-			// loadData(argsString);
+			loadData(argsString);
 		}
-	}, [args]);
+	}, [args, loadData]);
 
 	useEffect(() => {
 		(async () => {
@@ -212,63 +253,7 @@ function AppContent() {
 	const doEnd = () => {
 		setRecords([]);
 		setTabKey("search");
-		// setSearchFocusEpoch((oldEpoch) => oldEpoch + 1);
-	};
-
-	const getSearch = (override?: string) => {
-		let tempSearch = override || search;
-		if (tempSearch.length > 0) {
-			if (!tempSearch.startsWith("search")) {
-				tempSearch = `search ${tempSearch}`;
-			}
-		}
-
-		for (let filter of filters) {
-			// if we require a value make sure it exists
-			// need to !! to get to bools
-			if (filter.base.valueType) {
-				if (filter.value !== null && filter.value !== undefined) {
-					tempSearch += ` ${filter.base.command}`;
-					tempSearch += ` ${filter.value}`;
-				}
-			} else {
-				tempSearch += ` ${filter.base.command}`;
-			}
-		}
-
-		return tempSearch;
-	};
-
-	const loadData = async (override?: string) => {
-		let tempSearch = getSearch(override);
-
-		try {
-			let records = await bridge.getRecords({
-				args: tempSearch.split(" "),
-			});
-			setRecords(records);
-
-			let newIndex = 0;
-			if (lastExecutedSearch === tempSearch && currentRecord) {
-				// special case: if we're refreshing, try to find the record we were just on
-				newIndex = records.findIndex(
-					(record) => record.RecordID === currentRecord.RecordID
-				);
-				if (newIndex < 0) {
-					newIndex = 0;
-				}
-
-				toast("Reloaded");
-			} else {
-				toast("Loaded");
-			}
-			setTabKey("play");
-			setRecordIndex(newIndex);
-			setTagFocusEpoch((epoch) => epoch + 1);
-			setLastExecutedSearch(tempSearch);
-		} catch (e) {
-			console.log(e);
-		}
+		setSearchFocusEpoch((oldEpoch) => oldEpoch + 1);
 	};
 
 	const addTagLine = (tag: string) => {
@@ -645,6 +630,34 @@ function difference<T>(a: T[], b: T[]) {
 		}
 	}
 	return rv;
+}
+
+function getSearch(
+	search: string,
+	filters: IFilter[],
+	override?: string
+): string {
+	let tempSearch = override || search;
+	if (tempSearch.length > 0) {
+		if (!tempSearch.startsWith("search")) {
+			tempSearch = `search ${tempSearch}`;
+		}
+	}
+
+	for (let filter of filters) {
+		// if we require a value make sure it exists
+		// need to !! to get to bools
+		if (filter.base.valueType) {
+			if (filter.value !== null && filter.value !== undefined) {
+				tempSearch += ` ${filter.base.command}`;
+				tempSearch += ` ${filter.value}`;
+			}
+		} else {
+			tempSearch += ` ${filter.base.command}`;
+		}
+	}
+
+	return tempSearch;
 }
 
 export default App;
