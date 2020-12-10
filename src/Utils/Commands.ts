@@ -37,6 +37,13 @@ class Bridge {
 		return helper("GetPort", {});
 	}
 
+	async openContainingFolder(args: { location: string }): Promise<number> {
+		return helper("OpenContainingFolder", args);
+	}
+
+	async openNatively(args: { location: string }): Promise<number> {
+		return helper("OpenNatively", args);
+	}
 }
 
 let DEBUG = !(window.__TAURI_INVOKE_HANDLER__);

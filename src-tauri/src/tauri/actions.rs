@@ -3,6 +3,7 @@ use crate::take_flag;
 use crate::tauri::cmd::CommandError;
 use crate::tauri::cmd::Response;
 use portpicker::pick_unused_port;
+use std::process::Command;
 use std::sync::Arc;
 use std::sync::Mutex;
 use taggenator::errors::MyCustomError::UnknownError;
@@ -222,6 +223,46 @@ pub fn start_tauri_core(
 								_webview,
 								move || {
 									return Ok(args);
+								},
+								callback,
+								error,
+							);
+						}
+
+						OpenContainingFolder {
+							callback,
+							error,
+							location,
+						} => {
+							let args = initial_arguments.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									// TODO: make generic
+									// TODO: make path absolute
+									// TODO: disown
+									Command::new("nemo").arg(location).spawn();
+									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
+
+						OpenNatively {
+							callback,
+							error,
+							location,
+						} => {
+							let args = initial_arguments.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									// TODO: make generic
+									// TODO: make path absolute
+									// TODO: disown
+									Command::new("xdg-open").arg(location).spawn();
+									return Ok(());
 								},
 								callback,
 								error,

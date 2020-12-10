@@ -462,6 +462,42 @@ function AppContent() {
 
 									<OverlayTrigger
 										placement="top"
+										overlay={SimpleTooltip("Open natively")}
+									>
+										<Button
+											onClick={() =>
+												openNatively(
+													currentRecord.Location
+												)
+											}
+											size="sm"
+											variant="dark"
+										>
+											Open
+										</Button>
+									</OverlayTrigger>
+
+									<OverlayTrigger
+										placement="top"
+										overlay={SimpleTooltip(
+											"Open containing folder"
+										)}
+									>
+										<Button
+											onClick={() =>
+												openContainingFolder(
+													currentRecord.Location
+												)
+											}
+											size="sm"
+											variant="dark"
+										>
+											Folder
+										</Button>
+									</OverlayTrigger>
+
+									<OverlayTrigger
+										placement="top"
 										overlay={SimpleTooltip(
 											"Remove all tags"
 										)}
@@ -469,12 +505,12 @@ function AppContent() {
 										<Button
 											onClick={() => clearTags()}
 											size="sm"
-											variant="dark"
+											variant="danger"
 											disabled={
 												currentRecord.Tags.length === 0
 											}
 										>
-											Clear
+											Clear Tags
 										</Button>
 									</OverlayTrigger>
 
@@ -502,13 +538,13 @@ function AppContent() {
 										Reset
 									</Button>
 
-									<Button
+									{/* <Button
 										onClick={() => reload()}
 										size="sm"
 										variant="dark"
 									>
 										Reload
-									</Button>
+									</Button> */}
 
 									<Button
 										onClick={() => previousRecord()}
@@ -658,6 +694,14 @@ function getSearch(
 	}
 
 	return tempSearch;
+}
+
+async function openNatively(location: string) {
+	await bridge.openNatively({ location });
+}
+
+async function openContainingFolder(location: string) {
+	await bridge.openContainingFolder({ location });
 }
 
 export default App;

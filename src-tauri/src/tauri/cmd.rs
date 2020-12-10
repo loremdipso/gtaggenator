@@ -72,6 +72,18 @@ pub enum Cmd {
 		callback: String,
 		error: String,
 	},
+
+	OpenContainingFolder {
+		callback: String,
+		error: String,
+		location: String,
+	},
+
+	OpenNatively {
+		callback: String,
+		error: String,
+		location: String,
+	},
 }
 
 #[derive(Serialize)]
