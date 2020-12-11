@@ -25,10 +25,10 @@ export function Content({ record }: IContent) {
 						<ImageContainer path={getPath(port, record.Location)} />
 					) : null}
 					{isVideo(record.Name) ? (
-						<VideoContainer record={record} />
+						<VideoContainer location={record.Location} />
 					) : null}
 					{isComic(record.Name) ? (
-						<ComicContainer record={record} />
+						<ComicContainer location={record.Location} />
 					) : null}
 					{isFlash(record.Name) ? (
 						<FlashContainer path={getPath(port, record.Location)} />

@@ -8,10 +8,15 @@ interface IGrabBag {
 }
 export function GrabBag({ record }: IGrabBag) {
 	let [grabBag, setGrabBag] = useState({} as { [key: string]: string });
+	const [lastOpenedRecordID, setLastOpenedRecordID] = useState(
+		null as number | null
+	);
 
 	useEffect(() => {
-		if (record) {
+		if (record && record.RecordID !== lastOpenedRecordID) {
 			(async () => {
+				setLastOpenedRecordID(record.RecordID);
+
 				// TODO: make sure this doesn't freak out and loop forever
 				// TODO: show this somewhere
 				// also, should we actually load this all the time?
@@ -23,7 +28,7 @@ export function GrabBag({ record }: IGrabBag) {
 				}
 			})();
 		}
-	}, [record, setGrabBag]);
+	}, [record, lastOpenedRecordID, setGrabBag]);
 
 	if (!Object.keys(grabBag).length) {
 		return null;

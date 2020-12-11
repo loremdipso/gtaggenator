@@ -13,9 +13,9 @@ const times = {
 };
 
 interface IVideoContainer {
-	record: IRecord;
+	location: string;
 }
-export function VideoContainer({ record }: IVideoContainer) {
+export function VideoContainer({ location }: IVideoContainer) {
 	const videoRef = useRef(null as HTMLVideoElement | null);
 	const containerRef = useRef(null as HTMLDivElement | null);
 	const [volumeHeight, setVolumeHeight] = useState(0);
@@ -69,7 +69,7 @@ export function VideoContainer({ record }: IVideoContainer) {
 				}
 			};
 		}
-	}, [record, videoRef, containerRef, setVolumeHeight, setDurationWidth]);
+	}, [videoRef, containerRef, setVolumeHeight, setDurationWidth]);
 
 	const volumeUp = () => {
 		if (videoRef?.current) {
@@ -202,7 +202,7 @@ export function VideoContainer({ record }: IVideoContainer) {
 		scrub(times.TINY);
 	});
 
-	let path = record ? getPath(port, record.Location) : "";
+	let path = location ? getPath(port, location) : "";
 	return (
 		<div className="video-container" ref={containerRef}>
 			<video controls loop autoPlay ref={videoRef} src={path} />

@@ -100,6 +100,12 @@ const baseSorters: ISearchOption[] = [
 		id: id++,
 		type,
 	},
+	{
+		display: "Location",
+		command: "-sort location",
+		id: id++,
+		type,
+	},
 
 	{
 		display: "Random",

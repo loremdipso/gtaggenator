@@ -375,6 +375,10 @@ impl Filter {
 						records.sort_by(|a, b| a.Name.cmp(&b.Name));
 					}
 
+					"location" => {
+						records.sort_by(|a, b| a.Location.cmp(&b.Location));
+					}
+
 					"newest" => {
 						records.sort_by(|a, b| {
 							(b.DateAdded, b.DateCreated).cmp(&(a.DateAdded, a.DateCreated))

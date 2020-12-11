@@ -6,12 +6,12 @@ import { IRecord } from "../../Utils/interfaces";
 import { ImageContainer } from "./ImageContainer";
 
 interface IComicContainer {
-	record: IRecord;
+	location: string;
 }
 
 const NUM_TO_PRELOAD = 5;
 const NUM_MAX_IMAGES = 20;
-export function ComicContainer({ record }: IComicContainer) {
+export function ComicContainer({ location }: IComicContainer) {
 	const [recordIndex, setRecordIndex] = useRecoilState(currentRecordIndex);
 	const [pageIndex, setPageIndex] = useState(0);
 	const [comicInfo, setComicInfo] = useState(null as IComicInfo | null);
@@ -77,10 +77,10 @@ export function ComicContainer({ record }: IComicContainer) {
 
 	useEffect(() => {
 		(async () => {
-			let info = await getComicInfo(port, record.Location);
+			let info = await getComicInfo(port, location);
 			setComicInfo(info);
 		})();
-	}, [record, setComicInfo]);
+	}, [location, setComicInfo]);
 
 	useEffect(() => {
 		updatePage(0);
@@ -175,7 +175,7 @@ export function ComicContainer({ record }: IComicContainer) {
 				}
 			}}
 		>
-			{record && comicInfo ? (
+			{location && comicInfo ? (
 				<>
 					<div
 						style={{
@@ -193,7 +193,7 @@ export function ComicContainer({ record }: IComicContainer) {
 							key={imageIndex}
 							path={getComicPagePath(
 								port,
-								record.Location,
+								location,
 								comicInfo.pages[imageIndex]
 							)}
 							hidden={imageIndex !== pageIndex}

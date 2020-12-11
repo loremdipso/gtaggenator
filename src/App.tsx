@@ -314,14 +314,14 @@ function AppContent({ setInitialized }: IAppContent) {
 		let addedTags = difference(newRecord.Tags, oldRecord.Tags);
 		for (let tag of addedTags) {
 			toast(tag, {
-				position: "bottom-left",
+				position: "bottom-right",
 				className: "green-toast",
 			});
 		}
 
 		let removedTags = difference(oldRecord.Tags, newRecord.Tags);
 		for (let tag of removedTags) {
-			toast(tag, { position: "bottom-left", className: "red-toast" });
+			toast(tag, { position: "bottom-right", className: "red-toast" });
 		}
 
 		newRecord.Tags = sortTags(newRecord.Tags, oldRecord.Tags);
