@@ -215,7 +215,7 @@ function AppContent({ setInitialized }: IAppContent) {
 		if (args.length) {
 			setArgs([]);
 			console.log(`initial args: ${args}`);
-			let argsString = args.join(" ");
+			let argsString = args.map((e) => `"${e}"`).join(" ");
 			setSearch(argsString);
 			// TODO: populate filters from this
 			loadData(argsString);

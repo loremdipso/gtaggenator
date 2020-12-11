@@ -137,8 +137,6 @@ impl Searcher {
 							record.Tags.insert(tag);
 						}
 
-						// dbg!(&record);
-
 						current_record = Some(record);
 					}
 				}
@@ -182,7 +180,6 @@ impl Searcher {
 			count -= 1;
 		}
 
-		// dbg!(&self.filters);
 		// println!("{}", sql);
 		return sql;
 	}

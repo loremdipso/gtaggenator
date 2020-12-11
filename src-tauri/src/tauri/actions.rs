@@ -44,8 +44,7 @@ pub fn start_tauri_core(
 	let taggenator_box: Arc<Mutex<Option<Taggenator>>> = Arc::new(Mutex::new(None));
 
 	// if opening with command line arguments, skip initial folder selection step
-	// if initial_arguments.len() > 0 {
-	if true {
+	if initial_arguments.len() > 0 {
 		let do_skip_initialization = do_skip_initialization.clone();
 		let mut do_skip_initialization = do_skip_initialization.lock().unwrap();
 		*do_skip_initialization = true;
@@ -201,6 +200,7 @@ pub fn start_tauri_core(
 										let records = searcher
 											.get_records(&taggenator.database)
 											.map_err(|_| UnknownError)?;
+
 										return Ok(records);
 									} else {
 										// TODO: remove, throw error
