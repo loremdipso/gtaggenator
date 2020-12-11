@@ -44,7 +44,8 @@ pub fn start_tauri_core(
 	let taggenator_box: Arc<Mutex<Option<Taggenator>>> = Arc::new(Mutex::new(None));
 
 	// if opening with command line arguments, skip initial folder selection step
-	if initial_arguments.len() > 0 {
+	// if initial_arguments.len() > 0 {
+	if true {
 		let do_skip_initialization = do_skip_initialization.clone();
 		let mut do_skip_initialization = do_skip_initialization.lock().unwrap();
 		*do_skip_initialization = true;
@@ -55,7 +56,6 @@ pub fn start_tauri_core(
 		let taggenator =
 			initialize(ignore_updates, location.to_string_lossy().to_string()).unwrap();
 		*taggenator_option = Some(taggenator);
-		return Ok(());
 	}
 
 	tauri::AppBuilder::new()
@@ -72,9 +72,11 @@ pub fn start_tauri_core(
 								move || {
 									let mut do_skip_initialization =
 										do_skip_initialization.lock().unwrap();
+									let do_skip = *do_skip_initialization;
+									*do_skip_initialization = false;
 									return Ok(StartupOptions {
 										folders: get_locations().unwrap(),
-										skip: *do_skip_initialization,
+										skip: do_skip,
 									});
 								},
 								callback,
