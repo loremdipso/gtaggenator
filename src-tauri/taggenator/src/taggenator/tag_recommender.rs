@@ -40,14 +40,14 @@ impl<'a> TagRecommender {
 
 			let entry = self
 				.mapping
-				.entry(temp_tag.to_lowercase().to_string())
+				.entry(temp_tag.to_lowercase().replace(" ", ""))
 				.or_insert(HashSet::new());
 			// (*entry).insert(prefix);
 			(*entry).insert(tag.to_string());
 		} else {
 			let entry = self
 				.mapping
-				.entry(tag.to_string())
+				.entry(tag.to_lowercase().replace(" ", ""))
 				.or_insert(HashSet::new());
 			(*entry).insert(tag.to_lowercase().to_string());
 		}

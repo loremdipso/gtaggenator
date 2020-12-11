@@ -369,10 +369,12 @@ body {
 }
 
 .recommended-tags {
-	margin-top: 2rem;
+	// margin-top: 2rem;
 	> h4 {
 		background-color: black;
-		padding: 0.75rem;
+		// padding: 0.75rem;
 		text-align: center;
 	}
+
+	background-color: rgb(66, 66, 66);
 }

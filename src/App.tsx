@@ -592,6 +592,50 @@ function AppContent({ setInitialized }: IAppContent) {
 									actionName="Add"
 								/>
 
+								{recommendedTags.length ? (
+									<div className="recommended-tags">
+										<h4>
+											Recommended Tags{" "}
+											<Button
+												size="sm"
+												variant="dark"
+												onClick={() => {
+													addTagLine(
+														recommendedTags.join(
+															", "
+														)
+													);
+													setRecommendedTags([]);
+												}}
+											>
+												Add All
+											</Button>
+										</h4>
+										<div className="tag-container">
+											{recommendedTags.map((tag) => (
+												<DisplayTagLineGroup
+													tag={tag}
+													key={tag}
+													variant="secondary"
+													action={(
+														tagName: string
+													) => {
+														addTagLine(tagName);
+														setRecommendedTags(
+															(tags) =>
+																tags.filter(
+																	(tag) =>
+																		tag !==
+																		tagName
+																)
+														);
+													}}
+												/>
+											))}
+										</div>
+									</div>
+								) : null}
+
 								<div className="growable">
 									<div className="tag-container">
 										{currentRecord.Tags.map((tag) => (
@@ -611,34 +655,6 @@ function AppContent({ setInitialized }: IAppContent) {
 											/>
 										))}
 									</div>
-
-									{recommendedTags.length ? (
-										<div className="recommended-tags">
-											<h4>Recommended Tags</h4>
-											<div className="tag-container">
-												{recommendedTags.map((tag) => (
-													<DisplayTagLineGroup
-														tag={tag}
-														key={tag}
-														variant="secondary"
-														action={(
-															tagName: string
-														) => {
-															addTagLine(tagName);
-															setRecommendedTags(
-																(tags) =>
-																	tags.filter(
-																		(tag) =>
-																			tag !==
-																			tagName
-																	)
-															);
-														}}
-													/>
-												))}
-											</div>
-										</div>
-									) : null}
 								</div>
 
 								<Drawer
