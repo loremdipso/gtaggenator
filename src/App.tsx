@@ -175,7 +175,8 @@ function AppContent({ setInitialized }: IAppContent) {
 
 		try {
 			let records = await bridge.getRecords({
-				args: tempSearch.split(" "),
+				// split by whitespace, but keep quoted groups together
+				args: parseWords(tempSearch),
 			});
 			setRecords(records);
 
@@ -791,6 +792,12 @@ async function openNatively(location: string) {
 
 async function openContainingFolder(location: string) {
 	await bridge.openContainingFolder({ location });
+}
+
+function parseWords(words: string) {
+	return (words.match(/[^\s"]+|"([^"]*)"/gi) || []).map((word) =>
+		word.replace(/^"(.+(?="$))"$/, "$1")
+	);
 }
 
 export default App;
