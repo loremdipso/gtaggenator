@@ -326,7 +326,11 @@ impl Taggenator {
 				let mut do_remove = false;
 				for new_tag in result.split("\n") {
 					do_remove = true;
-					if !record.Tags.contains(new_tag) {
+					if new_tag.len() > 0
+						&& new_tag.chars().nth(0) != Some('#')
+						&& !record.Tags.contains(new_tag)
+					{
+						println!("tagger found: {}", &new_tag);
 						// NOTE: could lead to duplicates, but we're okay with that
 						to_add.push(new_tag.to_string());
 					}

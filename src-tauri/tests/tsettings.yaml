@@ -1,27 +1,28 @@
 ---
 extensions:
-  - ".txt"
-  - sup
-  - yaml
+    - ".txt"
+    - sup
+    - yaml
 synonyms:
-  pre: prefix
-  post: postfix
+    pre: prefix
+    post: postfix
 prefixes:
-  - "getmore:"
+    - "getmore:"
 derived:
-  thing:
-    - another thing
+    thing:
+        - another thing
 commands:
-  ls: ls
+    ls: ls
 tagger:
-  test: "sleep 5 && echo \"new tag1\nnew tag2\n%s\""
+    test: "sleep 5 && echo \"new tag1\nnew tag2\n%s\""
+    test:exe: /home/madams/Projects/gtaggenator/src-tauri/tests/testexe.sh "%s"
 openerconfig:
-  video:
-    Open: "vlc \"%s\""
-    Update: "vlc \"%s\""
-    Close: killall vlc
-  comic:
-    Open: "mcomix \"%s\""
-    Close: killall mcomix
-  default:
-    Open: "gnome-open \"%s\""
+    video:
+        Open: 'vlc "%s"'
+        Update: 'vlc "%s"'
+        Close: killall vlc
+    comic:
+        Open: 'mcomix "%s"'
+        Close: killall mcomix
+    default:
+        Open: 'gnome-open "%s"'

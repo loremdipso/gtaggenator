@@ -432,12 +432,10 @@ impl Filter {
 					}
 
 					"unseen" => {
-						println!("Before: {}", records.len());
 						records = records
 							.drain(..)
 							.filter(|record| record.TimesOpened == 0)
 							.collect();
-						println!("After: {}", records.len());
 					}
 
 					"tags" | "tags_exclusive" => {
