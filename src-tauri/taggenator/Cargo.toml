@@ -12,6 +12,7 @@ regex = "*"
 serde_yaml = "*"
 shell-words = "*"
 string-builder = "*"
+threadpool = "*"
 toml = "0.5.7"
 walkdir = "2"
 

@@ -322,7 +322,6 @@ impl Taggenator {
 					Regex::new("%s")?.replace(&tagger_command, record.Location.as_str());
 				let temp_tagger_command = temp_tagger_command.deref();
 
-				// TODO: parallelize this
 				let result = run_command_string(&temp_tagger_command.to_string())?;
 				let mut do_remove = false;
 				for new_tag in result.split("\n") {

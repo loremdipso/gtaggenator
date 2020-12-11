@@ -14,7 +14,7 @@ derived:
 commands:
   ls: ls
 tagger:
-  test: "echo \"new tag1\nnew tag2\n%s\""
+  test: "sleep 5 && echo \"new tag1\nnew tag2\n%s\""
 openerconfig:
   video:
     Open: "vlc \"%s\""

@@ -2058,6 +2058,7 @@ dependencies = [
  "serde_yaml",
  "shell-words",
  "string-builder",
+ "threadpool",
  "toml",
  "walkdir",
 ]

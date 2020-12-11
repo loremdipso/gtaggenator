@@ -23,7 +23,8 @@ cd ../tests
 #cargo test --release -p taggenator
 #cargo test --release -p taggenator
 
-time ~/.cargo-target/release/taggenator apply_tags --tag tag_application_works
+#time ~/.cargo-target/release/taggenator apply_tags --tag tag_application_works
+time ~/.cargo-target/release/taggenator apply_tags --tag test --threads 3
 #time ~/.cargo-target/release/taggenator move --destination ./tmp/destination search C.txt
 #time ~/.cargo-target/release/taggenator move --destination ./tmp/destination search C.txt
 #time ~/.cargo-target/release/taggenator delete search B.txt
