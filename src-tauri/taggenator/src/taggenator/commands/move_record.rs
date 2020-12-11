@@ -5,7 +5,7 @@ use crate::taggenator::flags::take_flag_with_arg;
 use crate::Taggenator;
 use std::path::Path;
 
-pub fn move_record(db: &mut Taggenator, mut args: Vec<String>) -> Result<(), BError> {
+pub fn move_record(taggenator: &mut Taggenator, mut args: Vec<String>) -> Result<(), BError> {
 	let destination = take_flag_with_arg(&mut args, "-destination")
 		.unwrap_or_else(|| take_flag_with_arg(&mut args, "--destination").unwrap());
 
@@ -19,7 +19,7 @@ pub fn move_record(db: &mut Taggenator, mut args: Vec<String>) -> Result<(), BEr
 	}
 
 	let mut searcher = Searcher::new(args)?;
-	let records = searcher.get_records(&db.database)?;
+	let records = searcher.get_records(&taggenator.database)?;
 
 	for record in records {
 		let new_location = Path::new(&destination).join(record.Name);

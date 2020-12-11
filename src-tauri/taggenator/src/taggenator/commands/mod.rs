@@ -3,6 +3,7 @@ use crate::taggenator::errors::BError;
 use crate::taggenator::errors::MyCustomError;
 use crate::Taggenator;
 
+mod apply_tags;
 mod delete;
 mod dump;
 mod dump_tags;
@@ -31,6 +32,9 @@ pub fn RunCommand(
 		}
 		"open" => {
 			return open::open(taggenator, args);
+		}
+		"apply_tags" => {
+			return apply_tags::apply_tags(taggenator, args);
 		}
 		"delete" => {
 			return delete::delete(taggenator, args);

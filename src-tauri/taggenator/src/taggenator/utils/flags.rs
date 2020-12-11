@@ -11,7 +11,7 @@ pub fn take_flag(args: &mut Vec<String>, flag: &str) -> bool {
 }
 
 pub fn take_flag_with_arg(args: &mut Vec<String>, flag: &str) -> Option<String> {
-	for i in 0..(args.len() - 1) {
+	for i in 0..(args.len()) {
 		let arg = &args[i];
 		if arg == flag {
 			let next = &args[i + 1];
