@@ -20,10 +20,10 @@ cargo build --release -q -p taggenator
 cd ../tests
 
 
-#cargo test --release -p taggenator
+cargo test --release -p taggenator
 #cargo test --release -p taggenator
 
-time ~/.cargo-target/release/taggenator run_grabbag --threads 3 --exe ./grabbagger.rb
+#time ~/.cargo-target/release/taggenator run_grabbag --threads 3 --exe ./grabbagger.rb
 #time ~/.cargo-target/release/taggenator apply_tags --tag tag_application_works
 
 #time ~/.cargo-target/release/taggenator apply_tags --tag test --threads 3

@@ -38,19 +38,19 @@ impl<'a> TagRecommender {
 			let index = tag.chars().count() - index;
 
 			// let prefix: String = tag.chars().take(index - 1).collect();
-			let temp_tag: String = tag.chars().skip(index).collect();
-
+			let temp_tag: String = tag.chars().skip(index).collect::<String>().to_lowercase();
+			let temp_tag = self.re.replace_all(&temp_tag, "");
+			let temp_tag = temp_tag.to_lowercase().replace(" ", "");
 			let entry = self
 				.mapping
-				.entry(temp_tag.to_lowercase().replace(" ", ""))
+				.entry(temp_tag.to_string())
 				.or_insert(HashSet::new());
 			// (*entry).insert(prefix);
 			(*entry).insert(tag.to_string());
 		} else {
-			let entry = self
-				.mapping
-				.entry(tag.to_lowercase().replace(" ", ""))
-				.or_insert(HashSet::new());
+			let temp_tag = self.re.replace_all(&tag, "");
+			let temp_tag = temp_tag.to_lowercase().replace(" ", "");
+			let entry = self.mapping.entry(temp_tag).or_insert(HashSet::new());
 			(*entry).insert(tag.to_lowercase().to_string());
 		}
 	}
@@ -94,7 +94,7 @@ fn test_recommend_tags() {
 		"prefix:a".to_string(),
 		"prefix:a b".to_string(),
 		"prefix:a b c".to_string(),
-		"prefix:h i".to_string(),
+		"prefix:h-i".to_string(),
 		"prefix:jk".to_string(),
 		"not a match".to_string(),
 	];
@@ -108,7 +108,7 @@ fn test_recommend_tags() {
 		"prefix:a".to_string(),
 		"some:prefix:a".to_string(),
 		"prefix:a b c".to_string(),
-		"prefix:h i".to_string(),
+		"prefix:h-i".to_string(),
 		"prefix:jk".to_string(),
 	];
 
