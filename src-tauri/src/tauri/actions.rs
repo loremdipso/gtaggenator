@@ -40,7 +40,23 @@ pub fn start_tauri_core(
 	initial_arguments: Vec<String>,
 	ignore_updates: bool,
 ) -> Result<(), BError> {
+	let do_skip_initialization: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
 	let taggenator_box: Arc<Mutex<Option<Taggenator>>> = Arc::new(Mutex::new(None));
+
+	// if opening with command line arguments, skip initial folder selection step
+	if initial_arguments.len() > 0 {
+		let do_skip_initialization = do_skip_initialization.clone();
+		let mut do_skip_initialization = do_skip_initialization.lock().unwrap();
+		*do_skip_initialization = true;
+
+		let mut taggenator_box = taggenator_box.clone();
+		let mut taggenator_option = taggenator_box.lock().map_err(|_| UnknownError)?;
+		let location = std::env::current_dir().unwrap();
+		let taggenator =
+			initialize(ignore_updates, location.to_string_lossy().to_string()).unwrap();
+		*taggenator_option = Some(taggenator);
+		return Ok(());
+	}
 
 	tauri::AppBuilder::new()
 		.invoke_handler(move |_webview, arg| {
@@ -50,11 +66,15 @@ pub fn start_tauri_core(
 				Ok(command) => {
 					match command {
 						GetStartupOptions { callback, error } => {
+							let do_skip_initialization = do_skip_initialization.clone();
 							tauri::execute_promise(
 								_webview,
 								move || {
+									let mut do_skip_initialization =
+										do_skip_initialization.lock().unwrap();
 									return Ok(StartupOptions {
 										folders: get_locations().unwrap(),
+										skip: *do_skip_initialization,
 									});
 								},
 								callback,

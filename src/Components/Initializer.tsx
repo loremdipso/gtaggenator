@@ -27,8 +27,11 @@ export function Initializer({ onInitialize }: IInitializer) {
 	useEffect(() => {
 		(async () => {
 			const options = await bridge.getStartupOptions();
-			console.log(options);
-			setOptions(options);
+			if (options.skip) {
+				onInitialize(true);
+			} else {
+				setOptions(options);
+			}
 		})();
 	}, []);
 

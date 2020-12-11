@@ -22,6 +22,7 @@ interface IDeltas {
 	undoRemoves: (delta: IDelta) => any;
 	addTagLine: (tag: string) => any;
 	removeTagLine: (tag: string) => any;
+	onDoubleClick?: (tag: string) => any;
 }
 
 export function DisplayDeltas({
@@ -31,6 +32,7 @@ export function DisplayDeltas({
 	undoRemoves,
 	addTagLine,
 	removeTagLine,
+	onDoubleClick,
 }: IDeltas) {
 	const removeDelta = (deltaToRemove: IDelta) => {
 		setDeltas((deltas: IDelta[]) =>
@@ -59,6 +61,7 @@ export function DisplayDeltas({
 					removeDelta={removeDelta}
 					addTagLine={addTagLine}
 					removeTagLine={removeTagLine}
+					onDoubleClick={onDoubleClick}
 				/>
 			))}
 		</div>
@@ -73,6 +76,7 @@ interface IDisplayDelta {
 	removeDelta: (delta: IDelta) => any;
 	addTagLine: (tag: string) => any;
 	removeTagLine: (tag: string) => any;
+	onDoubleClick?: (tag: string) => any;
 }
 
 function DisplayDelta({
@@ -83,6 +87,7 @@ function DisplayDelta({
 	removeDelta,
 	addTagLine,
 	removeTagLine,
+	onDoubleClick,
 }: IDisplayDelta) {
 	let variant = "secondary";
 	if (delta.added.length && !delta.removed.length) {
@@ -130,6 +135,10 @@ function DisplayDelta({
 
 						<Button
 							onClick={() => addTagLine(delta.originalString)}
+							onDoubleClick={() =>
+								onDoubleClick &&
+								onDoubleClick(delta.originalString)
+							}
 							variant={variant}
 							size="sm"
 							className="truncate fat-child"

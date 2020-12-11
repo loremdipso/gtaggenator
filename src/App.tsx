@@ -669,6 +669,7 @@ function AppContent({ setInitialized }: IAppContent) {
 										undoRemoves={undoRemoves}
 										addTagLine={addTagLine}
 										removeTagLine={removeTagLine}
+										onDoubleClick={() => nextRecord()}
 									/>
 								</Drawer>
 							</div>

@@ -19,6 +19,7 @@ export interface IRecord {
 
 export interface IStartupOptions {
 	folders: IStartupFolder[]
+	skip: boolean
 }
 
 export interface IStartupFolder {

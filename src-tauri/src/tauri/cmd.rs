@@ -150,6 +150,7 @@ impl<'a> std::error::Error for CommandError<'a> {}
 #[derive(Serialize)]
 pub struct StartupOptions {
 	pub folders: Vec<StartupFolder>,
+	pub skip: bool,
 }
 
 #[derive(Serialize)]
