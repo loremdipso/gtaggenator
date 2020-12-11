@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::convert::TryFrom;
 use std::error::Error;
+use std::path::Path;
 use string_builder::Builder;
 
 // TODO: is there some way to clean this up? Diesel, for ex?
@@ -466,6 +467,20 @@ impl Filter {
 							.collect();
 					}
 
+					"name" | "name_exclusive" => {
+						records = records
+							.drain(..)
+							.filter(|record| search_name_exclusive(&record, &self.args))
+							.collect();
+					}
+
+					"name_inclusive" => {
+						records = records
+							.drain(..)
+							.filter(|record| search_name_inclusive(&record, &self.args))
+							.collect();
+					}
+
 					"limit" => {
 						// TODO: log error
 						if let Some(limit) = self.args.get(0) {
@@ -575,6 +590,40 @@ fn search_tags_inclusive(record: &Record, search_terms: &Vec<String>) -> bool {
 			if tag.to_lowercase().contains(term) {
 				return true;
 			}
+		}
+	}
+
+	return false;
+}
+
+// every search term must match
+fn search_name_exclusive(record: &Record, search_terms: &Vec<String>) -> bool {
+	let name = Path::new(&record.Name)
+		.with_extension("")
+		.to_string_lossy()
+		.to_lowercase();
+
+	for term in search_terms {
+		if name == *term {
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+// any search term needs to match
+fn search_name_inclusive(record: &Record, search_terms: &Vec<String>) -> bool {
+	let name = Path::new(&record.Name)
+		.with_extension("")
+		.to_string_lossy()
+		.to_lowercase();
+
+	for term in search_terms {
+		if name == *term {
+			return true;
 		}
 	}
 

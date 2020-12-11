@@ -33,6 +33,7 @@ import { Initializer } from "./Components/Initializer";
 import { setTitle } from "tauri/api/window";
 
 type ITabKey = "search" | "play" | "edit_settings";
+const MAX_FILTERS = 20;
 
 function App() {
 	const [initialized, setInitialized] = useState(false);
@@ -302,7 +303,9 @@ function AppContent({ setInitialized }: IAppContent) {
 			let delta = createDelta(newRecord.Tags, oldRecord.Tags, line);
 			if (delta.added.length || delta.removed.length) {
 				// insert after all our favorite deltas
-				setDeltas((deltas) => appendDeltaImmutable(deltas, delta));
+				setDeltas((deltas) =>
+					appendDeltaImmutable(deltas, delta).slice(0, MAX_FILTERS)
+				);
 			}
 		}
 
