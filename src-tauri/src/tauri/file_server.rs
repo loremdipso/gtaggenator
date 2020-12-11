@@ -24,7 +24,9 @@ pub async fn serve_fs(port: u16) {
 
 	let get_comic_info =
 		warp::path("get_comic_info").and(warp::query().map(|query: ComicQuery| {
-			let mut archive_contents = get_archive(query.path.unwrap());
+			let path = query.path.unwrap();
+			let path = fixPath(&path);
+			let mut archive_contents = get_archive(path);
 
 			let mut pages_map: HashMap<usize, String> = HashMap::new();
 			// let mut pages: Vec<usize> = vec![];
@@ -67,6 +69,7 @@ pub async fn serve_fs(port: u16) {
 	let get_comic_page = warp::path("get_comic_page")
 		.and(warp::query().map(|query: ComicQuery| {
 			let path = query.path.unwrap();
+			let path = fixPath(&path);
 			let page_number = query.page_number.unwrap();
 			println!("Opening zip archive: {}, page: {}", path, page_number);
 
@@ -133,4 +136,9 @@ fn chain_ordering(o1: Ordering, o2: Ordering) -> Ordering {
 		Ordering::Equal => o2,
 		_ => o1,
 	}
+}
+
+fn fixPath(path: &String) -> String {
+	dbg!(&path);
+	return path.to_string();
 }

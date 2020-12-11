@@ -209,6 +209,7 @@ interface IComicInfo {
 	pages: number[];
 }
 async function getComicInfo(port: number, path: string): Promise<IComicInfo> {
+	path = encodeURIComponent(path);
 	let response = await fetch(
 		`http://0.0.0.0:${port}/get_comic_info?path=${path}`
 	);
@@ -221,5 +222,6 @@ function getComicPagePath(
 	path: string,
 	pageIndex: number
 ): string {
+	path = encodeURIComponent(path);
 	return `http://0.0.0.0:${port}/get_comic_page?path=${path}&page_number=${pageIndex}`;
 }

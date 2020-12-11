@@ -42,6 +42,7 @@ export function Content({ record }: IContent) {
 
 export function getPath(port: number, path: string): string {
 	path = path.substring(2); // remove the leading './' (specific to how our file server works)
+	path = encodeURIComponent(path);
 	return `http://0.0.0.0:${port}/static/${path}`;
 }
 
