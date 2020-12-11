@@ -247,6 +247,10 @@ pub fn start_tauri_core(
 											.database
 											.set_times_opened(record.RecordID, record.TimesOpened)
 											.map_err(|_| UnknownError)?;
+										taggenator
+											.database
+											.set_last_opened_to_now(record.RecordID)
+											.map_err(|_| UnknownError)?;
 										return Ok(record);
 									} else {
 										// TODO: remove, throw error

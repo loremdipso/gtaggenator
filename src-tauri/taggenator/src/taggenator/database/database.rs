@@ -446,6 +446,14 @@ impl Database {
 		)
 	}
 
+	pub fn set_last_opened_to_now(&mut self, recordId: i64) -> Result<(), BError> {
+		self.async_write(
+			"UPDATE Records SET DateLastAccessed = ?
+			WHERE Records.RecordID = ?",
+			vec![Date(Some(Utc::now())), Number(recordId)],
+		)
+	}
+
 	pub fn set_times_opened(&mut self, recordId: i64, times_opened: i32) -> Result<(), BError> {
 		self.async_write(
 			"UPDATE Records SET TimesOpened = ?
