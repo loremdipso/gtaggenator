@@ -139,11 +139,11 @@ export function VideoContainer({ record }: IVideoContainer) {
 
 	useHotkeysHelper("alt+j", () => {
 		// back
-		scrub(-times.MEDIUM);
+		scrub(-times.SMALL);
 	});
 	useHotkeysHelper("alt+k", () => {
 		// forward
-		scrub(times.MEDIUM);
+		scrub(times.SMALL);
 	});
 
 	useHotkeysHelper("alt+l", () => {

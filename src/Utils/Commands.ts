@@ -24,6 +24,10 @@ class Bridge {
 		return helper("Reload", {});
 	}
 
+	async getRecommendedTags(args: { record: IRecord }): Promise<IStartupOptions> {
+		return helper("GetRecommendedTags", args);
+	}
+
 	async editSettings(): Promise<IStartupOptions> {
 		return helper("EditSettings", {});
 	}

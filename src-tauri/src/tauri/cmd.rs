@@ -110,6 +110,12 @@ pub enum Cmd {
 		callback: String,
 		error: String,
 	},
+
+	GetRecommendedTags {
+		callback: String,
+		error: String,
+		record: Record,
+	},
 }
 
 #[derive(Serialize)]

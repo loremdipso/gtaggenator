@@ -197,8 +197,7 @@ pub fn start_tauri_core(
 								move || {
 									let mut taggenator = taggenator_box.lock().unwrap();
 									if let Some(ref mut taggenator) = *taggenator {
-										let mut searcher = Searcher::new(vec![]).unwrap();
-										let tags = searcher.get_tags(&taggenator.database).unwrap();
+										let tags = taggenator.get_all_tags();
 										return Ok(tags);
 									} else {
 										// TODO: remove, throw error
@@ -281,6 +280,29 @@ pub fn start_tauri_core(
 											.grabbag_upsert(record.RecordID, key, value)
 											.map_err(|_| UnknownError)?;
 										return Ok(());
+									} else {
+										// TODO: remove, throw error
+										panic!();
+									}
+								},
+								callback,
+								error,
+							);
+						}
+
+						GetRecommendedTags {
+							callback,
+							error,
+							mut record,
+						} => {
+							let mut taggenator_box = taggenator_box.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let mut taggenator = taggenator_box.lock().unwrap();
+									if let Some(ref mut taggenator) = *taggenator {
+										let tags = taggenator.get_recommended_tags(&record);
+										return Ok(tags);
 									} else {
 										// TODO: remove, throw error
 										panic!();

@@ -30,6 +30,8 @@ import { SpecialInput, SpecialInputSimple } from "./Components/SpecialInput";
 import { SimpleTooltip } from "./Components/SimpleTooltip";
 import { Initializer } from "./Components/Initializer";
 
+import { setTitle } from "tauri/api/window";
+
 type ITabKey = "search" | "play" | "edit_settings";
 
 function App() {
@@ -233,6 +235,8 @@ function AppContent({ setInitialized }: IAppContent) {
 				await bridge.openRecord({
 					record: currentRecord,
 				});
+
+				setTitle(currentRecord.Name);
 			}
 		})();
 	}, [currentRecord, lastOpenedRecordID, setRecords]);
@@ -411,7 +415,7 @@ function AppContent({ setInitialized }: IAppContent) {
 	return (
 		<div className="app">
 			<ResizablePanel
-				startingValue={350}
+				startingValue={400}
 				position="left"
 				className="sidebar"
 			>
@@ -600,6 +604,25 @@ function AppContent({ setInitialized }: IAppContent) {
 											/>
 										))}
 									</div>
+
+									<div className="tag-container">
+										{currentRecord.Tags.map((tag) => (
+											<DisplayTagLineGroup
+												tag={tag}
+												key={tag}
+												variant="success"
+												action={(tagName: string) => {
+													toast(
+														`hooray for ${tagName}`
+													);
+													setSearch(tagName);
+													loadData(tagName);
+												}}
+												rightClickAction={removeTagLine}
+												// secondaryTitle="?"
+											/>
+										))}
+									</div>
 								</div>
 
 								<Drawer
@@ -624,7 +647,7 @@ function AppContent({ setInitialized }: IAppContent) {
 						)}
 					</Tab>
 
-					<Tab eventKey="edit_settings" title="Settings">
+					<Tab eventKey="edit_settings" title="settings">
 						<Jumbotron fluid className="fancy-jumbotron">
 							<Button onClick={() => bridge.editSettings()}>
 								Edit In VSCode

@@ -6,6 +6,7 @@ use crate::taggenator::errors::MyCustomError;
 use crate::taggenator::models::record::MiniRecord;
 use crate::taggenator::models::record::Record;
 use crate::taggenator::settings::Settings;
+use crate::taggenator::tag_recommender::TagRecommender;
 use crate::taggenator::utils::commands::run_command_string;
 use crate::taggenator::utils::files::get_extension_from_filename;
 use crate::taggenator::utils::flags::take_flag;
@@ -27,6 +28,7 @@ use walkdir;
 pub struct Taggenator {
 	pub settings: Settings,
 	pub database: Database,
+	recommender: Option<TagRecommender>,
 	newest_temp: i32,
 }
 
@@ -37,6 +39,7 @@ impl Taggenator {
 		return Ok(Taggenator {
 			settings: settings,
 			database: database,
+			recommender: None,
 			newest_temp: 0,
 		});
 	}
@@ -47,6 +50,7 @@ impl Taggenator {
 		return Ok(Taggenator {
 			settings: settings,
 			database: database,
+			recommender: None,
 			newest_temp: 0,
 		});
 	}
@@ -412,5 +416,24 @@ impl Taggenator {
 		}
 
 		Ok(())
+	}
+
+	pub fn get_all_tags(&mut self) -> HashSet<String> {
+		let mut searcher = Searcher::new(vec![]).unwrap();
+		let tags = searcher.get_tags(&self.database).unwrap();
+		self.recommender = Some(TagRecommender::new(tags.iter()));
+		return tags;
+	}
+
+	pub fn get_recommended_tags(&mut self, record: &Record) -> Vec<String> {
+		if self.recommender.is_none() {
+			self.get_all_tags();
+		}
+
+		return self
+			.recommender
+			.as_ref()
+			.unwrap()
+			.recommend(&record.Location, &record.Tags);
 	}
 }

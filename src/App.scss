@@ -220,9 +220,12 @@ body {
 
 .fancy-tabs {
 	background-color: white;
+	flex-wrap: initial !important;
+	overflow-x: scroll;
 
 	.nav-link {
 		padding: 0rem 1rem;
+		white-space: nowrap;
 	}
 }
 
@@ -263,6 +266,10 @@ body {
 	flex-direction: row;
 
 	> * {
+		white-space: nowrap;
+	}
+
+	> *:not(:last-child) {
 		margin-right: 5px;
 	}
 }

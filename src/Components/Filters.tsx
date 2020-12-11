@@ -161,7 +161,7 @@ const baseSorters: ISearchOption[] = [
 		type,
 	},
 	{
-		display: "Least Oldest",
+		display: "Oldest",
 		command: "-sort oldest",
 		id: id++,
 		type,
