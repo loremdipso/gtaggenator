@@ -1,3 +1,4 @@
+use crate::taggenator::database::searcher::Searcher;
 use crate::taggenator::database::writer::Query;
 use crate::taggenator::database::writer::Sqlizable;
 use crate::taggenator::database::writer::Sqlizable::Boolean;
@@ -12,6 +13,8 @@ use crate::taggenator::errors::MyCustomError;
 use crate::taggenator::errors::MyCustomError::UnknownError;
 use crate::taggenator::models;
 use crate::taggenator::models::record::MiniRecord;
+use crate::taggenator::models::record::Record;
+use crate::taggenator::tag_recommender::TagRecommender;
 use chrono::prelude::*;
 use multimap::MultiMap;
 use pathdiff::diff_paths;
@@ -43,6 +46,8 @@ pub struct Database {
 
 	batching_count: i32,
 	batch: Vec<Query>,
+
+	recommender: Option<TagRecommender>,
 }
 
 impl Database {
@@ -79,6 +84,7 @@ impl Database {
 			todo_count: 0,
 			batching_count: 0,
 			batch: vec![],
+			recommender: None,
 		});
 	}
 
@@ -299,6 +305,10 @@ impl Database {
 	}
 
 	pub fn add_tag(&mut self, recordId: i64, tag: &String) -> Result<(), BError> {
+		if self.recommender.is_some() {
+			self.recommender.as_mut().unwrap().add_tag(tag);
+		}
+
 		self.async_write(
 			"INSERT INTO Tags (RecordID, TagName, DateAdded) VALUES (?1, ?2, ?3)",
 			vec![
@@ -520,5 +530,25 @@ impl Database {
 		real.push(diff);
 
 		return Ok(real.to_string_lossy().to_string());
+	}
+
+	// TODO: this is bad encapsulation. Fix it
+	pub fn get_all_tags(&mut self) -> HashSet<String> {
+		let mut searcher = Searcher::new(vec![]).unwrap();
+		let tags = searcher.get_tags(&self).unwrap();
+		self.recommender = Some(TagRecommender::new(tags.iter()));
+		return tags;
+	}
+
+	pub fn get_recommended_tags(&mut self, record: &Record) -> Vec<String> {
+		if self.recommender.is_none() {
+			self.get_all_tags();
+		}
+
+		return self
+			.recommender
+			.as_ref()
+			.unwrap()
+			.recommend(&record.Location, &record.Tags);
 	}
 }

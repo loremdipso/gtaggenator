@@ -367,3 +367,12 @@ body {
 	color: white;
 	text-align: center;
 }
+
+.recommended-tags {
+	margin-top: 2rem;
+	> h4 {
+		background-color: black;
+		padding: 0.75rem;
+		text-align: center;
+	}
+}

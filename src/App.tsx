@@ -74,6 +74,8 @@ function AppContent({ setInitialized }: IAppContent) {
 
 	const [tabKey, setTabKey] = useState("search" as ITabKey);
 
+	const [recommendedTags, setRecommendedTags] = useState([] as string[]);
+
 	const [lastOpenedRecordID, setLastOpenedRecordID] = useState(
 		null as number | null
 	);
@@ -220,11 +222,8 @@ function AppContent({ setInitialized }: IAppContent) {
 	}, [args, loadData]);
 
 	useEffect(() => {
-		(async () => {
-			if (
-				currentRecord &&
-				currentRecord.RecordID !== lastOpenedRecordID
-			) {
+		if (currentRecord && currentRecord.RecordID !== lastOpenedRecordID) {
+			(async () => {
 				// we've got to keep track of this, otherwise we get an infinite loop, which is no bueno
 				setLastOpenedRecordID(currentRecord.RecordID);
 				// UI minor change: we'll update the record immediately, even before the request is finished
@@ -237,9 +236,17 @@ function AppContent({ setInitialized }: IAppContent) {
 				});
 
 				setTitle(currentRecord.Name);
-			}
-		})();
-	}, [currentRecord, lastOpenedRecordID, setRecords]);
+			})();
+
+			setRecommendedTags([]);
+			(async () => {
+				let recommendedTags = await bridge.getRecommendedTags({
+					record: currentRecord,
+				});
+				setRecommendedTags(recommendedTags);
+			})();
+		}
+	}, [currentRecord, lastOpenedRecordID, setRecords, setRecommendedTags]);
 
 	useEffect(() => {
 		if (records.length === 0) {
@@ -605,24 +612,33 @@ function AppContent({ setInitialized }: IAppContent) {
 										))}
 									</div>
 
-									<div className="tag-container">
-										{currentRecord.Tags.map((tag) => (
-											<DisplayTagLineGroup
-												tag={tag}
-												key={tag}
-												variant="success"
-												action={(tagName: string) => {
-													toast(
-														`hooray for ${tagName}`
-													);
-													setSearch(tagName);
-													loadData(tagName);
-												}}
-												rightClickAction={removeTagLine}
-												// secondaryTitle="?"
-											/>
-										))}
-									</div>
+									{recommendedTags.length ? (
+										<div className="recommended-tags">
+											<h4>Recommended Tags</h4>
+											<div className="tag-container">
+												{recommendedTags.map((tag) => (
+													<DisplayTagLineGroup
+														tag={tag}
+														key={tag}
+														variant="secondary"
+														action={(
+															tagName: string
+														) => {
+															addTagLine(tagName);
+															setRecommendedTags(
+																(tags) =>
+																	tags.filter(
+																		(tag) =>
+																			tag !==
+																			tagName
+																	)
+															);
+														}}
+													/>
+												))}
+											</div>
+										</div>
+									) : null}
 								</div>
 
 								<Drawer

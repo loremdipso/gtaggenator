@@ -197,7 +197,7 @@ pub fn start_tauri_core(
 								move || {
 									let mut taggenator = taggenator_box.lock().unwrap();
 									if let Some(ref mut taggenator) = *taggenator {
-										let tags = taggenator.get_all_tags();
+										let tags = taggenator.database.get_all_tags();
 										return Ok(tags);
 									} else {
 										// TODO: remove, throw error
@@ -301,7 +301,8 @@ pub fn start_tauri_core(
 								move || {
 									let mut taggenator = taggenator_box.lock().unwrap();
 									if let Some(ref mut taggenator) = *taggenator {
-										let tags = taggenator.get_recommended_tags(&record);
+										let tags =
+											taggenator.database.get_recommended_tags(&record);
 										return Ok(tags);
 									} else {
 										// TODO: remove, throw error

@@ -226,7 +226,7 @@ export function createDelta(
 
 interface IDisplayTagLineGroup {
 	tag: string;
-	variant: "success" | "danger";
+	variant: "success" | "danger" | "secondary";
 	action: (tag: string) => any;
 	rightClickAction?: (tag: string) => any;
 	secondaryAction?: (tag: string) => any;
@@ -266,7 +266,7 @@ export function DisplayTagLineGroup({
 
 interface IDisplayTagLine {
 	tag: string;
-	variant: "success" | "danger";
+	variant: "success" | "danger" | "secondary";
 	action: (tag: string) => any;
 	rightClickAction?: (tag: string) => any;
 }
