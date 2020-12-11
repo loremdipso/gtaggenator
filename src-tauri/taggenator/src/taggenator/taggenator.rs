@@ -20,6 +20,7 @@ use std::include_str;
 use std::io::prelude::*;
 use std::ops::Deref;
 use std::path::Path;
+use std::path::PathBuf;
 use std::sync::mpsc::channel;
 use std::thread;
 use toml::{de::Error, Value};
@@ -318,8 +319,10 @@ impl Taggenator {
 				to_remove.push(i);
 
 				// NOTE: need to jump through hoops because of COW
+				let location = &record.Location;
+				let location = std::fs::canonicalize(PathBuf::from(location))?;
 				let temp_tagger_command =
-					Regex::new("%s")?.replace(&tagger_command, record.Location.as_str());
+					Regex::new("%s")?.replace(&tagger_command, location.to_str().unwrap());
 				let temp_tagger_command = temp_tagger_command.deref();
 
 				let result = run_command_string(&temp_tagger_command.to_string())?;
