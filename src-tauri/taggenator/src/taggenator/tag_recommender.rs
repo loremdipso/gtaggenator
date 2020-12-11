@@ -14,7 +14,9 @@ impl<'a> TagRecommender {
 		let mut mapping: HashMap<String, HashSet<String>> = HashMap::new();
 		let mut rv = TagRecommender {
 			mapping,
-			re: Regex::new(r#"[-_/\\.]"#).unwrap(),
+			// remove all non-alpha/numba/spacing characters
+			re: Regex::new(r#"[^A-Za-z0.9 ]"#).unwrap(),
+			// re: Regex::new(r#"[-_/\\.]"#).unwrap(),
 		};
 
 		rv.add_tags(tags);
@@ -53,8 +55,8 @@ impl<'a> TagRecommender {
 		}
 	}
 
-	pub fn recommend(&self, location: &String, existing_tags: &HashSet<String>) -> Vec<String> {
-		let mut rv = vec![];
+	pub fn recommend(&self, location: &String, existing_tags: &HashSet<String>) -> HashSet<String> {
+		let mut rv = HashSet::new();
 
 		let items: Vec<String> = self
 			.re
@@ -68,11 +70,13 @@ impl<'a> TagRecommender {
 		for start in (0..items.len()) {
 			for end in ((start + 1)..=(std::cmp::min(items.len(), start + max_count))) {
 				let range = &items[start..end];
-				let tag = range.join(" ");
+
+				// we'll join without spaces since we carefully avoided spaces in the key above
+				let tag = range.join("");
 				if let Some(matches) = self.mapping.get(&tag) {
 					for some_match in matches {
 						if existing_tags.iter().find(|el| el == &some_match).is_none() {
-							rv.push(some_match.to_string());
+							rv.insert(some_match.to_string());
 						}
 					}
 				}
@@ -90,24 +94,31 @@ fn test_recommend_tags() {
 		"prefix:a".to_string(),
 		"prefix:a b".to_string(),
 		"prefix:a b c".to_string(),
+		"prefix:h i".to_string(),
+		"prefix:jk".to_string(),
 		"not a match".to_string(),
 	];
 
 	let mut existing_tags = HashSet::new();
 	existing_tags.insert("prefix:a b".to_string());
 
-	let location = "a b c d e-f/g.\\h_i".to_string();
+	let location = "a b c d e-f[]/g.\\h_i j k".to_string();
 
 	let mut correct_answer = vec![
 		"prefix:a".to_string(),
 		"some:prefix:a".to_string(),
 		"prefix:a b c".to_string(),
+		"prefix:h i".to_string(),
+		"prefix:jk".to_string(),
 	];
-	correct_answer.sort();
 
 	let recommender = TagRecommender::new(all_tags.iter());
+	dbg!(&recommender);
 	let mut answer = recommender.recommend(&location, &existing_tags);
-	answer.sort();
+	dbg!(&answer);
 
-	assert_eq!(answer, correct_answer);
+	assert_eq!(answer.len(), correct_answer.len());
+	for tag in correct_answer {
+		assert_eq!(answer.contains(&tag), true);
+	}
 }

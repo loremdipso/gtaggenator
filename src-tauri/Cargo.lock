@@ -2055,6 +2055,7 @@ dependencies = [
  "rusqlite",
  "rustbreak",
  "serde",
+ "serde_json",
  "serde_yaml",
  "shell-words",
  "string-builder",

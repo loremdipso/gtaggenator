@@ -548,7 +548,7 @@ impl Database {
 		return tags;
 	}
 
-	pub fn get_recommended_tags(&mut self, record: &Record) -> Vec<String> {
+	pub fn get_recommended_tags(&mut self, record: &Record) -> HashSet<String> {
 		if self.recommender.is_none() {
 			self.get_all_tags();
 		}

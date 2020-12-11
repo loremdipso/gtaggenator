@@ -11,6 +11,7 @@ mod grab_bag;
 mod import;
 mod move_record;
 mod open;
+mod run_grabbag;
 
 pub fn RunCommand(
 	taggenator: &mut Taggenator,
@@ -35,6 +36,9 @@ pub fn RunCommand(
 		}
 		"apply_tags" => {
 			return apply_tags::apply_tags(taggenator, args);
+		}
+		"run_grabbag" => {
+			return run_grabbag::run_grabbag(taggenator, args);
 		}
 		"delete" => {
 			return delete::delete(taggenator, args);

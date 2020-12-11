@@ -11,14 +11,16 @@ pub fn take_flag(args: &mut Vec<String>, flag: &str) -> bool {
 }
 
 pub fn take_flag_with_arg(args: &mut Vec<String>, flag: &str) -> Option<String> {
-	for i in 0..(args.len()) {
-		let arg = &args[i];
-		if arg == flag {
-			let next = &args[i + 1];
-			let rv = Some(next.to_string());
-			args.remove(i + 1);
-			args.remove(i);
-			return rv;
+	if args.len() > 0 {
+		for i in 0..(std::cmp::max(0, args.len() - 1)) {
+			let arg = &args[i];
+			if arg == flag {
+				let next = &args[i + 1];
+				let rv = Some(next.to_string());
+				args.remove(i + 1);
+				args.remove(i);
+				return rv;
+			}
 		}
 	}
 
@@ -46,6 +48,13 @@ mod flag_tests {
 	#[test]
 	fn no_flag() {
 		let mut args = vec!["A".to_string(), "B".to_string(), "C".to_string()];
+		let flag = take_flag_with_arg(&mut args, "D");
+		assert_eq!(flag, None);
+	}
+
+	#[test]
+	fn empty_arr() {
+		let mut args = vec![];
 		let flag = take_flag_with_arg(&mut args, "D");
 		assert_eq!(flag, None);
 	}
