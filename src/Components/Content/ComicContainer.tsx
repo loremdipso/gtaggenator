@@ -77,6 +77,7 @@ export function ComicContainer({ location }: IComicContainer) {
 
 	useEffect(() => {
 		(async () => {
+			setComicInfo(null);
 			let info = await getComicInfo(port, location);
 			setComicInfo(info);
 		})();

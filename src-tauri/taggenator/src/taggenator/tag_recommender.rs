@@ -94,7 +94,7 @@ fn test_recommend_tags() {
 		"prefix:a".to_string(),
 		"prefix:a b".to_string(),
 		"prefix:a b c".to_string(),
-		"prefix:h-i".to_string(),
+		"prefix:H-i".to_string(),
 		"prefix:jk".to_string(),
 		"not a match".to_string(),
 	];
@@ -102,13 +102,13 @@ fn test_recommend_tags() {
 	let mut existing_tags = HashSet::new();
 	existing_tags.insert("prefix:a b".to_string());
 
-	let location = "a b c d e-f[]/g.\\h_i j k".to_string();
+	let location = "[H-i] a b c d e-f[]/g.\\j k".to_string();
 
 	let mut correct_answer = vec![
 		"prefix:a".to_string(),
 		"some:prefix:a".to_string(),
 		"prefix:a b c".to_string(),
-		"prefix:h-i".to_string(),
+		"prefix:H-i".to_string(),
 		"prefix:jk".to_string(),
 	];
 

@@ -46,8 +46,10 @@ pub async fn serve_fs(port: u16) {
 				let l_name = &pages_map[l];
 				let r_name = &pages_map[r];
 				return chain_ordering(
+					// TODO: fix this. We only want to sort on leading number when it's right to do so
 					get_leading_number(&l_name).cmp(&get_leading_number(&r_name)),
-					chain_ordering(l_name.cmp(r_name), l.cmp(r)),
+					l.cmp(r),
+					// chain_ordering(l_name.cmp(r_name), l.cmp(r)),
 				);
 			};
 			pages.sort_by(cmp);
