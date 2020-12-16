@@ -1,6 +1,6 @@
 import React from "react";
 import { IRecord } from "../Utils/interfaces";
-import { useRecoilState } from "recoil";
+import { readOnlySelector, useRecoilState } from "recoil";
 import { fileServerPort } from "../Utils/Atoms";
 import { ComicContainer } from "./Content/ComicContainer";
 import { FlashContainer } from "./Content/FlashContainer";
@@ -28,7 +28,10 @@ export function Content({ record }: IContent) {
 						<VideoContainer location={record.Location} />
 					) : null}
 					{isComic(record.Name) ? (
-						<ComicContainer location={record.Location} />
+						<ComicContainer
+							location={record.Location}
+							recordId={record.RecordID}
+						/>
 					) : null}
 					{isFlash(record.Name) ? (
 						<FlashContainer path={getPath(port, record.Location)} />

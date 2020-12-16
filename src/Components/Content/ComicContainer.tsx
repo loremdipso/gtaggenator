@@ -7,11 +7,12 @@ import { ImageContainer } from "./ImageContainer";
 
 interface IComicContainer {
 	location: string;
+	recordId: number;
 }
 
 const NUM_TO_PRELOAD = 5;
 const NUM_MAX_IMAGES = 20;
-export function ComicContainer({ location }: IComicContainer) {
+export function ComicContainer({ location, recordId }: IComicContainer) {
 	const [recordIndex, setRecordIndex] = useRecoilState(currentRecordIndex);
 	const [pageIndex, setPageIndex] = useState(0);
 	const [comicInfo, setComicInfo] = useState(null as IComicInfo | null);
@@ -77,8 +78,8 @@ export function ComicContainer({ location }: IComicContainer) {
 
 	useEffect(() => {
 		(async () => {
-			setComicInfo(null);
-			let info = await getComicInfo(port, location);
+			let info = await getComicInfo(port, location, recordId);
+			console.log(info);
 			setComicInfo(info);
 		})();
 	}, [location, setComicInfo]);
@@ -189,17 +190,20 @@ export function ComicContainer({ location }: IComicContainer) {
 						{pageIndex + 1}/{comicInfo.pages.length}
 					</div>
 
-					{images.map((imageIndex) => (
-						<ImageContainer
-							key={imageIndex}
-							path={getComicPagePath(
-								port,
-								location,
-								comicInfo.pages[imageIndex]
-							)}
-							hidden={imageIndex !== pageIndex}
-						/>
-					))}
+					{images.map((imageIndex) =>
+						comicInfo.recordId !== recordId ||
+						isNaN(comicInfo.pages[imageIndex]) ? null : (
+							<ImageContainer
+								key={imageIndex}
+								path={getComicPagePath(
+									port,
+									location,
+									comicInfo.pages[imageIndex]
+								)}
+								hidden={imageIndex !== pageIndex}
+							/>
+						)
+					)}
 				</>
 			) : null}
 		</div>
@@ -208,11 +212,16 @@ export function ComicContainer({ location }: IComicContainer) {
 
 interface IComicInfo {
 	pages: number[];
+	recordId: number;
 }
-async function getComicInfo(port: number, path: string): Promise<IComicInfo> {
+async function getComicInfo(
+	port: number,
+	path: string,
+	recordId: number
+): Promise<IComicInfo> {
 	path = encodeURIComponent(path);
 	let response = await fetch(
-		`http://0.0.0.0:${port}/get_comic_info?path=${path}`
+		`http://0.0.0.0:${port}/get_comic_info?path=${path}&recordId=${recordId}`
 	);
 	let info = await response.json();
 	return info;

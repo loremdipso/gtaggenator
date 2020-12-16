@@ -1,4 +1,6 @@
 use serde::Deserialize;
+use serde_json::Map;
+use serde_json::Value;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -23,8 +25,8 @@ pub async fn serve_fs(port: u16) {
 	let zip_archive: Arc<Mutex<Option<ZipArchive<File>>>> = Arc::new(Mutex::new(None));
 
 	let get_comic_info =
-		warp::path("get_comic_info").and(warp::query().map(|query: ComicQuery| {
-			let path = query.path.unwrap();
+		warp::path("get_comic_info").and(warp::query().map(|query: ComicInfoQuery| {
+			let path = query.path;
 			let path = fixPath(&path);
 			let mut archive_contents = get_archive(path);
 
@@ -54,10 +56,12 @@ pub async fn serve_fs(port: u16) {
 			};
 			pages.sort_by(cmp);
 
-			let mut rv = HashMap::new();
-			rv.insert("pages", pages);
-			let rv = serde_json::to_string(&rv).unwrap();
+			let item = json!({
+				"pages": pages,
+				"recordId": query.recordId
+			});
 
+			let rv = serde_json::to_string(&item).unwrap();
 			return rv;
 		}));
 
@@ -69,10 +73,10 @@ pub async fn serve_fs(port: u16) {
 	);
 
 	let get_comic_page = warp::path("get_comic_page")
-		.and(warp::query().map(|query: ComicQuery| {
-			let path = query.path.unwrap();
+		.and(warp::query().map(|query: ComicPageQuery| {
+			let path = query.path;
 			let path = fixPath(&path);
-			let page_number = query.page_number.unwrap();
+			let page_number = query.page_number;
 			println!("Opening zip archive: {}, page: {}", path, page_number);
 
 			let mut archive_contents = get_archive(path);
@@ -102,9 +106,15 @@ fn get_archive(path: String) -> ZipArchive<File> {
 }
 
 #[derive(Deserialize, Debug)]
-struct ComicQuery {
-	path: Option<String>,
-	page_number: Option<usize>,
+struct ComicInfoQuery {
+	path: String,
+	recordId: i32,
+}
+
+#[derive(Deserialize, Debug)]
+struct ComicPageQuery {
+	path: String,
+	page_number: usize,
 }
 
 const IMAGE_EXTENSIONS: [&str; 5] = ["jpg", "png", "jpeg", "gif", "svg"];
