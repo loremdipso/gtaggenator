@@ -18,7 +18,7 @@ pub fn open(taggenator: &mut Taggenator, args: Vec<String>) -> Result<(), BError
 		let record = &mut records[index];
 		print_record(&record);
 		let line = readline("Tag> ")?;
-		taggenator.insert_tag_line(record, line);
+		taggenator.insert_tag_line(record, line, false);
 	}
 
 	for record in records {

@@ -220,7 +220,12 @@ impl Taggenator {
 		return false;
 	}
 
-	pub fn insert_tag_line(&mut self, record: &mut Record, line: String) -> Result<(), BError> {
+	pub fn insert_tag_line(
+		&mut self,
+		record: &mut Record,
+		line: String,
+		ignore_touched: bool,
+	) -> Result<(), BError> {
 		let mut tags: Vec<String> = line
 			.split(",")
 			.map(|piece| piece.trim().to_string())
@@ -287,8 +292,10 @@ impl Taggenator {
 			self.database.set_touched(record.RecordID, false)?;
 		} else if !record.HaveManuallyTouched && to_add.len() > 0 {
 			// touched
-			record.HaveManuallyTouched = true;
-			self.database.set_touched(record.RecordID, true)?;
+			if !ignore_touched {
+				record.HaveManuallyTouched = true;
+				self.database.set_touched(record.RecordID, true)?;
+			}
 		}
 
 		Ok(())
@@ -395,30 +402,46 @@ impl Taggenator {
 
 	fn update_temp_tags(&mut self) -> Result<(), BError> {
 		if self.newest_temp == 0 {
-			let query = &"Select TagName From Tags Where TagName Like ?";
-			let mut stmt = self.database.conn.prepare(&query)?;
+			self.newest_temp = Taggenator::get_newest_temp_tag(&self.database)?;
+		}
 
-			// We're handling query args ourselves
-			let mut rows = stmt.query(&["temp%"])?;
+		return Ok(());
+	}
 
-			loop {
-				let row = rows.next()?;
-				match row {
-					None => break,
-					Some(row) => {
-						let tagName: String = row.get(0)?;
-						let tagName = tagName.strip_prefix("temp").unwrap().to_string();
-						let number = tagName.parse::<i32>();
-						if let Ok(number) = number {
-							if number > self.newest_temp {
-								self.newest_temp = number;
-							}
-						}
-					}
+	pub fn get_newest_temp_tag(database: &Database) -> Result<i32, BError> {
+		let mut newest_temp = 0;
+		let tags = Taggenator::get_temp_tags(&database)?;
+		for tag in tags {
+			let number = tag.parse::<i32>();
+			if let Ok(number) = number {
+				if number > newest_temp {
+					newest_temp = number;
+				}
+			}
+		}
+		return Ok(newest_temp);
+	}
+
+	pub fn get_temp_tags(database: &Database) -> Result<HashSet<String>, BError> {
+		let query = &"Select TagName From Tags Where TagName Like ?";
+		let mut stmt = database.conn.prepare(&query)?;
+
+		// We're handling query args ourselves
+		let mut rows = stmt.query(&["temp%"])?;
+
+		let mut temp_tags = HashSet::new();
+		loop {
+			let row = rows.next()?;
+			match row {
+				None => break,
+				Some(row) => {
+					let tag_name: String = row.get(0)?;
+					let tag_name = tag_name.strip_prefix("temp").unwrap().to_string();
+					temp_tags.insert(tag_name);
 				}
 			}
 		}
 
-		Ok(())
+		return Ok(temp_tags);
 	}
 }

@@ -1,6 +1,7 @@
 use crate::taggenator::database::Database;
 use crate::taggenator::errors::{BError, MyCustomError::UnknownError};
 use crate::taggenator::models::record::Record;
+use crate::Taggenator;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use rusqlite::NO_PARAMS;
@@ -85,7 +86,23 @@ impl Searcher {
 		return Ok(tags);
 	}
 
+	fn fix_arg(db: &Database, arg: String) -> Result<String, BError> {
+		// if arg == "temp" || arg == "tempnew" {
+		if arg == "tempnew" {
+			let newest_temp = Taggenator::get_newest_temp_tag(db)?;
+			return Ok(format!("temp{}", newest_temp));
+		} else {
+			return Ok(arg);
+		}
+	}
+
 	pub fn get_records(&mut self, db: &Database) -> Result<Vec<Record>, BError> {
+		for filter in self.filters.iter_mut() {
+			for arg in filter.args.iter_mut() {
+				*arg = Searcher::fix_arg(db, arg.to_string())?;
+			}
+		}
+
 		let query = &"\nSelect * From Records Left Join Tags On Records.RecordID = Tags.RecordID";
 		let query = &self.format_query(&query);
 		let mut stmt = db.conn.prepare(&query)?;

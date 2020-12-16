@@ -60,7 +60,7 @@ pub fn apply_tags(taggenator: &mut Taggenator, mut args: Vec<String>) -> Result<
 				if let Some((job_num, mut record)) = result {
 					println!("Worker #{}, job {} / {}", i, job_num, total_jobs);
 					for tag in &tags_to_add {
-						taggenator.insert_tag_line(&mut record, tag.to_string());
+						taggenator.insert_tag_line(&mut record, tag.to_string(), true);
 					}
 				} else {
 					break;
