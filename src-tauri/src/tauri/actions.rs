@@ -417,6 +417,45 @@ pub fn start_tauri_core(
 								error,
 							);
 						}
+
+						GetCache { callback, error, key } => {
+							let mut taggenator_box = taggenator_box.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let mut taggenator = taggenator_box.lock().unwrap();
+									if let Some(ref mut taggenator) = *taggenator {
+										let cache = taggenator.database.get_cache(key).map_err(|_| UnknownError)?;
+										return Ok(cache);
+									} else {
+										// TODO: remove, throw error
+										panic!();
+									}
+								},
+								callback,
+								error,
+							);
+						},
+
+						SetCache { callback, error, key, value } => {
+							let mut taggenator_box = taggenator_box.clone();
+							tauri::execute_promise(
+								_webview,
+								move || {
+									let mut taggenator = taggenator_box.lock().unwrap();
+									if let Some(ref mut taggenator) = *taggenator {
+										taggenator.database.set_cache(key, value).map_err(|_| UnknownError);
+										return Ok(());
+									} else {
+										// TODO: remove, throw error
+										panic!();
+									}
+								},
+								callback,
+								error,
+							);
+
+						}
 					}
 					Ok(())
 				}

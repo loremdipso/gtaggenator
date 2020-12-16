@@ -2,6 +2,11 @@ import { FileEarmarkEasel } from "react-bootstrap-icons";
 import { promisified } from "tauri/api/tauri";
 import { IRecord, IStartupOptions } from "./interfaces";
 
+export enum CACHE_KEYS {
+	search = "search",
+	deltas = "deltas"
+}
+
 class Bridge {
 	constructor() {
 		// await promisified({
@@ -61,12 +66,20 @@ class Bridge {
 		return helper("GetPort", {});
 	}
 
-	async openContainingFolder(args: { location: string }): Promise<number> {
+	async openContainingFolder(args: { location: string }): Promise<unknown> {
 		return helper("OpenContainingFolder", args);
 	}
 
-	async openNatively(args: { location: string }): Promise<number> {
+	async openNatively(args: { location: string }): Promise<unknown> {
 		return helper("OpenNatively", args);
+	}
+
+	async getCache(args: { key: CACHE_KEYS }): Promise<string> {
+		return helper("GetCache", args);
+	}
+
+	async setCache(args: { key: CACHE_KEYS, value: string }): Promise<unknown> {
+		return helper("SetCache", args);
 	}
 }
 

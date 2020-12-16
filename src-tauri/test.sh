@@ -20,7 +20,7 @@ cargo build --release -q -p taggenator
 cd ../tests
 
 
-cargo test --release -p taggenator
+#cargo test --release -p taggenator
 #cargo test --release -p taggenator
 
 #time ~/.cargo-target/release/taggenator run_grabbag --threads 3 --exe ./grabbagger.rb
@@ -53,7 +53,7 @@ cargo test --release -p taggenator
 #time ~/.cargo-target/release/taggenator dump tags_inclusive yupp yup
 #echo tag1, tag2 | time ~/.cargo-target/release/taggenator open
 #echo -tag1 | ~/.cargo-target/release/taggenator open
-#time ~/.cargo-target/release/taggenator dump touched
+time ~/.cargo-target/release/taggenator dump touched
 #time ~/.cargo-target/release/taggenator dump untouched
 #time ~/.cargo-target/release/taggenator dump -sort alpha -sort least_frequently_opened
 #time ~/.cargo-target/release/taggenator dump -sort alpha -sort biggest

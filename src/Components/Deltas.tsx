@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Accordion, Button, Card } from "react-bootstrap";
+import { bridge, CACHE_KEYS } from "../Utils/Commands";
 
 export interface IDelta {
 	added: string[];
@@ -329,5 +330,11 @@ export function appendDeltaImmutable(
 		}
 
 		return newDeltas;
+	}
+}
+
+export function fixDeltas(deltas: IDelta[]) {
+	for (let delta of deltas) {
+		delta.id = getDeltaID();
 	}
 }

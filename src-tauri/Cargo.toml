@@ -21,6 +21,7 @@ serde_yaml = "*"
 tauri-api = "*"
 warp = "*"
 zip = "*"
+alphanumeric-sort = "*"
 
   [dependencies.serde]
   features = [ "derive" ]

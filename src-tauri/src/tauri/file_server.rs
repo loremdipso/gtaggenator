@@ -47,12 +47,7 @@ pub async fn serve_fs(port: u16) {
 			let cmp = |l: &usize, r: &usize| {
 				let l_name = &pages_map[l];
 				let r_name = &pages_map[r];
-				return chain_ordering(
-					// TODO: fix this. We only want to sort on leading number when it's right to do so
-					get_leading_number(&l_name).cmp(&get_leading_number(&r_name)),
-					l.cmp(r),
-					// chain_ordering(l_name.cmp(r_name), l.cmp(r)),
-				);
+				return alphanumeric_sort::compare_path(l_name, r_name);
 			};
 			pages.sort_by(cmp);
 
@@ -77,7 +72,7 @@ pub async fn serve_fs(port: u16) {
 			let path = query.path;
 			let path = fixPath(&path);
 			let page_number = query.page_number;
-			println!("Opening zip archive: {}, page: {}", path, page_number);
+			// println!("Opening zip archive: {}, page: {}", path, page_number);
 
 			let mut archive_contents = get_archive(path);
 			let mut buffer = Vec::new();
@@ -143,14 +138,7 @@ fn test_get_leading_number() {
 	assert_eq!(0, get_leading_number("something else 4 then more"));
 }
 
-fn chain_ordering(o1: Ordering, o2: Ordering) -> Ordering {
-	match o1 {
-		Ordering::Equal => o2,
-		_ => o1,
-	}
-}
-
 fn fixPath(path: &String) -> String {
-	dbg!(&path);
+	// dbg!(&path);
 	return path.to_string();
 }

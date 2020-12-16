@@ -79,7 +79,6 @@ export function ComicContainer({ location, recordId }: IComicContainer) {
 	useEffect(() => {
 		(async () => {
 			let info = await getComicInfo(port, location, recordId);
-			console.log(info);
 			setComicInfo(info);
 		})();
 	}, [location, setComicInfo]);

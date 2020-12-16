@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import "./App.scss";
-import { bridge } from "./Utils/Commands";
+import { bridge, CACHE_KEYS } from "./Utils/Commands";
 import { IRecord } from "./Utils/interfaces";
 import { ArrowClockwise, ArrowRight, ArrowLeft } from "react-bootstrap-icons";
 import { Content } from "./Components/Content";
@@ -11,6 +11,7 @@ import {
 	DisplayDeltas,
 	DisplayTagLineGroup,
 	appendDeltaImmutable,
+	fixDeltas,
 } from "./Components/Deltas";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -82,6 +83,42 @@ function AppContent({ setInitialized }: IAppContent) {
 		null as number | null
 	);
 
+	const [lastPushedDeltas, setLastPushedDeltas] = useState(deltas);
+	useEffect(() => {
+		if (lastPushedDeltas !== deltas) {
+			console.log("About to update cache");
+			const id = setTimeout(() => {
+				console.log("Updating cache");
+				bridge.setCache({
+					key: CACHE_KEYS.deltas,
+					value: JSON.stringify(deltas),
+				});
+			}, 2000);
+			return () => {
+				clearTimeout(id);
+				console.log("Killing cache update");
+			};
+		}
+	}, [deltas, lastPushedDeltas]);
+
+	useEffect(() => {
+		(async () => {
+			// TODO: this
+			try {
+				let deltas_s = await bridge.getCache({
+					key: CACHE_KEYS.deltas,
+				});
+
+				let deltas = JSON.parse(deltas_s) as IDelta[];
+				fixDeltas(deltas);
+				setDeltas(deltas);
+				setLastPushedDeltas(deltas);
+			} catch {
+				// none found, likely
+			}
+		})();
+	}, []);
+
 	const [, setPort] = useRecoilState(fileServerPort);
 	useEffect(() => {
 		(async () => {
@@ -90,6 +127,21 @@ function AppContent({ setInitialized }: IAppContent) {
 			setPort(port);
 		})();
 	}, [setPort]);
+
+	useEffect(() => {
+		(async () => {
+			try {
+				let searches = await bridge.getCache({
+					key: CACHE_KEYS.search,
+				});
+				console.log(searches);
+				// TODO: this
+				// setSearch();
+			} catch {
+				// none found, likely
+			}
+		})();
+	}, []);
 
 	const updateTabKey = (key: ITabKey | null) => {
 		if (!key || tabKey === key) {

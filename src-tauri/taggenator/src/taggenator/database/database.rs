@@ -64,11 +64,24 @@ impl Database {
 
 		if !did_exist {
 			conn.execute_batch(&format!(
-				"BEGIN; {} {} {} COMMIT;",
+				"BEGIN; {} {} {} {} COMMIT;",
 				models::record::SQL,
 				models::tags::SQL,
-				models::grabbag::SQL
+				models::grabbag::SQL,
+				models::cache::SQL
 			))?;
+		} else {
+			let mut stmt = conn.prepare("SELECT Name FROM sqlite_master")?;
+			let table_iter = stmt.query_map(NO_PARAMS, |row| row.get(0))?;
+			let mut tables: HashSet<String> = HashSet::new();
+			for table in table_iter {
+				tables.insert(table.unwrap());
+			}
+			// add just the missing tables
+			// dbg!(&tables);
+			if !tables.contains("Cache") {
+				conn.execute_batch(&format!("BEGIN; {} COMMIT;", models::cache::SQL,))?;
+			}
 		}
 
 		let (sender, receiver) = channel();
@@ -515,6 +528,24 @@ impl Database {
 
 	fn send_batch(&mut self) -> Result<(), BError> {
 		self.sender.send(Some(self.batch.drain(..).collect()))?;
+		return Ok(());
+	}
+
+	pub fn get_cache(&mut self, key: String) -> Result<String, BError> {
+		let value = self.conn.query_row(
+			"SELECT value FROM cache where CACHE.key = ?",
+			&[key],
+			|row| row.get(0),
+		)?;
+		return Ok(value);
+	}
+
+	pub fn set_cache(&mut self, key: String, value: String) -> Result<(), BError> {
+		self.async_write(
+			"REPLACE INTO cache (Key, Value) VALUES(?, ?)",
+			vec![Text(key), Text(value)],
+		)?;
+
 		return Ok(());
 	}
 

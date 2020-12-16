@@ -116,6 +116,19 @@ pub enum Cmd {
 		error: String,
 		record: Record,
 	},
+
+	GetCache {
+		callback: String,
+		error: String,
+		key: String
+	},
+
+	SetCache {
+		callback: String,
+		error: String,
+		key: String,
+		value: String,
+	},
 }
 
 #[derive(Serialize)]
