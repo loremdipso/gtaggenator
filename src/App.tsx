@@ -33,6 +33,7 @@ import { SimpleTooltip } from "./Components/SimpleTooltip";
 import { Initializer } from "./Components/Initializer";
 
 import { setTitle } from "tauri/api/window";
+import { addSearch, DisplaySearches, ISearch } from "./Components/Searches";
 
 type ITabKey = "search" | "play" | "edit_settings";
 const MAX_FILTERS = 20;
@@ -63,6 +64,8 @@ function AppContent({ setInitialized }: IAppContent) {
 
 	const [tagLine, setTagLine] = useState("");
 	const [search, setSearch] = useState("");
+
+	const [searches, setSearches] = useState([] as ISearch[]);
 
 	const [records, setRecords] = useState([] as IRecord[]);
 
@@ -113,6 +116,41 @@ function AppContent({ setInitialized }: IAppContent) {
 				fixDeltas(deltas);
 				setDeltas(deltas);
 				setLastPushedDeltas(deltas);
+			} catch {
+				// none found, likely
+			}
+		})();
+	}, []);
+
+	const [lastPushedSearches, setLastPushedSearches] = useState(searches);
+	useEffect(() => {
+		if (lastPushedSearches !== searches) {
+			console.log("About to update search cache");
+			const id = setTimeout(async () => {
+				console.log("Updating search cache");
+				await bridge.setCache({
+					key: CACHE_KEYS.search,
+					value: JSON.stringify(searches),
+				});
+			}, 2000);
+			return () => {
+				clearTimeout(id);
+				console.log("Killing search cache update");
+			};
+		}
+	}, [searches, lastPushedSearches]);
+
+	useEffect(() => {
+		(async () => {
+			// TODO: this
+			try {
+				let search_s = await bridge.getCache({
+					key: CACHE_KEYS.search,
+				});
+
+				let searches = JSON.parse(search_s) as ISearch[];
+				setSearches(searches);
+				setLastPushedSearches(searches);
 			} catch {
 				// none found, likely
 			}
@@ -235,9 +273,12 @@ function AppContent({ setInitialized }: IAppContent) {
 		let tempSearch = getSearch(search, filters, override);
 
 		try {
+			addSearch(setSearches, searches, tempSearch);
+
+			let finalSearch = parseWords(tempSearch);
 			let records = await bridge.getRecords({
 				// split by whitespace, but keep quoted groups together
-				args: parseWords(tempSearch),
+				args: finalSearch,
 			});
 			setRecords(records);
 
@@ -499,19 +540,32 @@ function AppContent({ setInitialized }: IAppContent) {
 					}
 				>
 					<Tab eventKey="search" title="search">
-						<div className="filter-tab-container">
-							<SpecialInputSimple
-								onChange={setSearch}
-								action={loadData}
-								actionName="Search"
-								focusEpoch={searchFocusEpoch}
-								value={search}
-							/>
+						<div className="growable-container">
+							<div className="filter-tab-container growable">
+								<SpecialInputSimple
+									onChange={setSearch}
+									action={loadData}
+									actionName="Search"
+									focusEpoch={searchFocusEpoch}
+									value={search}
+								/>
 
-							<DisplayFilters
-								filters={filters}
-								setFilters={setFilters}
-							/>
+								<DisplayFilters
+									filters={filters}
+									setFilters={setFilters}
+								/>
+							</div>
+
+							<Drawer startingValue={350} position="bottom">
+								<DisplaySearches
+									searches={searches}
+									setSearches={setSearches}
+									action={(search: string) => {
+										loadData(search);
+										setSearch(search);
+									}}
+								/>
+							</Drawer>
 						</div>
 					</Tab>
 
@@ -526,7 +580,7 @@ function AppContent({ setInitialized }: IAppContent) {
 						}
 					>
 						{currentRecord ? (
-							<div className="tag-input-container">
+							<div className="tag-input-container growable-container">
 								<DisplayRecord record={currentRecord} />
 
 								<div className="fancy-button-bar">
@@ -826,7 +880,10 @@ function getSearch(
 ): string {
 	let tempSearch = override || search;
 	if (tempSearch.length > 0) {
-		if (!tempSearch.startsWith("search")) {
+		if (
+			!tempSearch.startsWith("search") &&
+			!tempSearch.startsWith("-sort")
+		) {
 			tempSearch = `search ${tempSearch}`;
 		}
 	}

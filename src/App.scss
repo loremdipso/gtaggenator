@@ -191,15 +191,6 @@ body {
 
 .tag-input-container {
 	background-color: rgb(44, 44, 44);
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-
-	> .growable {
-		/* overflow-y: scroll; */
-		/* min-height: 500px; */
-		flex-grow: 1 !important;
-	}
 }
 
 .tab-content,
@@ -254,9 +245,20 @@ body {
 	justify-content: space-between;
 }
 
+.growable-container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+
+	> .growable {
+		flex-grow: 1 !important;
+	}
+}
+
 .filter-tab-container {
+	// display: flex;
 	background-color: black;
-	padding-top: 10px;
+	// padding-top: 10px;
 	padding-bottom: 10px;
 }
 
