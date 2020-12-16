@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { ArrowRight, ArrowLeft } from "react-bootstrap-icons";
 import { useRecoilState } from "recoil";
 import { currentRecordIndex, fileServerPort } from "../../Utils/Atoms";
 import { useHotkeysHelper } from "../../Utils/Hotkeys";
-import { IRecord } from "../../Utils/interfaces";
 import { ImageContainer } from "./ImageContainer";
 
 interface IComicContainer {
@@ -180,14 +180,20 @@ export function ComicContainer({ location, recordId }: IComicContainer) {
 			{location && comicInfo ? (
 				<>
 					<div
-						style={{
-							position: "absolute",
-							top: 0,
-							right: 0,
-							backgroundColor: "black",
-						}}
+						className="comic-info-blurb"
+						onClick={(ev) => ev.stopPropagation()}
 					>
-						{pageIndex + 1}/{comicInfo.pages.length}
+						<ArrowLeft
+							onClick={() => previousPage()}
+							className="clickable"
+						/>
+						<span>
+							{pageIndex + 1}/{comicInfo.pages.length}
+						</span>
+						<ArrowRight
+							onClick={() => nextPage()}
+							className="clickable"
+						/>
 					</div>
 
 					{images.map((imageIndex) =>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import "./App.scss";
 import { bridge } from "./Utils/Commands";
 import { IRecord } from "./Utils/interfaces";
+import { ArrowClockwise, ArrowRight, ArrowLeft } from "react-bootstrap-icons";
 import { Content } from "./Components/Content";
 import {
 	IDelta,
@@ -119,6 +120,13 @@ function AppContent({ setInitialized }: IAppContent) {
 			setRecordIndex(Math.max(0, recordIndex - 1));
 		}
 	};
+
+	const addAllRecommended = () => {
+		addTagLine(recommendedTags.join(", "));
+		setRecommendedTags([]);
+	};
+
+	useHotkeys("alt+a", () => addAllRecommended(), [addAllRecommended]);
 
 	useHotkeys(
 		"ctrl+j",
@@ -470,20 +478,23 @@ function AppContent({ setInitialized }: IAppContent) {
 								<DisplayRecord record={currentRecord} />
 
 								<div className="fancy-button-bar">
-									{/* <OverlayTrigger
-											placement="top"
-											overlay={SimpleTooltip(
-												"Try to launch on local machine"
-											)}
+									<OverlayTrigger
+										placement="top"
+										overlay={SimpleTooltip(
+											"Reload records"
+										)}
+									>
+										<Button
+											size="sm"
+											variant="dark"
+											onClick={async () => {
+												await bridge.reload();
+												loadData();
+											}}
 										>
-											<Button
-												onClick={() => reload()}
-												size="sm"
-												variant="dark"
-											>
-												Launch
-											</Button>
-										</OverlayTrigger> */}
+											<ArrowClockwise />
+										</Button>
+									</OverlayTrigger>
 
 									<OverlayTrigger
 										placement="top"
@@ -576,14 +587,14 @@ function AppContent({ setInitialized }: IAppContent) {
 										size="sm"
 										variant="dark"
 									>
-										{"<"}
+										<ArrowLeft />
 									</Button>
 									<Button
 										onClick={() => nextRecord()}
 										size="sm"
 										variant="dark"
 									>
-										{">"}
+										<ArrowRight />
 									</Button>
 								</div>
 
@@ -593,7 +604,7 @@ function AppContent({ setInitialized }: IAppContent) {
 									options={allTags}
 									// onChange={updateTagLine}
 									// value={tagLine}
-									actionName="Add"
+									// actionName="Add"
 								/>
 
 								{recommendedTags.length ? (
@@ -603,14 +614,9 @@ function AppContent({ setInitialized }: IAppContent) {
 											<Button
 												size="sm"
 												variant="dark"
-												onClick={() => {
-													addTagLine(
-														recommendedTags.join(
-															", "
-														)
-													);
-													setRecommendedTags([]);
-												}}
+												onClick={() =>
+													addAllRecommended()
+												}
 											>
 												Add All
 											</Button>

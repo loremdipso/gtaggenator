@@ -199,16 +199,20 @@ export function DisplayFilters({ filters, setFilters }: IShowFilters) {
 		);
 	};
 
-	const addFilter = (newFilter: IFilter) => {
-		setFilters([...filters, newFilter]);
-	};
+	// const addFilter = (newFilter: IFilter) => {
+	// 	setFilters([...filters, newFilter]);
+	// };
 
 	const modifyFilter = (newFilter: IFilter) => {
-		setFilters((filters: IFilter[]) =>
-			filters.map((filter) =>
+		setFilters((filters: IFilter[]) => {
+			filters = filters.map((filter) =>
 				filter.id === newFilter.id ? newFilter : filter
-			)
-		);
+			);
+			if (filters.length === 0 || !isEmpty(filters[filters.length - 1])) {
+				filters.push(getEmptyFilter());
+			}
+			return filters;
+		});
 	};
 
 	const moveRecord = (oldIndex: number, newIndex: number) => {
@@ -235,7 +239,7 @@ export function DisplayFilters({ filters, setFilters }: IShowFilters) {
 
 	return (
 		<div>
-			{filters.map((filter) => (
+			{filters.map((filter, filterIndex) => (
 				<div className="filter-row" key={filter.id}>
 					{filters.length > 1 ? (
 						<UpDown
@@ -285,21 +289,24 @@ export function DisplayFilters({ filters, setFilters }: IShowFilters) {
 						)
 					) : null}
 
-					<Button
+					{/* <Button
 						variant="success"
 						size="sm"
 						onClick={() => addFilter(getEmptyFilter())}
 					>
 						+
-					</Button>
+					</Button> */}
 
-					<Button
-						variant="danger"
-						size="sm"
-						onClick={() => removeFilter(filter)}
-					>
-						X
-					</Button>
+					{filterIndex === filters.length - 1 &&
+					isEmpty(filter) ? null : (
+						<Button
+							variant="danger"
+							size="sm"
+							onClick={() => removeFilter(filter)}
+						>
+							X
+						</Button>
+					)}
 				</div>
 			))}
 		</div>
@@ -353,6 +360,10 @@ function getEmptyFilter(): IFilter {
 		type: "none",
 		id: getFilterID(),
 	};
+}
+
+function isEmpty(filter: IFilter): boolean {
+	return filter.type === "none";
 }
 
 function getIndex(filters: IFilter[], filterToMove: IFilter) {
