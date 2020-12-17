@@ -11,10 +11,13 @@ export function Initializer({ onInitialize }: IInitializer) {
 	const [options, setOptions] = useState(null as IStartupOptions | null);
 
 	const selectLocation = (location: string) => {
-		(async () => {
-			await bridge.initialize({ location });
-			onInitialize(true);
-		})();
+		// (async () => {
+		// await bridge.initialize({ location });
+		// we're not going to wait for this async call to complete.
+		// Instead we'll let it initialize in the background
+		bridge.initialize({ location });
+		onInitialize(true);
+		// })();
 	};
 
 	const addNew = () => {
