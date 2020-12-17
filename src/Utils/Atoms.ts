@@ -14,3 +14,8 @@ export const allTagsAtom = atom({
 	key: 'allTags',
 	default: [] as string[],
 });
+
+export const currentTagAtom = atom({
+	key: 'currentTag',
+	default: "" as string,
+});

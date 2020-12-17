@@ -8,6 +8,7 @@ export interface ISpecialInput {
 	options: string[];
 	// onChange: (value: string) => void;
 	// value: string;
+	onInputChange: (newValue: string) => void;
 
 	actionName?: string;
 	prefix?: string;
@@ -22,6 +23,7 @@ export function SpecialInput({
 	prefix,
 	extra,
 	options,
+	onInputChange,
 	focusEpoch,
 }: ISpecialInput) {
 	const typeAheadRef = useRef(null as any);
@@ -56,9 +58,9 @@ export function SpecialInput({
 				id="TODO: make unique id"
 				options={options}
 				maxResults={20}
-				// onInputChange={(newValue) => {
-				// 	onChange(newValue);
-				// }}
+				onInputChange={(newValue) => {
+					onInputChange(newValue);
+				}}
 				onChange={(selection) => {
 					if (selection[0]) {
 						doAction(selection[0]);

@@ -34,7 +34,12 @@ import { useHotkeysHelper } from "./Utils/Hotkeys";
 import { DisplayFilters, IFilter } from "./Components/Filters";
 import Drawer from "./Components/Drawer";
 import { RecoilRoot, useRecoilState } from "recoil";
-import { allTagsAtom, currentRecordIndex, fileServerPort } from "./Utils/Atoms";
+import {
+	allTagsAtom,
+	currentTagAtom,
+	currentRecordIndex,
+	fileServerPort,
+} from "./Utils/Atoms";
 import { SpecialInput, SpecialInputSimple } from "./Components/SpecialInput";
 import { SimpleTooltip } from "./Components/SimpleTooltip";
 import { Initializer } from "./Components/Initializer";
@@ -535,8 +540,6 @@ function AppContent({ setInitialized }: IAppContent) {
 		}
 	};
 
-	console.log(searches);
-
 	return (
 		<div className="app">
 			<ResizablePanel
@@ -732,13 +735,10 @@ function AppContent({ setInitialized }: IAppContent) {
 									</Button>
 								</div>
 
-								<SpecialInput
+								<TagInput
 									focusEpoch={tagFocusEpoch}
 									action={handleTagLine}
 									options={allTags}
-									// onChange={updateTagLine}
-									// value={tagLine}
-									// actionName="Add"
 								/>
 
 								{recommendedTags.length ? (
@@ -782,22 +782,15 @@ function AppContent({ setInitialized }: IAppContent) {
 
 								<div className="growable">
 									<div className="tag-container">
-										{currentRecord.Tags.map((tag) => (
-											<DisplayTagLineGroup
-												tag={tag}
-												key={tag}
-												variant="success"
-												action={(tagName: string) => {
-													toast(
-														`hooray for ${tagName}`
-													);
-													setSearch(tagName);
-													loadData(tagName);
-												}}
-												rightClickAction={removeTagLine}
-												// secondaryTitle="?"
-											/>
-										))}
+										<TagGrouper
+											tags={currentRecord.Tags}
+											action={(tagName: string) => {
+												toast(`hooray for ${tagName}`);
+												setSearch(tagName);
+												loadData(tagName);
+											}}
+											rightClickAction={removeTagLine}
+										/>
 									</div>
 								</div>
 
@@ -947,3 +940,48 @@ function parseWords(words: string) {
 }
 
 export default App;
+
+export interface ITagInput {
+	focusEpoch: number;
+	action: Function;
+	options: string[];
+}
+
+function TagInput(args: ITagInput) {
+	const [, setCurrentTag] = useRecoilState(currentTagAtom);
+	return (
+		<SpecialInput
+			{...args}
+			onInputChange={(newValue: string) => {
+				console.log(newValue);
+				setCurrentTag(newValue.toLowerCase());
+			}}
+		/>
+	);
+}
+
+interface ITagGrouper {
+	tags: string[];
+	action: (tagName: string) => any;
+	rightClickAction: (tagName: string) => any;
+}
+function TagGrouper({ tags, action, rightClickAction }: ITagGrouper) {
+	const [currentTag] = useRecoilState(currentTagAtom);
+	const matchesSearch = (tagName: string) => {
+		return currentTag.length > 0 && tagName.indexOf(currentTag) > -1;
+	};
+
+	return (
+		<>
+			{tags.map((tag) => (
+				<DisplayTagLineGroup
+					tag={tag}
+					key={tag}
+					variant={matchesSearch(tag) ? "primary" : "success"}
+					action={action}
+					rightClickAction={rightClickAction}
+				/>
+			))}
+		</>
+	);
+}
