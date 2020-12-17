@@ -16,7 +16,14 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Button, Jumbotron, OverlayTrigger, Tab, Tabs } from "react-bootstrap";
+import {
+	Button,
+	Jumbotron,
+	OverlayTrigger,
+	Spinner,
+	Tab,
+	Tabs,
+} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DisplayRecord from "./Components/DisplayRecord";
@@ -140,10 +147,12 @@ function AppContent({ setInitialized }: IAppContent) {
 		}
 	}, [searches, lastPushedSearches]);
 
+	const [isLoadingSearches, setIsLoadingSearches] = useState(false);
 	useEffect(() => {
 		(async () => {
 			// TODO: this
 			try {
+				setIsLoadingSearches(true);
 				let search_s = await bridge.getCache({
 					key: CACHE_KEYS.search,
 				});
@@ -154,6 +163,8 @@ function AppContent({ setInitialized }: IAppContent) {
 			} catch {
 				// none found, likely
 			}
+
+			setIsLoadingSearches(false);
 		})();
 	}, []);
 
@@ -557,14 +568,26 @@ function AppContent({ setInitialized }: IAppContent) {
 							</div>
 
 							<Drawer startingValue={350} position="bottom">
-								<DisplaySearches
-									searches={searches}
-									setSearches={setSearches}
-									action={(search: string) => {
-										loadData(search);
-										setSearch(search);
-									}}
-								/>
+								{isLoadingSearches ? (
+									<Spinner
+										animation="border"
+										role="status"
+										className="centered"
+									>
+										<span className="sr-only">
+											Loading...
+										</span>
+									</Spinner>
+								) : (
+									<DisplaySearches
+										searches={searches}
+										setSearches={setSearches}
+										action={(search: string) => {
+											loadData(search);
+											setSearch(search);
+										}}
+									/>
+								)}
 							</Drawer>
 						</div>
 					</Tab>
