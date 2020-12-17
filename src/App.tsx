@@ -523,7 +523,8 @@ function AppContent({ setInitialized }: IAppContent) {
 				tempTagLine[tempTagLine.length - 1] === "<" ||
 				tempTagLine[tempTagLine.length - 1] === ">"
 			) {
-				let direction = tempTagLine[0] === "<" ? -1 : 1;
+				let direction =
+					tempTagLine[tempTagLine.length - 1] === "<" ? -1 : 1;
 				let amount = parseInt(
 					tempTagLine.substring(0, tempTagLine.length - 1)
 				);
@@ -531,6 +532,12 @@ function AppContent({ setInitialized }: IAppContent) {
 					amount = 1;
 				}
 				setRecordIndex(recordIndex + direction * amount);
+			} else if (tempTagLine === "?") {
+				// to do random location
+				let randomIndex = Math.round(
+					Math.random() * (records.length - 1)
+				);
+				setRecordIndex(randomIndex);
 			} else {
 				// TODO: is this safe?
 				addTags(tempTagLine);
