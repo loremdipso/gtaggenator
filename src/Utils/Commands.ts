@@ -1,4 +1,3 @@
-import { FileEarmarkEasel } from "react-bootstrap-icons";
 import { promisified } from "tauri/api/tauri";
 import { IRecord, IStartupOptions } from "./interfaces";
 
@@ -9,23 +8,25 @@ export enum CACHE_KEYS {
 
 class Bridge {
 	constructor() {
-		// await promisified({
-		// });
 	}
 
 	async getStartupOptions(): Promise<IStartupOptions> {
 		return helper("GetStartupOptions", {});
 	}
 
-	async initialize(args: { location: string }): Promise<IStartupOptions> {
+	async removeFolder(args: { path: string }): Promise<boolean> {
+		return helper("RemoveFolder", args);
+	}
+
+	async initialize(args: { location: string }): Promise<never> {
 		return helper("Initialize", args);
 	}
 
-	async openNewFolder(): Promise<IStartupOptions> {
+	async openNewFolder(): Promise<boolean> {
 		return helper("OpenNewFolder", {});
 	}
 
-	async reload(): Promise<IStartupOptions> {
+	async reload(): Promise<never> {
 		return helper("Reload", {});
 	}
 
@@ -66,11 +67,11 @@ class Bridge {
 		return helper("GetPort", {});
 	}
 
-	async openContainingFolder(args: { location: string }): Promise<unknown> {
+	async openContainingFolder(args: { location: string }): Promise<never> {
 		return helper("OpenContainingFolder", args);
 	}
 
-	async openNatively(args: { location: string }): Promise<unknown> {
+	async openNatively(args: { location: string }): Promise<never> {
 		return helper("OpenNatively", args);
 	}
 
@@ -78,7 +79,7 @@ class Bridge {
 		return helper("GetCache", args);
 	}
 
-	async setCache(args: { key: CACHE_KEYS, value: string }): Promise<unknown> {
+	async setCache(args: { key: CACHE_KEYS, value: string }): Promise<never> {
 		return helper("SetCache", args);
 	}
 }

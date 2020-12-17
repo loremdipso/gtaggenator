@@ -535,6 +535,8 @@ function AppContent({ setInitialized }: IAppContent) {
 		}
 	};
 
+	console.log(searches);
+
 	return (
 		<div className="app">
 			<ResizablePanel
@@ -567,28 +569,31 @@ function AppContent({ setInitialized }: IAppContent) {
 								/>
 							</div>
 
-							<Drawer startingValue={350} position="bottom">
-								{isLoadingSearches ? (
-									<Spinner
-										animation="border"
-										role="status"
-										className="centered"
-									>
-										<span className="sr-only">
-											Loading...
-										</span>
-									</Spinner>
-								) : (
-									<DisplaySearches
-										searches={searches}
-										setSearches={setSearches}
-										action={(search: string) => {
-											loadData(search);
-											setSearch(search);
-										}}
-									/>
-								)}
-							</Drawer>
+							{!isLoadingSearches &&
+							searches.length === 0 ? null : (
+								<Drawer startingValue={350} position="bottom">
+									{isLoadingSearches ? (
+										<Spinner
+											animation="border"
+											role="status"
+											className="centered"
+										>
+											<span className="sr-only">
+												Loading...
+											</span>
+										</Spinner>
+									) : (
+										<DisplaySearches
+											searches={searches}
+											setSearches={setSearches}
+											action={(search: string) => {
+												loadData(search);
+												setSearch(search);
+											}}
+										/>
+									)}
+								</Drawer>
+							)}
 						</div>
 					</Tab>
 

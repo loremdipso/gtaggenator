@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Table } from "react-bootstrap";
 import { bridge } from "../Utils/Commands";
-import { IStartupOptions } from "../Utils/interfaces";
+import { IStartupFolder, IStartupOptions } from "../Utils/interfaces";
 
 interface IInitializer {
 	onInitialize: (initialized: boolean) => any;
@@ -22,20 +22,31 @@ export function Initializer({ onInitialize }: IInitializer) {
 
 	const addNew = () => {
 		(async () => {
-			await bridge.openNewFolder();
-			onInitialize(true);
+			let success = await bridge.openNewFolder();
+			if (success) {
+				onInitialize(true);
+			}
 		})();
 	};
 
+	const reload = async () => {
+		const options = await bridge.getStartupOptions();
+		if (options.skip) {
+			onInitialize(true);
+		} else {
+			setOptions(options);
+		}
+	};
+
+	const removeFolder = async (folder: IStartupFolder) => {
+		let success = await bridge.removeFolder({ path: folder.location });
+		if (success) {
+			reload();
+		}
+	};
+
 	useEffect(() => {
-		(async () => {
-			const options = await bridge.getStartupOptions();
-			if (options.skip) {
-				onInitialize(true);
-			} else {
-				setOptions(options);
-			}
-		})();
+		reload();
 	}, []);
 
 	if (!options) {
@@ -55,12 +66,23 @@ export function Initializer({ onInitialize }: IInitializer) {
 						>
 							<td>{getName(folder.location)}</td>
 							<td>{folder.location}</td>
+							<td width={1}>
+								<Button
+									variant="danger"
+									onClick={(event) => {
+										event.stopPropagation();
+										removeFolder(folder);
+									}}
+								>
+									X
+								</Button>
+							</td>
 						</tr>
 					))}
 				</tbody>
 			</Table>
 
-			<Button style={{ marginLeft: "auto" }} onClick={() => addNew()}>
+			<Button className="centered" onClick={() => addNew()}>
 				Add New
 			</Button>
 		</div>

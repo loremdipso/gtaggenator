@@ -35,6 +35,12 @@ pub enum Cmd {
 		error: String,
 	},
 
+	RemoveFolder {
+		callback: String,
+		error: String,
+		path: String,
+	},
+
 	Initialize {
 		callback: String,
 		error: String,
@@ -120,7 +126,7 @@ pub enum Cmd {
 	GetCache {
 		callback: String,
 		error: String,
-		key: String
+		key: String,
 	},
 
 	SetCache {
@@ -234,4 +240,29 @@ pub fn add_to_cache(location: String) -> Result<(), BError> {
 	std::fs::write(config_path, s)?;
 
 	return Ok(());
+}
+
+pub fn remove_from_cache(location: String) -> Result<bool, BError> {
+	let home_dir = std::env::home_dir().unwrap();
+	let config_path = Path::new(&home_dir).join(CACHE_FILENAME);
+	if !config_path.exists() {}
+
+	if config_path.exists() {
+		let mut file = File::open(&config_path)?;
+		let mut contents = String::new();
+		file.read_to_string(&mut contents)
+			.unwrap_or_else(|err| panic!("Error while reading cache: [{}]", err));
+
+		let mut cache: Cache = serde_yaml::from_str(&contents)?;
+		let index = cache.opened.iter().position(|e| **e == *location);
+		if let Some(index) = index {
+			cache.opened.remove(index);
+
+			let s = serde_yaml::to_string(&cache)?;
+			std::fs::write(config_path, s)?;
+			return Ok(true);
+		}
+	}
+
+	return Ok(false);
 }

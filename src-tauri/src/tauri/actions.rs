@@ -1,5 +1,6 @@
 use super::file_server;
 use crate::take_flag;
+use crate::tauri::cmd::remove_from_cache;
 use crate::tauri::cmd::CommandError;
 use crate::tauri::cmd::Response;
 use crate::tauri::cmd::StartupOptions;
@@ -128,21 +129,40 @@ pub fn start_tauri_core(
 							let mut taggenator_box = taggenator_box.clone();
 							let response = tauri_api::dialog::pick_folder(Some(
 								std::env::current_dir().unwrap(),
-							))
-							.unwrap();
+							));
 
 							tauri::execute_promise(
 								_webview,
-								move || {
-									if let Okay(location) = response {
+								move || match response {
+									Ok(Okay(location)) => {
 										let mut taggenator_option =
 											taggenator_box.lock().map_err(|_| UnknownError)?;
 										let taggenator =
 											initialize(ignore_updates, location).unwrap();
 										*taggenator_option = Some(taggenator);
-										return Ok(());
+										return Ok(true);
+									}
+									_ => {
+										return Ok(false);
+									}
+								},
+								callback,
+								error,
+							);
+						}
+
+						RemoveFolder {
+							callback,
+							error,
+							path,
+						} => {
+							tauri::execute_promise(
+								_webview,
+								move || {
+									if let Ok(true) = remove_from_cache(path) {
+										return Ok(true);
 									} else {
-										panic!();
+										return Ok(false);
 									}
 								},
 								callback,
