@@ -54,7 +54,11 @@ impl<'a> TagRecommender {
 		}
 	}
 
-	pub fn recommend(&self, location: &String, existing_tags: &HashSet<String>) -> HashSet<String> {
+	pub fn recommend_from_location(
+		&self,
+		location: &String,
+		existing_tags: &HashSet<String>,
+	) -> HashSet<String> {
 		let mut rv = HashSet::new();
 
 		let items: Vec<String> = self
@@ -84,13 +88,31 @@ impl<'a> TagRecommender {
 
 		return rv;
 	}
+
+	pub fn recommend_from_grabbag(
+		&self,
+		existing_tags: &HashSet<String>,
+		grabbag_tags: &HashSet<String>,
+	) -> HashSet<String> {
+		let mut rv = HashSet::new();
+		for tag in grabbag_tags {
+			if let Some(matches) = self.mapping.get(tag) {
+				for some_match in matches {
+					if existing_tags.iter().find(|el| el == &some_match).is_none() {
+						rv.insert(some_match.to_string());
+					}
+				}
+			}
+		}
+		return rv;
+	}
 }
 
 #[cfg(test)]
 mod flag_tests {
-    use std::collections::HashSet;
+	use std::collections::HashSet;
 
-    use super::TagRecommender;
+	use super::TagRecommender;
 
 	#[test]
 	fn basic() {
@@ -118,7 +140,7 @@ mod flag_tests {
 		];
 
 		let recommender = TagRecommender::new(all_tags.iter());
-		let mut answer = recommender.recommend(&location, &existing_tags);
+		let mut answer = recommender.recommend_from_location(&location, &existing_tags);
 
 		assert_eq!(answer.len(), correct_answer.len());
 		for tag in correct_answer {
@@ -128,22 +150,16 @@ mod flag_tests {
 
 	#[test]
 	fn extended() {
-		let all_tags = vec![
-			"beginning".to_string(),
-			"ending".to_string(),
-		];
+		let all_tags = vec!["beginning".to_string(), "ending".to_string()];
 
 		let mut existing_tags = HashSet::new();
 
 		let location = "beginning &#39;s ending.ext".to_string();
 
-		let mut correct_answer = vec![
-			"beginning".to_string(),
-			"ending".to_string(),
-		];
+		let mut correct_answer = vec!["beginning".to_string(), "ending".to_string()];
 
 		let recommender = TagRecommender::new(all_tags.iter());
-		let mut answer = recommender.recommend(&location, &existing_tags);
+		let mut answer = recommender.recommend_from_location(&location, &existing_tags);
 
 		assert_eq!(answer.len(), correct_answer.len());
 		for tag in correct_answer {

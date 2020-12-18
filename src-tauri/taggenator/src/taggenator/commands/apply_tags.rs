@@ -19,7 +19,7 @@ extern crate shell_words;
 extern crate threadpool;
 
 pub fn apply_tags(taggenator: &mut Taggenator, mut args: Vec<String>) -> Result<(), BError> {
-	let num_threads = take_flag_with_arg(&mut args, "--threads")
+	let mut num_threads = take_flag_with_arg(&mut args, "--threads")
 		.unwrap_or("1".to_string())
 		.parse::<usize>()
 		.unwrap();
@@ -44,11 +44,15 @@ pub fn apply_tags(taggenator: &mut Taggenator, mut args: Vec<String>) -> Result<
 
 	let mut searcher = Searcher::new(args)?;
 	let records = searcher.get_records(&taggenator.database)?;
+
+	// Don't spawn unnecessary threads
+	let total_jobs = records.len();
+	num_threads = std::cmp::min(num_threads, total_jobs);
+
 	println!("Found {} files", &records.len());
 
 	let (tx, rx) = channel();
 	let receiver = Arc::new(Mutex::new(rx));
-	let total_jobs = records.len();
 	for i in 0..num_threads {
 		let receiver = receiver.clone();
 		let tags_to_add = tags_to_add.clone();
@@ -81,6 +85,5 @@ pub fn apply_tags(taggenator: &mut Taggenator, mut args: Vec<String>) -> Result<
 	}
 
 	pool.join();
-
 	return Ok(());
 }

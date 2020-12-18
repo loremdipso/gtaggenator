@@ -328,19 +328,24 @@ impl Taggenator {
 				// NOTE: need to jump through hoops because of COW
 				let location = &record.Location;
 				let location = std::fs::canonicalize(PathBuf::from(location))?;
+				let location_copy = location.clone();
 				let temp_tagger_command =
 					Regex::new("%s")?.replace(&tagger_command, location.to_str().unwrap());
 				let temp_tagger_command = temp_tagger_command.deref();
 
 				let result = run_command_string(&temp_tagger_command.to_string())?;
 				let mut do_remove = false;
-				for new_tag in result.split("\n") {
+				let tags = result.split("\n");
+
+				println!("");
+				println!("{}", location_copy.to_str().unwrap());
+				println!("tagger found: {:?}", &tags.clone().collect::<Vec<&str>>());
+				for new_tag in tags {
 					do_remove = true;
 					if new_tag.len() > 0
 						&& new_tag.chars().nth(0) != Some('#')
 						&& !record.Tags.contains(new_tag)
 					{
-						println!("tagger found: {}", &new_tag);
 						// NOTE: could lead to duplicates, but we're okay with that
 						to_add.push(new_tag.to_string());
 					}

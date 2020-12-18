@@ -72,6 +72,7 @@ export function SpecialInput({
 						let value = typeAheadRef.current.getInput().value;
 						doAction(value);
 						typeAheadRef.current.clear();
+						onInputChange("");
 					}
 				}}
 				open

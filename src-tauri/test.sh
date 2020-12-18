@@ -34,6 +34,9 @@ cd ../tests
 #time ~/.cargo-target/release/taggenator delete search B.txt
 #echo thing | ~/.cargo-target/release/taggenator open
 #~/.cargo-target/release/taggenator open
+
+time ~/.cargo-target/release/taggenator grabbag add "./tmp/woop.txt" Tags wowowo
+
 #time ~/.cargo-target/release/taggenator grabbag add "./tmp/B.txt" huh welp2 --ignore-update
 #time ~/.cargo-target/release/taggenator grabbag delete "./tmp/B.txt" sup
 #time ~/.cargo-target/release/taggenator grabbag get "./tmp/B.txt" sup

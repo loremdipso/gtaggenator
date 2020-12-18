@@ -50,6 +50,13 @@ pub struct Database {
 	recommender: Option<TagRecommender>,
 }
 
+impl Drop for Database {
+	fn drop(&mut self) {
+		println!("Dropping database...");
+		self.flush_writes();
+	}
+}
+
 impl Database {
 	pub fn new() -> Result<Database, BError> {
 		// TODO: remove
@@ -345,7 +352,7 @@ impl Database {
 
 	pub fn grabbag_get(&mut self, recordId: i64, key: String) -> Result<String, BError> {
 		return Ok(self.conn.query_row(
-			"SELECT Value FROM grabbag WHERE RecordID = ? AND Key = ?",
+			"SELECT Value FROM grabbag WHERE RecordID = ? AND Key Like ?",
 			params![&recordId, &key],
 			|row| row.get(0),
 		)?);
@@ -584,10 +591,38 @@ impl Database {
 			self.get_all_tags();
 		}
 
-		return self
+		let mut tags_from_location = self
 			.recommender
 			.as_ref()
 			.unwrap()
-			.recommend(&record.Location, &record.Tags);
+			.recommend_from_location(&record.Location, &record.Tags);
+
+		if let Some(grabbag_tags) = self.get_grabbag_tags(&record) {
+			if grabbag_tags.len() > 0 {
+				let mut tags_from_grabbag = self
+					.recommender
+					.as_ref()
+					.unwrap()
+					.recommend_from_grabbag(&record.Tags, &grabbag_tags);
+
+				tags_from_location.extend(tags_from_grabbag);
+			}
+		}
+
+		return tags_from_location;
+	}
+
+	pub fn get_grabbag_tags(&mut self, record: &Record) -> Option<HashSet<String>> {
+		let result = self.grabbag_get(record.RecordID, "tags".to_owned());
+		if let Ok(tags_string) = result {
+			return Some(
+				tags_string
+					.split(",")
+					.map(|e| e.trim().to_lowercase())
+					.collect::<HashSet<String>>(),
+			);
+		}
+
+		return None;
 	}
 }
