@@ -603,7 +603,7 @@ impl Database {
 					.recommender
 					.as_ref()
 					.unwrap()
-					.recommend_from_grabbag(&record.Tags, &grabbag_tags);
+					.recommend_from_grabbag(grabbag_tags, &record.Tags);
 
 				tags_from_location.extend(tags_from_grabbag);
 			}
@@ -612,14 +612,14 @@ impl Database {
 		return tags_from_location;
 	}
 
-	pub fn get_grabbag_tags(&mut self, record: &Record) -> Option<HashSet<String>> {
+	pub fn get_grabbag_tags(&mut self, record: &Record) -> Option<Vec<String>> {
 		let result = self.grabbag_get(record.RecordID, "tags".to_owned());
 		if let Ok(tags_string) = result {
 			return Some(
 				tags_string
 					.split(",")
 					.map(|e| e.trim().to_lowercase())
-					.collect::<HashSet<String>>(),
+					.collect::<Vec<String>>(),
 			);
 		}
 

@@ -59,8 +59,6 @@ impl<'a> TagRecommender {
 		location: &String,
 		existing_tags: &HashSet<String>,
 	) -> HashSet<String> {
-		let mut rv = HashSet::new();
-
 		let items: Vec<String> = self
 			.re
 			.replace_all(&location.to_lowercase(), " ")
@@ -69,6 +67,19 @@ impl<'a> TagRecommender {
 			.map(|e| e.to_string())
 			.collect();
 
+		return self.helper(items, existing_tags);
+	}
+
+	pub fn recommend_from_grabbag(
+		&self,
+		grabbag_tags: Vec<String>,
+		existing_tags: &HashSet<String>,
+	) -> HashSet<String> {
+		return self.helper(grabbag_tags, existing_tags);
+	}
+
+	pub fn helper(&self, items: Vec<String>, existing_tags: &HashSet<String>) -> HashSet<String> {
+		let mut rv = HashSet::new();
 		let max_count = std::cmp::min(items.len(), 5);
 		for start in (0..items.len()) {
 			for end in ((start + 1)..=(std::cmp::min(items.len(), start + max_count))) {
@@ -86,24 +97,6 @@ impl<'a> TagRecommender {
 			}
 		}
 
-		return rv;
-	}
-
-	pub fn recommend_from_grabbag(
-		&self,
-		existing_tags: &HashSet<String>,
-		grabbag_tags: &HashSet<String>,
-	) -> HashSet<String> {
-		let mut rv = HashSet::new();
-		for tag in grabbag_tags {
-			if let Some(matches) = self.mapping.get(tag) {
-				for some_match in matches {
-					if existing_tags.iter().find(|el| el == &some_match).is_none() {
-						rv.insert(some_match.to_string());
-					}
-				}
-			}
-		}
 		return rv;
 	}
 }
