@@ -4,7 +4,7 @@ CREATE TABLE GrabBag (
 	RecordID INTEGER,
 	Key VARCHAR(255),
 	Value VARCHAR(255),
-	FOREIGN KEY(RecordID) REFERENCES Records(RecordID),
+	FOREIGN KEY(RecordID) REFERENCES Records(RecordID) ON DELETE CASCADE,
 	UNIQUE(RecordID, Key)
 );
 ";

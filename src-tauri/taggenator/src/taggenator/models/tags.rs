@@ -4,7 +4,7 @@ CREATE TABLE Tags (
 	RecordID INTEGER,
 	TagName VARCHAR(255),
 	DateAdded DateTime,
-	FOREIGN KEY(RecordID) REFERENCES Records(RecordID),
+	FOREIGN KEY(RecordID) REFERENCES Records(RecordID) ON DELETE CASCADE,
 	UNIQUE(RecordID, TagName)
 );
 ";
