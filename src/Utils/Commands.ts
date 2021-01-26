@@ -172,7 +172,7 @@ function sortTagHelper(a: string, b: string): number {
 	let bBase = getTagBase(b);
 
 	if (aBase === bBase) {
-		return a.localeCompare(b);
+		return a.length - b.length;
 	} else {
 		return aBase.length - bBase.length;
 	}

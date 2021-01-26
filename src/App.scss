@@ -210,13 +210,34 @@ body {
 }
 
 .fancy-tabs {
-	background-color: white;
+	background-color: grey;
 	flex-wrap: initial !important;
 	overflow-x: scroll;
 
 	.nav-link {
 		padding: 0rem 1rem;
 		white-space: nowrap;
+		background-color: black !important;
+
+		$margin: 4px;
+		margin-right: $margin;
+
+		color: white !important;
+
+		&:hover {
+			background-color: grey !important;
+		}
+
+		&.active {
+			background-color: #9ab999 !important;
+			border: 0px !important;
+			color: black !important;
+		}
+
+		&:not(:last-child) {
+			flex-grow: 1;
+			text-align: center;
+		}
 	}
 }
 

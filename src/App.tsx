@@ -3,7 +3,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import "./App.scss";
 import { bridge, CACHE_KEYS } from "./Utils/Commands";
 import { IRecord } from "./Utils/interfaces";
-import { ArrowClockwise, ArrowRight, ArrowLeft } from "react-bootstrap-icons";
+import {
+	ArrowClockwise,
+	ArrowRight,
+	ArrowLeft,
+	GearFill,
+} from "react-bootstrap-icons";
 import { Content } from "./Components/Content";
 import {
 	IDelta,
@@ -834,7 +839,7 @@ function AppContent({ setInitialized }: IAppContent) {
 						)}
 					</Tab>
 
-					<Tab eventKey="edit_settings" title="settings">
+					<Tab eventKey="edit_settings" title={<GearFill />}>
 						<Jumbotron fluid className="fancy-jumbotron">
 							<Button onClick={() => bridge.editSettings()}>
 								Edit In VSCode
