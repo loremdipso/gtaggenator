@@ -20,7 +20,7 @@ cargo build --release -q -p taggenator
 cd ../tests
 
 
-#cargo test --release -p taggenator
+cargo test --release -p taggenator
 #cargo test --release -p taggenator
 
 #time ~/.cargo-target/release/taggenator run_grabbag --threads 3 --exe ./grabbagger.rb
@@ -35,7 +35,7 @@ cd ../tests
 #echo thing | ~/.cargo-target/release/taggenator open
 #~/.cargo-target/release/taggenator open
 
-time ~/.cargo-target/release/taggenator grabbag add "./tmp/woop.txt" Tags wowowo
+#time ~/.cargo-target/release/taggenator grabbag add "./tmp/woop.txt" Tags wowowo
 
 #time ~/.cargo-target/release/taggenator grabbag add "./tmp/B.txt" huh welp2 --ignore-update
 #time ~/.cargo-target/release/taggenator grabbag delete "./tmp/B.txt" sup

@@ -201,7 +201,7 @@ body {
 .resizable-panel-handle {
 	background-color: orange;
 	z-index: 1000;
-	/* border: 5px solid black; */
+	cursor: pointer;
 }
 
 .filter-row {

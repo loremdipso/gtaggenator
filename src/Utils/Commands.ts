@@ -43,7 +43,11 @@ class Bridge {
 	}
 
 	async getTags(): Promise<string[]> {
-		return helper("GetTags", {});
+		let tags = await helper<string[]>("GetTags", {});
+
+		// sort, excluding the prefixes
+		tags.sort(sortTagHelper);
+		return tags;
 	}
 
 	// returns the tags we just added
@@ -156,6 +160,24 @@ function fakeRecord(): IRecord {
 
 		HaveManuallyTouched: true,
 	};
+}
+
+// cut off the part before any ":"'s
+function getTagBase(tag: string): string {
+	return tag.substr(tag.indexOf(":") + 1);
+}
+
+function sortTagHelper(a: string, b: string): number {
+	let aBase = getTagBase(a);
+	let bBase = getTagBase(b);
+
+	console.log(aBase);
+
+	if (aBase === bBase) {
+		return a.localeCompare(b);
+	} else {
+		return aBase.length - bBase.length;
+	}
 }
 
 export const bridge = new Bridge();

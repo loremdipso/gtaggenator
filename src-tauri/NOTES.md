@@ -41,6 +41,8 @@
     - [x] Preload images in browser
     - [x] Dynamically bind filesystem to port
     - [ ] Add settings edit screen
+    - [ ] Add tag edit screen
+    - [ ] Exit on ctrl+q
 
 3. Backburner
     - [ ] Figure out plugin architecture
