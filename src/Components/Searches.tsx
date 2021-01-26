@@ -109,8 +109,8 @@ export function appendSearchImmutable(
 ): ISearch[] {
 	if (newSearch.favorite) {
 		return [
-			newSearch,
 			...searches.filter((search) => search.id !== newSearch.id),
+			newSearch,
 		];
 	} else {
 		let newSearches = [];

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import "./App.scss";
 import { bridge, CACHE_KEYS } from "./Utils/Commands";
@@ -182,20 +182,20 @@ function AppContent({ setInitialized }: IAppContent) {
 		})();
 	}, [setPort]);
 
-	useEffect(() => {
-		(async () => {
-			try {
-				let searches = await bridge.getCache({
-					key: CACHE_KEYS.search,
-				});
-				console.log(searches);
-				// TODO: this
-				// setSearch();
-			} catch {
-				// none found, likely
-			}
-		})();
-	}, []);
+	// useEffect(() => {
+	// 	(async () => {
+	// 		try {
+	// 			let searches = await bridge.getCache({
+	// 				key: CACHE_KEYS.search,
+	// 			});
+	// 			console.log(searches);
+	// 			// TODO: this
+	// 			// setSearch();
+	// 		} catch {
+	// 			// none found, likely
+	// 		}
+	// 	})();
+	// }, []);
 
 	const updateTabKey = (key: ITabKey | null) => {
 		if (!key || tabKey === key) {
@@ -285,41 +285,51 @@ function AppContent({ setInitialized }: IAppContent) {
 	);
 
 	// TODO: is this the most react-y thing we can do?
-	const loadData = async (override?: string) => {
-		let tempSearch = getSearch(search, filters, override);
+	const loadData = useCallback(
+		async (override?: string) => {
+			let tempSearch = getSearch(search, filters, override);
 
-		try {
-			addSearch(setSearches, searches, tempSearch);
+			try {
+				addSearch(setSearches, searches, tempSearch);
 
-			let finalSearch = parseWords(tempSearch);
-			let records = await bridge.getRecords({
-				// split by whitespace, but keep quoted groups together
-				args: finalSearch,
-			});
-			setRecords(records);
+				let finalSearch = parseWords(tempSearch);
+				let records = await bridge.getRecords({
+					// split by whitespace, but keep quoted groups together
+					args: finalSearch,
+				});
+				setRecords(records);
 
-			let newIndex = 0;
-			if (lastExecutedSearch === tempSearch && currentRecord) {
-				// special case: if we're refreshing, try to find the record we were just on
-				newIndex = records.findIndex(
-					(record) => record.RecordID === currentRecord.RecordID
-				);
-				if (newIndex < 0) {
-					newIndex = 0;
+				let newIndex = 0;
+				if (lastExecutedSearch === tempSearch && currentRecord) {
+					// special case: if we're refreshing, try to find the record we were just on
+					newIndex = records.findIndex(
+						(record) => record.RecordID === currentRecord.RecordID
+					);
+					if (newIndex < 0) {
+						newIndex = 0;
+					}
+
+					toast("Reloaded");
+				} else {
+					toast("Loaded");
 				}
-
-				toast("Reloaded");
-			} else {
-				toast("Loaded");
+				setTabKey("play");
+				setRecordIndex(newIndex);
+				setTagFocusEpoch((epoch) => epoch + 1);
+				setLastExecutedSearch(tempSearch);
+			} catch (e) {
+				console.log(e);
 			}
-			setTabKey("play");
-			setRecordIndex(newIndex);
-			setTagFocusEpoch((epoch) => epoch + 1);
-			setLastExecutedSearch(tempSearch);
-		} catch (e) {
-			console.log(e);
-		}
-	};
+		},
+		[
+			currentRecord,
+			filters,
+			lastExecutedSearch,
+			search,
+			searches,
+			setRecordIndex,
+		]
+	);
 
 	// load initial arguments, once
 	useEffect(() => {

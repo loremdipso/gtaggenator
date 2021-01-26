@@ -171,8 +171,6 @@ function sortTagHelper(a: string, b: string): number {
 	let aBase = getTagBase(a);
 	let bBase = getTagBase(b);
 
-	console.log(aBase);
-
 	if (aBase === bBase) {
 		return a.localeCompare(b);
 	} else {
