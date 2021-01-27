@@ -7,9 +7,6 @@ export enum CACHE_KEYS {
 }
 
 class Bridge {
-	constructor() {
-	}
-
 	async getStartupOptions(): Promise<IStartupOptions> {
 		return helper("GetStartupOptions", {});
 	}
@@ -77,6 +74,10 @@ class Bridge {
 
 	async openNatively(args: { location: string }): Promise<never> {
 		return helper("OpenNatively", args);
+	}
+
+	async openAll(args: { locations: string[] }): Promise<never> {
+		return helper("OpenAll", args);
 	}
 
 	async getCache(args: { key: CACHE_KEYS }): Promise<string> {

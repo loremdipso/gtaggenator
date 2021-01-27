@@ -580,7 +580,7 @@ function AppContent({ setInitialized }: IAppContent) {
 	return (
 		<div className="app">
 			<ResizablePanel
-				startingValue={400}
+				startingValue={420}
 				position="left"
 				className="sidebar"
 			>
@@ -689,6 +689,26 @@ function AppContent({ setInitialized }: IAppContent) {
 
 									<OverlayTrigger
 										placement="top"
+										overlay={SimpleTooltip("Open natively")}
+									>
+										<Button
+											onClick={() =>
+												openAll(
+													records.map(
+														(record) =>
+															record.Location
+													)
+												)
+											}
+											size="sm"
+											variant="dark"
+										>
+											Open All
+										</Button>
+									</OverlayTrigger>
+
+									<OverlayTrigger
+										placement="top"
 										overlay={SimpleTooltip(
 											"Open containing folder"
 										)}
@@ -720,7 +740,7 @@ function AppContent({ setInitialized }: IAppContent) {
 												currentRecord.Tags.length === 0
 											}
 										>
-											Clear Tags
+											Clear
 										</Button>
 									</OverlayTrigger>
 
@@ -965,6 +985,10 @@ function getSearch(
 
 async function openNatively(location: string) {
 	await bridge.openNatively({ location });
+}
+
+async function openAll(locations: string[]) {
+	await bridge.openAll({ locations });
 }
 
 async function openContainingFolder(location: string) {

@@ -17,6 +17,7 @@ pub mod database;
 pub mod query_processor;
 
 mod commands;
+pub use commands::open_all::open_all_core;
 
 pub mod models;
 

@@ -20,7 +20,7 @@ cargo build --release -q -p taggenator
 cd ../tests
 
 
-cargo test --release -p taggenator
+#cargo test --release -p taggenator
 #cargo test --release -p taggenator
 
 #time ~/.cargo-target/release/taggenator run_grabbag --threads 3 --exe ./grabbagger.rb
@@ -34,6 +34,8 @@ cargo test --release -p taggenator
 #time ~/.cargo-target/release/taggenator delete search B.txt
 #echo thing | ~/.cargo-target/release/taggenator open
 #~/.cargo-target/release/taggenator open
+
+time ~/.cargo-target/release/taggenator open_all search txt
 
 #time ~/.cargo-target/release/taggenator grabbag add "./tmp/woop.txt" Tags wowowo
 

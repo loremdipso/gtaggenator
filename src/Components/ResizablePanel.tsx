@@ -34,7 +34,7 @@ export default function ResizablePanel({
 		} else {
 			setValue(startingValue - deltaPosition.y);
 		}
-	}, [deltaPosition, startingValue]);
+	}, [position, deltaPosition, startingValue]);
 
 	const onStart = () => {
 		setDidDrag(false);
@@ -175,7 +175,7 @@ export default function ResizablePanel({
 			className={`${isClosed ? "closed" : ""} ${className}`}
 			style={{ ...containerStyle }}
 		>
-			{children}
+			{isClosed ? null : children}
 
 			<Draggable
 				axis={axis as any}

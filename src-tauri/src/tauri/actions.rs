@@ -11,6 +11,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use taggenator::errors::MyCustomError::UnknownError;
 use taggenator::taggenator::database::searcher::Searcher;
+use taggenator::taggenator::open_all_core;
 use taggenator::taggenator::SETTINGS_FILENAME;
 use taggenator::BError;
 use taggenator::Taggenator;
@@ -414,6 +415,27 @@ pub fn start_tauri_core(
 									// TODO: make path absolute
 									// TODO: disown
 									Command::new("xdg-open").arg(location).spawn();
+									return Ok(());
+								},
+								callback,
+								error,
+							);
+						}
+
+						OpenAll {
+							callback,
+							error,
+							locations,
+						} => {
+							tauri::execute_promise(
+								_webview,
+								move || {
+									// TODO: make generic
+									// TODO: make path absolute
+									// TODO: disown
+									if let Some(location) = open_all_core(locations) {
+										Command::new("xdg-open").arg(location).spawn();
+									}
 									return Ok(());
 								},
 								callback,

@@ -107,6 +107,12 @@ pub enum Cmd {
 		location: String,
 	},
 
+	OpenAll {
+		callback: String,
+		error: String,
+		locations: Vec<String>,
+	},
+
 	EditSettings {
 		callback: String,
 		error: String,

@@ -11,6 +11,7 @@ mod grab_bag;
 mod import;
 mod move_record;
 mod open;
+pub mod open_all; // expose to outside
 mod run_grabbag;
 
 pub fn RunCommand(
@@ -33,6 +34,9 @@ pub fn RunCommand(
 		}
 		"open" => {
 			return open::open(taggenator, args);
+		}
+		"open_all" => {
+			return open_all::open_all(taggenator, args);
 		}
 		"apply_tags" => {
 			return apply_tags::apply_tags(taggenator, args);
