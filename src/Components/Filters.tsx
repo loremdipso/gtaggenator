@@ -19,6 +19,26 @@ let id = 0;
 let type: "filter" | "sorter" = "filter";
 const baseFilters: ISearchOption[] = [
 	{ display: "None", command: "", id: id++, type: "none" },
+
+	{
+		display: "Limit",
+		command: "-sort limit",
+		valueType: "number",
+		id: id++,
+		type,
+	},
+
+	{ display: "Touched", command: "-sort touched", id: id++, type },
+	{
+		display: "Untouched",
+		command: "-sort untouched",
+		id: id++,
+		type,
+	},
+
+	{ display: "Seen", command: "-sort seen", id: id++, type },
+	{ display: "Unseen", command: "-sort unseen", id: id++, type },
+
 	{
 		display: "Search",
 		command: "-sort search",
@@ -48,48 +68,16 @@ const baseFilters: ISearchOption[] = [
 		id: id++,
 		type,
 	},
-
-	{ display: "Touched", command: "-sort touched", id: id++, type },
-	{
-		display: "Untouched",
-		command: "-sort untouched",
-		id: id++,
-		type,
-	},
-
-	{ display: "Seen", command: "-sort seen", id: id++, type },
-	{ display: "Unseen", command: "-sort unseen", id: id++, type },
-
-	{
-		display: "Limit",
-		command: "-sort limit",
-		valueType: "number",
-		id: id++,
-		type,
-	},
 ];
 
 id = 0;
 type = "sorter";
 const baseSorters: ISearchOption[] = [
 	{ display: "None", command: "", id: id++, type: "none" },
-	{
-		display: "Most Tags",
-		command: "-sort most_tags",
-		id: id++,
-		type,
-	},
-	{
-		display: "Fewest Tags",
-		command: "-sort fewest_tags",
-		id: id++,
-		type,
-	},
 
-	{ display: "Largest", command: "-sort largest", id: id++, type },
 	{
-		display: "Smallest",
-		command: "-sort smallest",
+		display: "Random",
+		command: "-sort random",
 		id: id++,
 		type,
 	},
@@ -100,33 +88,7 @@ const baseSorters: ISearchOption[] = [
 		id: id++,
 		type,
 	},
-	{
-		display: "Location",
-		command: "-sort location",
-		id: id++,
-		type,
-	},
 
-	{
-		display: "Random",
-		command: "-sort random",
-		id: id++,
-		type,
-	},
-
-	{
-		display: "Reverse",
-		command: "-sort reverse",
-		id: id++,
-		type,
-	},
-
-	{
-		display: "Most Tags",
-		command: "-sort most_tags",
-		id: id++,
-		type,
-	},
 	{
 		display: "Fewest Tags",
 		command: "-sort fewest_tags",
@@ -148,6 +110,41 @@ const baseSorters: ISearchOption[] = [
 	},
 
 	{
+		display: "Newest",
+		command: "-sort newest",
+		id: id++,
+		type,
+	},
+	{
+		display: "Oldest",
+		command: "-sort oldest",
+		id: id++,
+		type,
+	},
+
+	{ display: "Largest", command: "-sort largest", id: id++, type },
+	{
+		display: "Smallest",
+		command: "-sort smallest",
+		id: id++,
+		type,
+	},
+
+	{
+		display: "Location",
+		command: "-sort location",
+		id: id++,
+		type,
+	},
+
+	{
+		display: "Most Tags",
+		command: "-sort most_tags",
+		id: id++,
+		type,
+	},
+
+	{
 		display: "Most Frequently Opened",
 		command: "-sort most_frequently_opened",
 		id: id++,
@@ -161,14 +158,8 @@ const baseSorters: ISearchOption[] = [
 	},
 
 	{
-		display: "Newest",
-		command: "-sort newest",
-		id: id++,
-		type,
-	},
-	{
-		display: "Oldest",
-		command: "-sort oldest",
+		display: "Reverse",
+		command: "-sort reverse",
 		id: id++,
 		type,
 	},
@@ -198,10 +189,6 @@ export function DisplayFilters({ filters, setFilters }: IShowFilters) {
 			filters.filter((filter) => filter.id !== filterToRemove.id)
 		);
 	};
-
-	// const addFilter = (newFilter: IFilter) => {
-	// 	setFilters([...filters, newFilter]);
-	// };
 
 	const modifyFilter = (newFilter: IFilter) => {
 		setFilters((filters: IFilter[]) => {

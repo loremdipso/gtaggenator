@@ -16,6 +16,8 @@ body {
 
 .app {
 	display: flex;
+	width: 100vw;
+	height: 100vh;
 }
 
 .sidebar {
@@ -27,6 +29,11 @@ body {
 
 	&.closed > :not(.react-draggable) {
 		display: none;
+	}
+
+	&.full-size {
+		width: 100vw;
+		height: 100vh;
 	}
 }
 
@@ -166,6 +173,7 @@ body {
 
 	.fat-child {
 		width: 100%;
+		text-align: left;
 	}
 }
 
@@ -193,9 +201,23 @@ body {
 	background-color: rgb(44, 44, 44);
 }
 
-.tab-content,
-.tab-content > * {
-	height: 100%;
+.sidebar {
+	// TODO: make less worse
+	.tab-content,
+	.tab-content > * {
+		height: 100%;
+	}
+
+	// display: flex;
+	// flex-direction: column;
+
+	// .tab-content {
+	// 	flex-grow: 1;
+	// 	display: flex;
+	// 	.tab-pane {
+	// 		flex-grow: 1;
+	// 	}
+	// }
 }
 
 .resizable-panel-handle {
@@ -207,6 +229,10 @@ body {
 .filter-row {
 	display: flex;
 	padding-top: 10px;
+}
+
+.selectable {
+	user-select: initial;
 }
 
 .fancy-tabs {
@@ -388,7 +414,10 @@ body {
 .fancy-jumbotron {
 	background-color: black !important;
 	color: white;
-	text-align: center;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .recommended-tags {

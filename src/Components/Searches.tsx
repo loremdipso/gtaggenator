@@ -109,8 +109,9 @@ export function appendSearchImmutable(
 ): ISearch[] {
 	if (newSearch.favorite) {
 		return [
-			...searches.filter((search) => search.id !== newSearch.id),
+			// pre-pend newSearch
 			newSearch,
+			...searches.filter((search) => search.id !== newSearch.id),
 		];
 	} else {
 		let newSearches = [];

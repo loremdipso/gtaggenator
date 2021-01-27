@@ -50,7 +50,12 @@ import { SimpleTooltip } from "./Components/SimpleTooltip";
 import { Initializer } from "./Components/Initializer";
 
 import { setTitle } from "tauri/api/window";
-import { addSearch, DisplaySearches, ISearch } from "./Components/Searches";
+import {
+	addSearch,
+	DisplaySearches,
+	fixSearches,
+	ISearch,
+} from "./Components/Searches";
 
 type ITabKey = "search" | "play" | "edit_settings";
 const MAX_FILTERS = 20;
@@ -168,6 +173,8 @@ function AppContent({ setInitialized }: IAppContent) {
 				});
 
 				let searches = JSON.parse(search_s) as ISearch[];
+				fixSearches(searches);
+
 				setSearches(searches);
 				setLastPushedSearches(searches);
 			} catch {
@@ -356,30 +363,38 @@ function AppContent({ setInitialized }: IAppContent) {
 	}, [args, loadData]);
 
 	useEffect(() => {
-		if (currentRecord && currentRecord.RecordID !== lastOpenedRecordID) {
-			(async () => {
-				// we've got to keep track of this, otherwise we get an infinite loop, which is no bueno
-				setLastOpenedRecordID(currentRecord.RecordID);
-				// UI minor change: we'll update the record immediately, even before the request is finished
-				updateRecord(setRecords, {
-					...currentRecord,
-					TimesOpened: currentRecord.TimesOpened + 1,
-				});
-				await bridge.openRecord({
-					record: currentRecord,
-				});
-
-				setTitle(currentRecord.Name);
-			})();
-
-			setRecommendedTags([]);
-			(async () => {
-				let recommendedTags = await bridge.getRecommendedTags({
-					record: currentRecord,
-				});
-				setRecommendedTags(recommendedTags);
-			})();
+		if (!currentRecord) {
+			// no records, reset title
+			setTitle("GTaggenator");
+			return;
 		}
+
+		if (currentRecord.RecordID === lastOpenedRecordID) {
+			return;
+		}
+
+		(async () => {
+			// we've got to keep track of this, otherwise we get an infinite loop, which is no bueno
+			setLastOpenedRecordID(currentRecord.RecordID);
+			// UI minor change: we'll update the record immediately, even before the request is finished
+			updateRecord(setRecords, {
+				...currentRecord,
+				TimesOpened: currentRecord.TimesOpened + 1,
+			});
+			await bridge.openRecord({
+				record: currentRecord,
+			});
+
+			setTitle(currentRecord.Name);
+		})();
+
+		setRecommendedTags([]);
+		(async () => {
+			let recommendedTags = await bridge.getRecommendedTags({
+				record: currentRecord,
+			});
+			setRecommendedTags(recommendedTags);
+		})();
 	}, [currentRecord, lastOpenedRecordID, setRecords, setRecommendedTags]);
 
 	useEffect(() => {
@@ -862,6 +877,7 @@ function AppContent({ setInitialized }: IAppContent) {
 				</Tabs>
 			</ResizablePanel>
 
+			{/* {tabKey === "play" ? <Content record={currentRecord} /> : null} */}
 			<Content record={currentRecord} />
 
 			<ToastContainer

@@ -6,6 +6,7 @@ type IResizablePanel = React.PropsWithChildren<{
 	startingValue: number;
 	position: "top" | "bottom" | "left" | "right";
 	className?: string;
+	fullSize?: boolean;
 }>;
 
 export default function ResizablePanel({
@@ -13,6 +14,7 @@ export default function ResizablePanel({
 	position,
 	className,
 	children,
+	fullSize,
 }: IResizablePanel) {
 	const [value, setValue] = useState(startingValue);
 	const [isClosed, setIsClosed] = useState(false);
@@ -162,6 +164,10 @@ export default function ResizablePanel({
 				}
 				break;
 		}
+	}
+
+	if (fullSize) {
+		return <div className={`${className} full-size`}>{children}</div>;
 	}
 
 	return (
