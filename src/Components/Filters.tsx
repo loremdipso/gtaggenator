@@ -333,13 +333,13 @@ function DropdownHelper({ modifyFilter, type, filter }: IDropdownHelper) {
 	);
 }
 
-function getDefaultFilter(): IFilter {
-	return {
-		base: baseFilters[1], // TODO: make less hacky
-		type: "filter",
-		id: getFilterID(),
-	};
-}
+// function getDefaultFilter(): IFilter {
+// 	return {
+// 		base: baseFilters[1], // TODO: make less hacky
+// 		type: "filter",
+// 		id: getFilterID(),
+// 	};
+// }
 
 function getEmptyFilter(): IFilter {
 	return {

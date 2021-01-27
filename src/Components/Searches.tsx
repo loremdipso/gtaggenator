@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import { Accordion, Button, Card } from "react-bootstrap";
-import { bridge, CACHE_KEYS } from "../Utils/Commands";
+import React from "react";
+import { Button, Card } from "react-bootstrap";
+import { Star, StarFill, X } from "react-bootstrap-icons";
 
 export interface ISearch {
 	id: number;
@@ -41,7 +41,7 @@ export function DisplaySearches({
 
 	return (
 		<div className="delta-container">
-			{searches.map((search, i) => (
+			{searches.map((search) => (
 				<DisplaySearch
 					key={search.id}
 					search={search}
@@ -78,6 +78,7 @@ function DisplaySearch({
 						variant={variant}
 						size="sm"
 						className="truncate fat-child"
+						title={search.text}
 					>
 						{search.text}
 					</Button>
@@ -87,7 +88,7 @@ function DisplaySearch({
 						size="sm"
 						style={{ minWidth: 25 }}
 					>
-						{search.favorite ? "*" : "O"}
+						{search.favorite ? <StarFill /> : <Star />}
 					</Button>
 					<Button
 						variant="dark"
@@ -95,7 +96,7 @@ function DisplaySearch({
 						size="sm"
 						style={{ minWidth: 25 }}
 					>
-						X
+						<X />
 					</Button>
 				</div>
 			</Card.Header>

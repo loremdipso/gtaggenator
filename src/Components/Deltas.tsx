@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Accordion, Button, Card } from "react-bootstrap";
-import { bridge, CACHE_KEYS } from "../Utils/Commands";
+import { Star, StarFill, Dash, X, PlusCircle } from "react-bootstrap-icons";
 
 export interface IDelta {
 	added: string[];
@@ -110,9 +110,9 @@ function DisplayDelta({
 								variant="dark"
 								onClick={() => undoAdds(delta)}
 								size="sm"
-								style={{ minWidth: 50 }}
+								style={{ minWidth: 30 }}
 							>
-								-
+								<Dash />
 							</Button>
 						) : null}
 
@@ -122,9 +122,9 @@ function DisplayDelta({
 								variant="dark"
 								onClick={() => undoRemoves(delta)}
 								size="sm"
-								style={{ minWidth: 50 }}
+								style={{ minWidth: 30 }}
 							>
-								+
+								<PlusCircle />
 							</Button>
 						) : null}
 
@@ -153,7 +153,7 @@ function DisplayDelta({
 							size="sm"
 							style={{ minWidth: 25 }}
 						>
-							{delta.favorite ? "*" : "O"}
+							{delta.favorite ? <StarFill /> : <Star />}
 						</Button>
 						<Button
 							variant="dark"
@@ -161,7 +161,7 @@ function DisplayDelta({
 							size="sm"
 							style={{ minWidth: 25 }}
 						>
-							X
+							<X />
 						</Button>
 					</div>
 				</Card.Header>
