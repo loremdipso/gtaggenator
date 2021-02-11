@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import "./App.scss";
-import { bridge, CACHE_KEYS } from "./Utils/Commands";
+import { bridge, CACHE_KEYS, setTitle } from "./Utils/Commands";
 import { IRecord } from "./Utils/interfaces";
 import {
 	ArrowClockwise,
@@ -49,7 +49,6 @@ import { SpecialInput, SpecialInputSimple } from "./Components/SpecialInput";
 import { SimpleTooltip } from "./Components/SimpleTooltip";
 import { Initializer } from "./Components/Initializer";
 
-import { setTitle } from "tauri/api/window";
 import {
 	addSearch,
 	DisplaySearches,

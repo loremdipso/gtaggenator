@@ -1,5 +1,8 @@
 import { promisified } from "tauri/api/tauri";
 import { IRecord, IStartupOptions } from "./interfaces";
+import { setTitle as tauriSetTitle } from "tauri/api/window";
+import { ISearch } from "../Components/Searches";
+import { IDelta } from "../Components/Deltas";
 
 export enum CACHE_KEYS {
 	search = "search",
@@ -90,6 +93,18 @@ class Bridge {
 }
 
 let DEBUG = !(window.__TAURI_INVOKE_HANDLER__);
+if (DEBUG) {
+	// mock some tauri functions
+	(window as any).setTitle = () => { };
+}
+export function setTitle(title: string) {
+	if (DEBUG) {
+		console.log("setTitle is mocked");
+	} else {
+		tauriSetTitle(title);
+	}
+}
+
 function helper<T>(tagname: string, args: any): Promise<T> {
 	if (DEBUG) {
 		return fake(tagname, args);
@@ -98,11 +113,11 @@ function helper<T>(tagname: string, args: any): Promise<T> {
 	}
 }
 
-function fake(tagname: string, args: any): Promise<any> {
+function fake(tagName: string, args: any): Promise<any> {
 	return new Promise((resolve) => {
-		switch (tagname) {
+		switch (tagName) {
 			case "GetRecords":
-				return resolve([fakeRecord(), fakeRecord()]);
+				return resolve(Array.from({ length: 10 }).map((_, i) => fakeRecord()));
 
 			case "GetTags":
 				{
@@ -139,29 +154,86 @@ function fake(tagname: string, args: any): Promise<any> {
 
 			case "GetPort":
 				return resolve(4242);
+
+			case "Reload":
+				return resolve(null);
+
+			case "GetRecommendedTags":
+				return resolve(["Rec Tag1", "Rec Tag 2"]);
+
+			case "GetCache":
+				let { key } = args;
+				switch (key as CACHE_KEYS) {
+					case CACHE_KEYS.deltas:
+						let deltas: IDelta[] = [
+							{
+								id: 0,
+								added: ["tag1"],
+								removed: ["tag2"],
+								originalString: "tag1 -tag2",
+								favorite: true
+							},
+							{
+								id: 0,
+								added: ["tag3"],
+								removed: ["tag4"],
+								originalString: "tag3 -tag4",
+								favorite: false
+							},
+						];
+						return resolve(JSON.stringify(deltas));
+					case CACHE_KEYS.search:
+						let searches: ISearch[] = [
+							{
+								id: 0,
+								text: "Search1",
+								favorite: true
+							},
+							{
+								// purposefully wrong, since this should be fixed on the client
+								id: 0,
+								text: "Search2",
+								favorite: false
+							},
+						];
+						return resolve(JSON.stringify(searches));
+				}
+
+			case "GetStartupOptions":
+				return resolve({
+					folders: [],
+					skip: true
+				} as IStartupOptions);
+
+			default:
+				console.log(`Missing tag: ${tagName}`);
 		}
 	});
 }
 
-function fakeRecord(): IRecord {
-	return {
-		RecordID: 1,
-		Name: "name",
-		Location: "location",
+let fakeRecord = (() => {
+	let id = 0;
+	return (): IRecord => {
+		id += 1;
+		return {
+			RecordID: id,
+			Name: `record ${id}`,
+			Location: `location ${id}`,
 
-		Tags: ["some tag"],
+			Tags: ["some tag"],
 
-		Size: 5,
-		Length: 10,
-		TimesOpened: 2,
+			Size: 5,
+			Length: 10,
+			TimesOpened: 2,
 
-		DateAdded: "",
-		DateCreated: "",
-		DateLastAccessed: "",
+			DateAdded: "",
+			DateCreated: "",
+			DateLastAccessed: "",
 
-		HaveManuallyTouched: true,
-	};
-}
+			HaveManuallyTouched: true,
+		};
+	}
+})();
 
 // cut off the part before any ":"'s
 function getTagBase(tag: string): string {
